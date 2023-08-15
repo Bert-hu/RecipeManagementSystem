@@ -163,7 +163,7 @@ namespace Rms.TestForm
             var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(url, body);
             RichTextBoxAddText("Get api result");
             RichTextBoxAddText(apiresult);
-
+            listBox_recipelist_SelectedValueChanged(null, null);
         }
 
         private void listBox_recipelist_SelectedValueChanged(object sender, EventArgs e)
@@ -199,7 +199,7 @@ namespace Rms.TestForm
             var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(url, body);
             RichTextBoxAddText("Get api result");
             RichTextBoxAddText(apiresult);
-
+            listBox_recipelist_SelectedValueChanged(null, null);
         }
 
         private void button_reloadbody_Click(object sender, EventArgs e)
