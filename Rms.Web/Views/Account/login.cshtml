@@ -1,0 +1,129 @@
+﻿@model  Rms.Web.ViewModels.LoginViewModel
+@{
+    Layout = null;
+    int bgnumber = new Random().Next(1, 6);
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>DPS RMS</title>
+    <link href="~/Content/login.css" rel="stylesheet" />
+    <style>
+
+        .translucent-panel {
+            position: fixed;
+            width: 20%; /* 页面宽度的1/5，减去20像素用于留白 */
+            height: calc(80% - 40px); /* 页面高度的2/3，减去40像素用于留白 */
+            top: 17%; /* 页面高度的1/3 */
+            left: 70%; /* 页面宽度的1/3 */
+            /* background-color: rgba(255, 255, 255, 0.75); /* 设置半透明背景颜色 */
+            border-radius: 10px; /* 圆角边框 */
+            font-weight: bold;
+        }
+
+        .link:nth-child(even),
+        .floating-text:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.5); /* 设置偶数行的背景颜色 */
+        }
+
+        .link:nth-child(odd),
+        .floating-text:nth-child(odd) {
+            background-color: rgba(255, 255, 255, 0.3); /* 设置奇数行的背景颜色 */
+        }
+
+        .link {
+            display: block; /* 将超链接元素转为块级元素，使其占据整行空间 */
+            padding: 10px; /* 设置超链接内边距 */
+            color: #3b78e7; /* 设置超链接文本颜色 */
+            text-decoration: none; /* 去除下划线效果 */
+            transition: background-color 0.3s ease; /* 添加背景颜色变化的过渡效果 */
+        }
+
+            .link:hover {
+                background-color: rgba(255, 255, 255, 0.8); /* 设置鼠标悬停时的背景颜色 */
+                color: #ff00dc; /* 设置超链接文本颜色 */
+            }
+
+            .link:active {
+                background-color: rgba(255, 255, 255, 1); /* 设置点击时的背景颜色 */
+            }
+        .floating-text {
+            position: absolute; /* 使用绝对定位 */
+            top: 20%; /* 垂直1/3位置 */
+            left: 50%; /* 水平居中 */
+            transform: translate(-50%, -50%); /* 调整位置至水平垂直居中 */
+            color: #fff; /* 设置文字颜色为白色 */
+            font-weight: bold; /* 设置字体加粗 */
+            font-size: 60px;
+        }
+        .hanging-image {
+            position: absolute;
+            top: 5%;
+            left: 5%;
+        }
+    </style>
+</head>
+<body>
+    <div class="loginBody app-login-back-3" style="flex: 1 1 auto !important; ">
+        <div id="particles-js"></div>
+        @*<img src="~/Content/images/Logo/Logo_W_SMDi4_800x130_简.png" class="hanging-image" />*@
+        <img src="~/Content/images/Logo/Logo_W_SMDi4_600x98_简.png" class="hanging-image"/>
+        <span class="floating-text">DPS RMS</span>
+        <div class="translucent-panel">
+
+            <a href="\box\index" target="_blank" class="link">MTBBA Dashboard</a>
+            <a href="\robot\index" target="_blank" class="link">Robot Dashboard</a>
+            <a href="\DPPM\box" target="_blank" class="link">Box Fixture DPPM Dashboard</a>
+            <a href="\DPPM\tray" target="_blank" class="link">Tray Fixture DPPM Dashboard</a>
+            @*<a href="#" class="link">Link 3</a>*@
+        </div>
+        <div class="account-container">
+            <div class="account-modal-container">
+                <div class="modal"></div>
+                <div class="load-bar-container">
+                    <div class="load-bar">
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                    </div>
+                </div>
+                <div class="account-signin-container">
+
+                    <h1>User Login</h1>
+                    @using (Html.BeginForm("login", "account", FormMethod.Post, new { @class = "account-form", role = "form" }))
+                    {
+                        @Html.ValidationMessage("error_message", new { @class = "error" })
+                        @Html.AntiForgeryToken()
+                        <div class="form-group">
+                            <label>
+                                <span>Account:</span>
+                                @Html.TextBoxFor(m => m.UserName, new { placeholder = "Please enter a user name" })
+                                @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "error" })
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <span>Password:</span>
+                                @Html.PasswordFor(m => m.Password, new { placeholder = "Please enter a password" })
+                                @Html.ValidationMessageFor(m => m.Password, "", new { @class = "error" })
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <button id="btn_login" type="submit">Log in</button>
+                            @*<a class="btn-register" href="~/account/register">注册账号</a>*@
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+        <script src="~/Scripts/partices/particles.js"></script>
+        <script src="~/Scripts/partices/app.js"></script>
+        <script src="~/Scripts/jquery-3.4.1.min.js"></script>
+        <script src="~/Scripts/jquery.validate.min.js"></script>
+        <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+    </div>
+</body>
+
+</html>

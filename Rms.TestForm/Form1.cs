@@ -1,0 +1,231 @@
+﻿using Newtonsoft.Json;
+using Rms.Models.DataBase.Rms;
+using Rms.Models.RabbitMq;
+using Rms.Models.WebApi;
+using Rms.Utils;
+using RMS.Domain.Rms;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+using System.Web.UI.WebControls;
+using System.Windows.Forms;
+using static System.Net.Mime.MediaTypeNames;
+
+namespace Rms.TestForm
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var trans = new RabbitMqTransaction
+            {
+                TransactionName = "GetEPPD",
+                EquipmentID = "EQTEST01",
+                NeedReply = true,
+                ReplyChannel = "Rms.Services.Test",
+                Parameters = new Dictionary<string, object>() { { "key1", "value1" } }
+            };
+            RichTextBoxAddText("Send RMQ");
+            RichTextBoxAddText(trans);
+            var rep = RabbitMqService.ProduceWaitReply(this.textBox_sendpath.Text, trans, 5);
+            RichTextBoxAddText("Receive RMQ");
+            RichTextBoxAddText(rep);
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Form1_Shown(object sender, EventArgs e)
+        {
+
+        }
+
+        private void RichTextBoxAddText(object text)
+        {
+            this.Invoke(new Action(() =>
+            {
+                richTextBox_compare.Text += DateTime.Now.ToString() + " " + JsonConvert.SerializeObject(text, Formatting.Indented) + "\n";
+            }));
+        }
+        byte[] temp;
+        private void button2_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var trans = new RabbitMqTransaction
+                {
+                    TransactionName = "GetUnfomattedRecipe",
+                    EquipmentID = "EQTEST01",
+                    NeedReply = true,
+                    ReplyChannel = "Rms.Services.Test",
+                    Parameters = new Dictionary<string, object>() { { "RecipeName", this.textBox_recipename.Text } }
+                };
+                RichTextBoxAddText("Send RMQ");
+                RichTextBoxAddText(trans);
+                var rep = RabbitMqService.ProduceWaitReply(this.textBox_sendpath.Text, trans, 5);
+                RichTextBoxAddText("Receive RMQ");
+                RichTextBoxAddText(rep);
+                if (rep.Parameters["ContentType"].ToString() == "secsByte")
+                {
+                    temp = Convert.FromBase64String(rep.Parameters["RecipeBody"].ToString());
+                }
+            }
+            catch
+            {
+
+            }
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            var body = Convert.ToBase64String(temp);
+            var trans = new RabbitMqTransaction
+            {
+                TransactionName = "SetUnfomattedRecipe",
+                EquipmentID = "EQTEST01",
+                NeedReply = true,
+                ReplyChannel = "Rms.Services.Test",
+                Parameters = new Dictionary<string, object>() { { "RecipeName", this.textBox_recipename.Text }, { "RecipeBody", body } }
+            };
+            RichTextBoxAddText("Send RMQ");
+            RichTextBoxAddText(trans);
+            var rep = RabbitMqService.ProduceWaitReply(this.textBox_sendpath.Text, trans, 5);
+            RichTextBoxAddText("Receive RMQ");
+            RichTextBoxAddText(rep);
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            RabbitMqService.Initiate("192.168.53.174", "admin", "admin", 5672);
+            //   RabbitMqService.BeginConsume("EAP.SecsClient.EQTEST01");
+            RabbitMqService.BeginConsume("Rms.Services.Test");
+            this.button4.Enabled = false;
+            this.button1.Enabled = true;
+            this.button_getrecipe.Enabled = true;
+            this.button_setrecipe.Enabled = true;
+
+        }
+
+        private void button_geteppd_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string url = $"{textBox_apiurl.Text}" + "/api/geteppd";
+                var body = JsonConvert.SerializeObject(new GetEppdRequest { EuipmentId = this.textBox_apieqid.Text });
+                RichTextBoxAddText("Send Web Api");
+                RichTextBoxAddText(body);
+                var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(url, body);
+                RichTextBoxAddText("Get api result");
+                RichTextBoxAddText(apiresult);
+                if (apiresult != null)
+                {
+                    var rep = JsonConvert.DeserializeObject<GetEppdResponse>(apiresult);
+                    List<string> recipelist = rep.EPPD;
+                    RichTextBoxAddText("Update List Box");
+                    this.listBox_recipelist.DataSource = recipelist;
+                }
+
+            }
+            catch (Exception)
+            {
+
+
+            }
+        }
+
+        private void button_clearlog_Click(object sender, EventArgs e)
+        {
+            this.Invoke(new Action(() =>
+            {
+                richTextBox_compare.Text = "";
+            }));
+        }
+
+        private void button_addrecipe_Click(object sender, EventArgs e)
+        {
+            string url = $"{textBox_apiurl.Text}" + "/api/addnewrecipe";
+            var body = JsonConvert.SerializeObject(new AddNewRecipeRequest { EquipmentId = this.textBox_apieqid.Text, RecipeName = this.listBox_recipelist.SelectedValue.ToString() });
+            RichTextBoxAddText("Send Web Api");
+            RichTextBoxAddText(body);
+            var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(url, body);
+            RichTextBoxAddText("Get api result");
+            RichTextBoxAddText(apiresult);
+
+        }
+
+        private void listBox_recipelist_SelectedValueChanged(object sender, EventArgs e)
+        {
+            var db = DbFactory.GetSqlSugarClient();
+            var recipe = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == this.textBox_apieqid.Text && it.NAME == listBox_recipelist.SelectedValue.ToString())?.First();
+            if (recipe == null)
+            {
+                listBox_version.DataSource = null;
+                return;
+            }
+            var versions = db.Queryable<RMS_RECIPE_VERSION>().Where(it => it.RECIPE_ID == recipe.ID).OrderBy(it => it.VERSION, SqlSugar.OrderByType.Desc).ToList();
+            var showlist = versions.ToDictionary(it => it.VERSION, it => it.ID);
+            listBox_version.DisplayMember = "Key";
+            listBox_version.ValueMember = "Value";
+            listBox_version.DataSource = new BindingSource(showlist, null);
+
+        }
+
+        private void button_addversion_Click(object sender, EventArgs e)
+        {
+            string url = $"{textBox_apiurl.Text}" + "/api/addnewrecipeversion";
+            var db = DbFactory.GetSqlSugarClient();
+            var recipe = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == this.textBox_apieqid.Text && it.NAME == listBox_recipelist.SelectedValue.ToString())?.First();
+            if (recipe == null)
+            {
+                MessageBox.Show("请先Add Recipe之后再Add Version");
+                return;
+            }
+            var body = JsonConvert.SerializeObject(new AddNewRecipeVersionRequest { EquipmentId = this.textBox_apieqid.Text, RecipeName = this.listBox_recipelist.SelectedValue.ToString(), RecipeId = recipe.ID });
+            RichTextBoxAddText("Send Web Api");
+            RichTextBoxAddText(body);
+            var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(url, body);
+            RichTextBoxAddText("Get api result");
+            RichTextBoxAddText(apiresult);
+
+        }
+
+        private void button_reloadbody_Click(object sender, EventArgs e)
+        {
+            string url = $"{textBox_apiurl.Text}" + "/api/reloadrecipebody";
+            var body = JsonConvert.SerializeObject(new ReloadRecipeBodyRequest { VersionId = this.listBox_version.SelectedValue.ToString(), RecipeName = this.listBox_recipelist.SelectedValue.ToString() });
+            RichTextBoxAddText("Send Web Api");
+            RichTextBoxAddText(body);
+            var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(url, body);
+            RichTextBoxAddText("Get api result");
+            RichTextBoxAddText(apiresult);
+        }
+
+        private void button2_Click_1(object sender, EventArgs e)
+        {
+            string url = $"{textBox_apiurl.Text}" + "/api/comparerecipebody";
+            var body = JsonConvert.SerializeObject(new CompareRecipeBodyRequest
+            {
+                EquipmentId = this.textBox_apieqid.Text,
+                RecipeName = this.listBox_recipelist.SelectedValue.ToString()
+            });
+            RichTextBoxAddText("Send Web Api");
+            RichTextBoxAddText(body);
+            var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(url, body);
+            RichTextBoxAddText("Get api result");
+            RichTextBoxAddText(apiresult);
+        }
+    }
+}

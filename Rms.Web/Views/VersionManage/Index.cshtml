@@ -1,0 +1,527 @@
+﻿
+@{
+
+}
+<style>
+    .scrollable-div {
+        max-height: 80vh;
+        overflow-y: auto; /* 或者使用 overflow-y: auto; */
+    }
+</style>
+<script src="~/Scripts/layui/xm-select.js"></script>
+<script src="~/Scripts/layui/layui.table.formdate.js"></script>
+<div class="layui-row layui-col-space10" style=" margin-bottom: 50px">
+    <div class="layui-col-md4">
+        <form class="layui-form layui-form-pane" action="">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <div id="projects" lay-filter="index" class="xm-select-demo"></div>
+                    </div>
+                    @*<button class="layui-btn" lay-submit lay-filter="getdetail">查看</button>*@
+                    @*<button class="layui-btn" lay-submit id="getversions">查看</button>*@
+                </div>
+
+            </div>
+        </form>
+        <table class="layui-hide" id="versiontable" lay-filter="versiontable"></table>
+    </div>
+    <div class="layui-col-md8 scrollable-div">
+        <fieldset class="layui-elem-field layui-field-title">
+            <legend id="info"></legend>
+        </fieldset>
+        <form class="layui-form  layui-form-pane" action="" lay-filter="versioninfo" id="versioninfo" style="display:none">
+
+
+            <div class="layui-form-item">
+                <input type="text" name="ID" autocomplete="off" class="layui-input" style="display:none">
+                <div class="layui-inline">
+                    <label class="layui-form-label">版本号</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="NAME" autocomplete="off" placeholder="请输入版本号" class="layui-input">
+                    </div>
+                </div>
+            </div>
+
+
+
+            <fieldset class="layui-elem-field layui-field-title">
+                <legend>版本文件</legend>
+            </fieldset>
+
+
+            <div class="layui-upload">
+                <div style="display: flex; align-items: center;">
+                    <button type="button" class="layui-btn" id="test1">上传文件</button>
+                    <div class="layui-progress layui-progress" lay-showpercent="yes" lay-filter="demo" style="flex-grow: 1; margin-left: 10px; width: auto;">
+                        <div class="layui-progress-bar" lay-percent=""></div>
+                    </div>
+                </div>
+                <div class="layui-upload-list">
+                    <img class="layui-upload" id="demo1">
+                    <p id="demoText"></p>
+                </div>
+            </div>
+            <table class="layui-hide" id="filetable" lay-filter="filetable"></table>
+            <fieldset class="layui-elem-field layui-field-title">
+                <legend>更新说明</legend>
+            </fieldset>
+
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">备注</label>
+                <div class="layui-input-block">
+                    <textarea placeholder="请输入更新内容" class="layui-textarea" name="REMARK"></textarea>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <button type="button" class="layui-btn layui-btn-normal" id="saveform">保存</button>
+                <button type="submit" class="layui-btn" lay-submit="" lay-filter="sbm">立即提交</button>
+            </div>
+        </form>
+        <fieldset class="layui-elem-field layui-field-title">
+            <legend>签核记录</legend>
+        </fieldset>
+        <table class="layui-hide" id="processrecordtable" lay-filter="processrecordtable"></table>
+    </div>
+
+</div>
+
+<script type="text/html" id="toolbar">
+    <div>
+        <div class="layui-btn-container" style="float:left;display:inline">
+            <button class="layui-btn layui-btn-sm" lay-event="add">添加新版本</button>
+        </div>
+
+    </div>
+</script>
+<script type="text/html" id="versiontoolbar">
+    <a class="layui-btn layui-btn layui-btn-xs" lay-event="detail">查看</a>
+
+</script>
+<script type="text/html" id="filetoolbar">
+    <a class="layui-btn layui-btn layui-btn-xs" lay-event="download">下载</a>
+    <a class="layui-btn layui-btn layui-btn-xs" lay-event="delete">删除</a>
+</script>
+
+<script>
+    layui.use(['layer', 'table', 'form', 'upload','element'], function () {
+        var layer = layui.layer
+            , table = layui.table
+            , form = layui.form
+            , upload = layui.upload
+            , element = layui.element ;
+
+        var projectsel = xmSelect.render({
+            el: '#projects',
+            initValue: [9],
+            radio: true,
+            block: {
+                //最大显示数量, 0:不限制
+                showCount: 0,
+                //是否显示删除图标
+                showIcon: false,
+            },
+            on: function (data) {
+                //arr:  当前多选已选中的数据
+                var arr = data.arr;
+                //change, 此次选择变化的数据,数组
+                var change = data.change;
+                //isAdd, 此次操作是新增还是删除
+                var isAdd = data.isAdd;
+
+                console.log(change);
+                var projectid = change[0].value;
+                ShowVersionTable(projectid);
+            },
+
+        })
+        var versiontable;
+        var newversionlock = true;
+
+        function ShowVersionTable(id) {
+            versiontable = table.render({
+                elem: '#versiontable'
+                , url: '/VersionManage/GetVersions'
+                , toolbar: '#toolbar'
+                , id: "versiontable"
+                , limit: 1000
+                , limits: [1000]
+                , height: 'full-235'
+                , cols: [[
+                    { field: 'VERSION', title: 'No', width: 50 }
+                    , { field: 'NAME', title: '版本', width: 200 }
+                    , {
+                        field: 'CURRENT_FLOW_INDEX', title: '签核状态', sort: true, width: 110,
+                        templet: function (d, s) {
+                            var strstate;
+                            if (d.CURRENT_FLOW_INDEX == 100) {
+                                strstate = '已完成'
+                            } else if (d.CURRENT_FLOW_INDEX == -1) {
+                                strstate = '未提交'
+                            }
+                            else {
+                                strstate = d._FLOW_ROLES[d.CURRENT_FLOW_INDEX];
+                            }
+                            return strstate;
+                        }
+                    }
+                    , { field: 'CREATOR', title: '创建者', width: 120 }
+                    , { field: 'CREATE_TIME', title: '创建时间', templet: '<div>{{ FormDate(d.CREATE_TIME, "yyyy-MM-dd HH:mm:ss") }}</div>', width: 180 }
+                    , { fixed: 'right', width: 100, align: 'center', toolbar: '#versiontoolbar' }
+
+                ]]
+                , where: {
+                    projectid: id
+                }
+                , currentprojectid: id
+                , done: function (data) {
+                    newversionlock = data.newversionlock;
+                    var that = $("#versiontable").siblings();
+                    console.log(data);
+                    data.data.forEach(function (item, index) {
+                        var tr = that.find(".layui-table-box tbody tr[data-index='" + index + "']");
+
+
+                        if (item.ID === data.effective_version_id) {//绿色
+                            tr.css("background-color", "#5FB878");
+                        }
+                        console.log(item.CURRENT_FLOW_INDEX);
+                        if (item.CURRENT_FLOW_INDEX < 100) {//黄色
+                            tr.css("background-color", "#FFB800");
+                        }
+                        if (item.CURRENT_FLOW_INDEX == -1) {
+
+                            tr.css("background-color", "#C0C0C0");
+                        }
+                    });
+                }
+            });
+
+        }
+
+
+        ShowVersionTable(9);
+
+
+        getData();
+
+        async function getData() {
+            try {
+                let result1 = await $.ajax({
+                    type: 'post',
+                    dataType: 'json',
+                    url: '/Home/GetProjects',
+                    data: {
+                        page: 1,
+                        limit: 9999
+                    },
+                    success: function (data) {
+                        console.log(data);
+                        var seldata = data.data.map(it => {
+                            return {
+                                name: it.NAME,
+                                value: it.ID
+                            };
+                        });
+                        projectsel.update({
+                            data: seldata
+                        });
+
+
+                    },
+                    error: function () {
+                    }
+                });
+
+
+            } catch (error) {
+                //处理错误
+            }
+        }
+
+        //表头工具条
+        table.on('toolbar(versiontable)', function (obj) {
+            var id = obj.config.id;
+            var checkStatus = table.checkStatus(id);
+
+            console.log(versiontable);
+            if (newversionlock) {
+                layer.msg('<em style="color:black;font-style:normal;font-weight:normal">有未完成的签核版本，禁止新增！</em>', { icon: 5 });
+            }
+            else {
+                switch (obj.event) {
+                    case 'add':
+                        if (confirm('确定新增版本？')) {
+                            $.ajax({
+                                url: '/VersionManage/AddNewVersion',
+                                data: {
+                                    projectid: versiontable.config.currentprojectid,
+                                },
+                                async: false,
+                                type: 'POST',
+                                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                                success: function (response) {
+                                    layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + response.message + '</em>', { icon: response.result ? 1 : 4 });
+                                    result = response.result;
+                                    versiontable.reload();
+                                    ShowVersionDetail(response.data.versionid);
+                                },
+                                error: function () {
+                                    layer.msg('提交失败', { icon: 4 });
+                                    result = false;
+                                }
+                            });
+                        }
+                        break;
+
+                }
+            }
+
+        })
+         //表中工具条
+        table.on('tool(versiontable)', function (obj) { //注：tool 是工具条事件名，recipe 是 table 原始容器的属性 lay-filter="对应的值"
+            var selectdata = obj.data //获得当前行数据
+                , layEvent = obj.event; //获得 lay-event 对应的值
+            if (layEvent === 'detail') {
+                ShowVersionDetail(selectdata.ID);
+
+
+
+            }
+
+        });
+
+        //表单保存
+        layui.$('#saveform').on('click', function () {
+            var formdata = form.val('versioninfo');
+            $.ajax({
+                type: 'post',
+                dataType: 'json',
+                url: '/VersionManage/SaveForm',
+                data: formdata,
+                success: function (data) {
+                    layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: data.result ? 1 : 4 });
+                    versiontable.reload();
+                },
+                error: function () {
+                }
+            });
+        });
+        //表单提交
+        form.on('submit(versioninfo)', function (data) {
+
+            if (confirm('确定提交？')) {
+                var formdata = form.val('versioninfo');
+                $.ajax({
+                    type: 'post',
+                    dataType: 'json',
+                    url: '/VersionManage/SubmitForm',
+                    data: formdata,
+                    success: function (data) {
+                        layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: data.result ? 1 : 4 });
+                        versiontable.reload();
+                    },
+                    error: function () {
+                    }
+                });
+            }
+            return false;
+        });
+
+        var currentversionid;
+        function ShowVersionDetail(versionid) {
+            currentversionid = versionid;
+
+            $.ajax({
+                url: '/VersionManage/GetVersionInfo',
+                data: {
+                    versionid: versionid,
+                },
+                async: false,
+                type: 'GET',
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                success: function (data) {
+                    console.log(data);
+                    var status = GetVersionStatus(data.versioninfo._FLOW_ROLES, data.versioninfo.CURRENT_FLOW_INDEX);
+                    document.getElementById("info").innerHTML = data.projectinfo.NAME + " " + data.versioninfo.VERSION + ' ' + status;
+                    var fff = document.getElementById("versioninfo");
+                    fff.style.display = "block";
+                    form.val('versioninfo', {
+                        "ID": data.versioninfo.ID,
+                        "NAME": data.versioninfo.NAME,
+                        "REMARK": data.versioninfo.REMARK // "name": "value"
+
+                    });
+
+                    var $form = $('#versioninfo'); // 使用选择器替换 formId 为表单区域的 id
+                    //状态>-1(-1为未提交状态)则锁定表单
+                    if (data.versioninfo.CURRENT_FLOW_INDEX > -1) {
+                        // 遍历表单区域中的每个元素
+                        $form.find('input, textarea, select').each(function () {
+                            // 设置 readonly 属性为 true
+                            $(this).attr('readonly', true);
+                        });
+
+                    } else {
+
+                        $form.find('input, textarea, select').each(function () {
+                            $(this).attr('readonly', false);
+                        });
+                    }
+                    // 重新渲染 layui 表单
+                    layui.form.render();
+
+                    var uploadInst = upload.render({
+                        elem: '#test1'
+                        , accept: 'file'
+                        , url: 'UploadVersionFile' //此处用的是第三方的 http 请求演示，实际使用时改成您自己的上传接口即可。
+                        , data: {
+                            versionid: versionid
+                        }
+                        , before: function (obj) {
+                            //预读本地文件示例，不支持ie8
+                            //obj.preview(function (index, file, result) {
+                            //    $('#demo1').attr('src', result); //图片链接（base64）
+                            //});
+
+                            element.progress('demo', '0%'); //进度条复位
+                            layer.msg('上传中', { icon: 16, time: 0 });
+                        }
+                        , done: function (res) {
+                            layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + res.message + '</em>', { icon: res.result ? 1 : 4 });
+
+                            $('#demoText').html(''); //置空上传失败的状态
+                        }
+                        , error: function () {
+                            //演示失败状态，并实现重传
+                            var demoText = $('#demoText');
+                            demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+                            demoText.find('.demo-reload').on('click', function () {
+                                uploadInst.upload();
+                            });
+                        }
+                        //进度条
+                        , progress: function (n, elem, e) {
+                            element.progress('demo', n + '%'); //可配合 layui 进度条元素使用
+                            if (n == 100) {
+                                //layer.msg('上传完毕', { icon: 1 });
+                                filetable.reload();
+                            }
+                        }
+                    });
+
+                    var filetable = table.render({
+                        elem: '#filetable'
+                        , url: '/VersionManage/GetFileTable'
+                        //, toolbar: true
+                        , id: "filetable"
+                        , limit: 1000
+                        , limits: [1000]
+                        , height: '80'
+                        , cols: [[
+                            { field: 'NAME', title: '文件名' }
+                            , { field: 'CREATOR', title: '创建者', width: 120 }
+                            , { field: 'CREATE_TIME', title: '创建时间', templet: '<div>{{ FormDate(d.CREATE_TIME, "yyyy-MM-dd HH:mm:ss") }}</div>', width: 180 }
+                            , { fixed: 'right', width: 200, align: 'center', toolbar: '#filetoolbar' }
+
+                        ]]
+                        , where: {
+                            versionid: versionid
+                        }
+                        , currentversionid: versionid
+
+                    });
+
+                    //表中工具条
+                    table.on('tool(filetable)', function (obj) { //注：tool 是工具条事件名，recipe 是 table 原始容器的属性 lay-filter="对应的值"
+                        var selectdata = obj.data //获得当前行数据
+                            , layEvent = obj.event; //获得 lay-event 对应的值
+                        if (layEvent === 'download') {
+                            DownladFile(selectdata.ID);
+                        } else if (layEvent === 'delete') {
+                            if (confirm('确定删除？')) {
+                                DeleteFile(selectdata.ID);
+                            }
+                        }
+
+                    });
+
+
+                    function DownladFile(fileid) {
+                        var url = "/VersionManage/DownladFile?fileid=" + fileid;
+                        window.open(url, "_blank");
+                    }
+                    function DeleteFile(fileid) {
+                        $.ajax({
+                            type: 'post',
+                            dataType: 'json',
+                            url: '/VersionManage/DeleteFile',
+                            data: {
+                                fileid: fileid,
+                            },
+                            success: function (data) {
+
+                                layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: data.result ? 1 : 4 });
+                                filetable.reload();
+                            },
+                            error: function () {
+                            }
+                        });
+                    }
+                },
+
+            });
+
+            var processrecordtable = table.render({
+                elem: '#processrecordtable'
+                , url: '/VersionManage/GetProcessRecord'
+                //, toolbar: true
+                , id: "processrecordtable"
+                , limit: 1000
+                , limits: [1000]
+                , height: '300'
+                , cols: [[
+                    { field: 'FLOW_INDEX', title: '流程序号' }
+                    , {
+                        field: 'ACTION', title: '结果',
+                        templet: function (d, s) {
+                            var strstate;
+                            if (d.ACTION == 0) {
+                                strstate = '提交'
+                            } else if (d.ACTION == 1) {
+                                strstate = '同意'
+                            }
+                            else {
+                                strstate = '否决'
+                            }
+                            return strstate;
+                        }    }
+                    , { field: 'REMARK', title: '备注' }
+                    , { field: 'CREATOR', title: '签核人员', width: 120 }
+                    , { field: 'CREATE_TIME', title: '签核时间', templet: '<div>{{ FormDate(d.CREATE_TIME, "yyyy-MM-dd HH:mm:ss") }}</div>', width: 180 }
+
+
+                ]]
+                , where: {
+                    versionid: versionid
+                }
+
+
+            });
+        }
+
+        function GetVersionStatus(flows, index) {
+            var status = '';
+            if (index == -1) {
+                status = '未提交';
+            } else if (index == 100) {
+                status = '已完成';
+            } else {
+                status = '待' + flows[index]+'签核';
+            }
+            return status;
+        }
+
+    });
+</script>

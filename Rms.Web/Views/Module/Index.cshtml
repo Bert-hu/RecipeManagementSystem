@@ -1,0 +1,91 @@
+﻿
+@{
+
+}
+<a class="layui-btn layui-btn-normal" id="newmodule">添加</a>
+<table class="layui-hide" id="module" lay-filter="module"></table>
+<script type="text/html" id="toolbar">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="permission">权限</a>
+</script>
+<script src="~/Scipts/layui/layui.table.formdate.js"></script>
+<script>
+    layui.use(['table', 'jquery'], function () {
+        var table = layui.table
+            , $ = layui.jquery;
+
+        table.render({
+            elem: '#module'
+            , height: 'full-250'
+            , url: '/Module/Get/' //数据接口
+            , title: '模块'
+            , id: "module"
+            , toolbar
+            , defaultToolbar: ['filter']
+            , page: true
+            , limit: 20
+            , cols: [
+
+                [
+                    { field: 'ID', title: 'ID', filter: true,hide :true}
+                    , { field: 'CLASSNAME', title: '类别' }
+                    , { field: 'NAME', title: '名称' }
+                    , { field: 'LINKURL', title: '链接' }
+                    , { field: 'DESCRIPTION', title: '描述' }
+                ]]
+
+        });
+
+        $(document).on('click', '#newmodule', function () {
+            layer.open({
+                title: '新增模块'
+                , type: 2
+                , btn: ['确定', '取消']
+                , content: 'Add'
+                , area: ['40%', '50%']
+                , success: function (layero, index) {
+                    //向layer页面传值，传值主要代码
+                    //   var body = layer.getChildFrame('body', index);
+                }
+                , yes: function (index) {
+                    var res = window["layui-layer-iframe" + index].callback();
+                    var data = JSON.parse(res);
+
+                    if (data.class == "" || data.name == "" || data.linkurl == "" || data.controller == "" ) {
+                        layer.msg('请补全信息');
+                    }
+                    else {
+                        //layer.msg('添加用户成功');
+                        AddModule(data);
+                        table.reload('module');
+                        //console.log(data);
+                        // layer.msg(res);
+                        layer.close(index);
+                    }
+
+                }, btn2: function (index, layero) {
+                    layer.msg('取消操作');
+                }
+
+            });
+        });
+
+        function AddModule(data) {
+            $.ajax({
+                url: '/Module/AddModule',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                data: {
+                    data
+                },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
+                async: false,
+                success: function (data) {
+                    layer.open({ content: data.message });
+
+                },
+                error: function (message) {
+                    alert('error!');
+                }
+            });
+        }   
+    })
+</script>

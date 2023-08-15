@@ -1,0 +1,300 @@
+﻿
+@{
+
+}
+
+<div class="layui-row layui-col-space10">
+    <div class="layui-col-md4">
+        <fieldset class="layui-elem-field layui-field-title">
+            <legend>待签核列表</legend>
+        </fieldset>
+        <table class="layui-hide" id="versiontable" lay-filter="versiontable"></table>
+
+    </div>
+    <div class="layui-col-md8 scrollable-div">
+        <fieldset class="layui-elem-field layui-field-title">
+            <legend id="info"></legend>
+        </fieldset>
+        <form class="layui-form  layui-form-pane" action="" lay-filter="versioninfo" id="versioninfo" style="display:none">
+            <div class="layui-form-item">
+                <div>
+                    <button type="button" class="layui-btn" id="Approve">同意</button>
+                    <button type="button" class="layui-btn layui-btn-danger" id="Reject">否决</button>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <input type="text" name="ID" autocomplete="off" class="layui-input" style="display:none">
+                <div class="layui-inline">
+                    <label class="layui-form-label">版本号</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="NAME" autocomplete="off" placeholder="请输入版本号" class="layui-input">
+                    </div>
+                </div>
+            </div>
+
+
+
+            <fieldset class="layui-elem-field layui-field-title">
+                <legend>版本文件</legend>
+            </fieldset>
+
+            <table class="layui-hide" id="filetable" lay-filter="filetable"></table>
+            <fieldset class="layui-elem-field layui-field-title">
+                <legend>更新说明</legend>
+            </fieldset>
+
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">备注</label>
+                <div class="layui-input-block">
+                    <textarea placeholder="请输入更新内容" class="layui-textarea" name="REMARK"></textarea>
+                </div>
+            </div>
+
+
+        </form>
+        <table class="layui-hide" id="processrecordtable" lay-filter="processrecordtable"></table>
+    </div>
+
+</div>
+<style>
+    .scrollable-div {
+        max-height: 80vh;
+        overflow-y: auto; /* 或者使用 overflow-y: auto; */
+    }
+</style>
+<script type="text/html" id="versiontoolbar">
+    <a class="layui-btn layui-btn layui-btn-xs" lay-event="detail">查看</a>
+
+</script>
+<script type="text/html" id="filetoolbar">
+    <a class="layui-btn layui-btn layui-btn-xs" lay-event="download">下载</a>
+
+</script>
+<script src="~/Scripts/layui/layui.table.formdate.js"></script>
+<script>
+    layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
+        var layer = layui.layer
+            , table = layui.table
+            , form = layui.form
+            , upload = layui.upload
+            , element = layui.element;
+
+        var versiontable = table.render({
+            elem: '#versiontable'
+            , url: '/VersionAudit/GetCurrentAuditVersions'
+            , id: "versiontable"
+            , limit: 1000
+            , limits: [1000]
+            , height: 'full-220'
+            , cols: [[
+                { field: 'PROJECT_NAME', title: '项目名', width: 200 }
+                ,{ field: 'VERSION', title: 'No', width: 50 }
+                , { field: 'NAME', title: '版本', width: 200 }
+                , { field: 'CREATOR', title: '创建者', width: 120 }
+                , { field: 'CREATE_TIME', title: '创建时间', templet: '<div>{{ FormDate(d.CREATE_TIME, "yyyy-MM-dd HH:mm:ss") }}</div>', width: 180 }
+                , { fixed: 'right', width: 100, align: 'center', toolbar: '#versiontoolbar' }
+            ]]
+        });
+        //表中工具条
+        table.on('tool(versiontable)', function (obj) { //注：tool 是工具条事件名，recipe 是 table 原始容器的属性 lay-filter="对应的值"
+            var selectdata = obj.data //获得当前行数据
+                , layEvent = obj.event; //获得 lay-event 对应的值
+            if (layEvent === 'detail') {
+                ShowVersionDetail(selectdata.ID);
+            }
+        });
+        function ShowVersionDetail(versionid) {
+            currentversionid = versionid;
+            console.log(currentversionid);
+            console.log("show" + versionid);
+            $.ajax({
+                url: '/VersionAudit/GetVersionInfo',
+                data: {
+                    versionid: versionid,
+                },
+                async: false,
+                type: 'GET',
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                success: function (data) {
+                    console.log(data);
+                    var status = GetVersionStatus(data.versioninfo._FLOW_ROLES, data.versioninfo.CURRENT_FLOW_INDEX);
+                    document.getElementById("info").innerHTML = data.projectinfo.NAME + " " + data.versioninfo.VERSION + ' ' + status;
+                   
+                    var fff = document.getElementById("versioninfo");
+                    fff.style.display = "block";
+                    form.val('versioninfo', {
+                        "ID": data.versioninfo.ID,
+                        "NAME": data.versioninfo.NAME,
+                        "REMARK": data.versioninfo.REMARK // "name": "value"
+
+                    });
+
+                    //锁定表单
+                    var $form = $('#versioninfo'); // 使用选择器替换 formId 为表单区域的 id
+                    // 遍历表单区域中的每个元素
+                    $form.find('input, textarea, select').each(function () {
+                        // 设置 readonly 属性为 true
+                        $(this).attr('readonly', true);
+                    });
+                    // 重新渲染 layui 表单
+                    layui.form.render();
+                    //文件table
+                    var filetable = table.render({
+                        elem: '#filetable'
+                        , url: '/VersionAudit/GetFileTable'
+                        //, toolbar: true
+                        , id: "filetable"
+                        , limit: 1000
+                        , limits: [1000]
+                        , height: '80'
+                        , cols: [[
+                            { field: 'NAME', title: '文件名' }
+                            , { field: 'CREATOR', title: '创建者', width: 120 }
+                            , { field: 'CREATE_TIME', title: '创建时间', templet: '<div>{{ FormDate(d.CREATE_TIME, "yyyy-MM-dd HH:mm:ss") }}</div>', width: 180 }
+                            , { fixed: 'right', width: 200, align: 'center', toolbar: '#filetoolbar' }
+
+                        ]]
+                        , where: {
+                            versionid: versionid
+                        }
+                        , currentversionid: versionid
+
+                    });
+
+                    //表中工具条
+                    table.on('tool(filetable)', function (obj) { //注：tool 是工具条事件名，recipe 是 table 原始容器的属性 lay-filter="对应的值"
+                        var selectdata = obj.data //获得当前行数据
+                            , layEvent = obj.event; //获得 lay-event 对应的值
+                        if (layEvent === 'download') {
+                            DownladFile(selectdata.ID);
+                        }
+
+                    });
+
+                    //表单拒绝
+                    layui.$('#Reject').on('click', function () {
+                        var formdata = form.val('versioninfo');
+                        layer.prompt({
+                            formType: 2,
+                            value: '否决',
+                            title: '确认拒绝表单',
+                            area: ['800px', '350px'] //自定义文本域宽高
+                        }, function (value, index, elem) {
+                            console.log(value)
+                            $.ajax({
+                                type: 'post',
+                                dataType: 'json',
+                                url: '/VersionAudit/RejectVersion',
+                                data: {
+                                    versionid: formdata.ID,
+                                    remark: value,
+                                },
+                                success: function (data) {
+                                    layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: data.result ? 1 : 4 });
+                                    versiontable.reload();
+                                    processrecordtable.reload();
+                                },
+                                error: function () {
+                                }
+                            });
+                            layer.close(index);
+                        });
+
+                    });
+                    //表单同意
+                    layui.$('#Approve').on('click', function () {
+                        var formdata = form.val('versioninfo');
+                        layer.prompt({
+                            formType: 2,
+                            value: '同意',
+                            title: '确认同意表单',
+                            area: ['800px', '350px'] //自定义文本域宽高
+                        }, function (value, index, elem) {
+                            console.log(value)
+                            $.ajax({
+                                type: 'post',
+                                dataType: 'json',
+                                url: '/VersionAudit/ApproveVersion',
+                                data: {
+                                    versionid: formdata.ID,
+                                    remark: value,
+                                },
+                                success: function (data) {
+                                    layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: data.result ? 1 : 4 });
+                         
+                                    location.reload();
+                                },
+                                error: function () {
+                                }
+                            });
+                            layer.close(index);
+                        });
+
+                    });
+
+
+
+
+
+                    function DownladFile(fileid) {
+                        var url = "/VersionAudit/DownladFile?fileid=" + fileid;
+                        window.open(url, "_blank");
+                    }
+
+                },
+
+            });
+            var processrecordtable = table.render({
+                elem: '#processrecordtable'
+                , url: '/VersionManage/GetProcessRecord'
+                //, toolbar: true
+                , id: "processrecordtable"
+                , limit: 1000
+                , limits: [1000]
+                , height: '300'
+                , cols: [[
+                    { field: 'FLOW_INDEX', title: '流程序号' }
+                    , {
+                        field: 'ACTION', title: '结果',
+                        templet: function (d, s) {
+                            var strstate;
+                            if (d.ACTION == 0) {
+                                strstate = '提交'
+                            } else if (d.ACTION == 1) {
+                                strstate = '同意'
+                            }
+                            else {
+                                strstate = '否决'
+                            }
+                            return strstate;
+                        }
+                    }
+                    , { field: 'REMARK', title: '备注' }
+                    , { field: 'CREATOR', title: '签核人员', width: 120 }
+                    , { field: 'CREATE_TIME', title: '签核时间', templet: '<div>{{ FormDate(d.CREATE_TIME, "yyyy-MM-dd HH:mm:ss") }}</div>', width: 180 }
+
+
+                ]]
+                , where: {
+                    versionid: versionid
+                }
+
+
+            });
+        }
+
+        function GetVersionStatus(flows, index) {
+            var status = '';
+            if (index == -1) {
+                status = '未提交';
+            } else if (index == 100) {
+                status = '已完成';
+            } else {
+                status = '待' + flows[index] + '签核';
+            }
+            return status;
+        }
+    });
+
+</script>

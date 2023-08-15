@@ -1,0 +1,278 @@
+﻿
+@{
+    ViewBag.Title = "user";
+}
+
+
+<style>
+    /* 修改 select 元素所在的单元格样式 */
+    .layui-table-cell {
+        position: relative; /* 或者使用 absolute */
+        overflow: visible;
+    }
+
+
+    /* 隐藏选择边框 */
+    .layui-unselect {
+        appearance: none;
+        -webkit-appearance: none;
+        border: none !important;
+        outline: none !important;
+        background-color: transparent;
+    }
+    /* 使得下拉框与单元格刚好合适 */
+    td .layui-form-select {
+        margin-top: -10px;
+        margin-left: -15px;
+        margin-right: -15px;
+    }
+</style>
+
+<script type="text/html" id="toolbar">
+    <div>
+        <div style="float:left;position:relative;">
+            <div class="layui-inline">
+                <input class="layui-input" style="width:300px;margin-right:8px" id="searchfield" placeholder="请输入查询内容" autocomplete="off">
+            </div>
+            <button type="button" class="layui-btn layui-btn-sm" lay-event="search">查找</button>
+        </div>
+    </div>
+</script>
+
+<a class="layui-btn layui-btn-normal" id="newuser">添加</a>
+
+<table class="layui-hide" id="user" lay-filter="user"></table>
+
+<script type="text/html" id="roleSel">
+    <select name='ROLEID'>
+        {{# layui.each(d.options, function(index, option){ }}
+        <option value="{{option.field}}" {{  d.d.ROLEID === option.field ? 'selected' : ''}}>{{option.text}}</option>
+        {{# }); }}
+    </select>
+</script>
+
+<script>
+    layui.use(['table', 'jquery'], function () {
+        var layer = layui.layer
+            , table = layui.table
+            , form = layui.form
+            , $ = layui.jquery;
+        getData();
+        var usertable;
+        async function getData() {
+            var options = [];
+            let result1 = await $.ajax({
+                type: 'post',
+                dataType: 'json',
+                url: '/Role/Get',
+                data: {
+                    page: 1,
+                    limit: 9999
+                },
+                success: function (data) {
+                    console.log(data.data);
+                    options = data.data.map(({ ID: field, NAME: text }) => ({ field, text }));
+                    console.log(options);
+                },
+                error: function () {
+                }
+            });
+
+
+            usertable = table.render({
+                elem: '#user'
+                , height: 'full-250'
+                , url: '/User/Get/' //数据接口
+                , title: '用户'
+                , id: "user"
+                , page: true
+                , toolbar: '#toolbar'
+                , defaultToolbar: ['filter']
+                , limit: 20
+                , cols: [
+                    [
+                        { field: 'ID', title: 'ID' }
+                        , { field: 'USERNAME', title: '用户名' }
+                        , { field: 'TRUENAME', title: '姓名' }
+                        , { field: 'EMAIL', title: '邮件', edit: true }
+                        // , { field: 'ROLEID', title: '用户角色' }
+                        , {
+                            field: 'ROLEID', title: '用户角色', templet: function (d) {
+                                console.log(d);
+                                return layui.laytpl($('#roleSel').html()).render({
+                                    field: 'ROLEID', // lay-filter
+                                    options: options,
+                                    d: d
+                                });
+                            }
+                        }
+
+                    ]]
+                , where: {
+                    "userFilter": $("siteFilter").val()
+                }, done: function (res, curr, count) {
+                    //数据渲染完的回调。
+                    //由于layui 设置了超出隐藏，所以这里改变下，以兼容操作按钮的下拉菜单
+                    // $(".layui-table-body, .layui-table-box, .layui-table-cell").css('overflow', 'visible');
+                }
+
+            });
+
+            form.on('select', function (data) {
+                var elem = $(data.elem);
+                var trElem = elem.parents('tr');
+                var tableData = table.cache['user'];
+
+                // 更新到表格的缓存数据中，才能在获得选中行等等其他的方法中得到更新之后的值
+                var userid = tableData[trElem.data('index')].ID;
+                // 其他的操作看需求 TODO
+
+                console.log(userid);
+                console.log(data.value);
+                layer.confirm('is not?', { icon: 3, title: '修改确认', content: data.value }, function (index) {
+                    //do something
+                    $.ajax({
+                        url: '/User/Edit',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                        data: {
+                            "id": userid,
+                            "value": data.value,
+                            "field": "ROLEID"
+                        },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
+                        type: 'POST',
+                        contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
+                        async: false,
+                        success: function (data) {
+                            layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: 4 });
+                            usertable.reload();
+
+                        },
+                        error: function (message) {
+                            alert('error!');
+                        }
+                    });
+                    layer.close(index);
+                },
+                    function (index) {
+                        layer.msg('取消修改');
+                        usertable.reload();
+                    }
+
+                );
+
+            });
+
+            //工具条
+            table.on('toolbar(user)', function (obj) {
+                var id = obj.config.id;
+                var checkStatus = table.checkStatus(id);
+                var othis = lay(this);
+
+                switch (obj.event) {
+                    case 'search':
+                        var filter = $("#searchfield").val();
+                        console.log(filter);
+                        table.reload('user', {
+                            url: '/User/Get',
+                            where: {
+                                filter: filter
+                            }
+                        })
+                        $("#searchfield").val(filter);
+                        break;
+                }
+            })
+
+            //编辑事件
+            table.on('edit(user)', function (obj) { //注：edit是固定事件名，tableEvent是table原始容器的属性 lay-filter="对应的值"
+
+                layer.confirm('is not?', { icon: 3, title: '修改确认', content: obj.value }, function (index) {
+                    //do something
+                    $.ajax({
+                        url: '/User/Edit',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                        data: {
+                            "id": obj.data.ID,
+                            "value": obj.value,
+                            "field": obj.field
+                        },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
+                        type: 'POST',
+                        contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
+                        async: false,
+                        success: function (data) {
+                            layer.msg(data.message);
+                            usertable.reload();
+
+                        },
+                        error: function (message) {
+                            alert('error!');
+                        }
+                    });
+                    layer.close(index);
+                },
+                    function (index) {
+                        layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: 4 });
+                        usertable.reload();
+                    }
+
+                );
+
+            });
+
+        }
+
+
+        $(document).on('click', '#newuser', function () {
+            layer.open({
+                title: '新增模块'
+                , type: 2
+                , btn: ['确定', '取消']
+                , content: 'Add'
+                , area: ['40%', '50%']
+                , success: function (layero, index) {
+                    //向layer页面传值，传值主要代码
+                    //   var body = layer.getChildFrame('body', index);
+                }
+                , yes: function (index) {
+                    var res = window["layui-layer-iframe" + index].callback();
+                    var data = JSON.parse(res);
+
+                    if (data.id == "" || data.name == ""  ) {
+                        layer.msg('请补全信息');
+                    }
+                    else {
+                        //layer.msg('添加用户成功');
+                        AddUser(data);
+                        table.reload('user');
+                        //console.log(data);
+                        // layer.msg(res);
+                        layer.close(index);
+                    }
+
+                }, btn2: function (index, layero) {
+                    layer.msg('取消操作');
+                }
+
+            });
+        });
+
+        function AddUser(data) {
+            $.ajax({
+                url: '/User/AddUser',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                data: {
+                    id: data.id,
+                    name: data.name,
+                    role:data.role
+                },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
+                async: false,
+                success: function (data) {
+                    layer.open({ content: data.message });
+
+                },
+                error: function (message) {
+                    alert('error!');
+                }
+            });
+        }   
+    })
+</script>

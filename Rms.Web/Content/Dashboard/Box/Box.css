@@ -1,0 +1,198 @@
+﻿@charset "utf-8";
+
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box
+}
+
+@font-face {
+    font-family: 'DS-DIGIT';
+    src: url('../../font/DS-DIGIT.TTF') format('truetype');
+}
+
+
+html, body {
+    background: #000d4a url('../../images/dashboard/bg.jpg') center top;
+    background-size: cover;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: 'Cambria';
+    font-weight: bold;
+    color: rgba(255,255,255,.7);
+    cursor: move;
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+.header {
+    top: 0;
+    padding: 0px;
+    margin: 0px;
+    width: 100%;
+    height: 1rem;
+    background: url(../../images/dashboard/head_bg.png) no-repeat center center;
+    background-size: 100% 100%;
+    position: relative;
+}
+
+    .header .logo {
+      
+
+        background-repeat: no-repeat;
+        width: 200px;
+        height: 33px;
+        float: left;
+        margin-top: 0.1rem;
+        margin-left: 0.3rem;
+        /*        display: flex;
+        align-items: center;
+        justify-content: center;*/
+    }
+
+    .header .title {
+        width: auto;
+        margin-left: 2rem;
+        margin-right: 2rem;
+        color: #fff;
+        text-align: center;
+        line-height: 1rem;
+        font-size: 0.48rem;
+    }
+
+
+
+    .header .controlbox {
+        position: absolute;
+        font-size: 0.3rem;
+        right: 0.3rem;
+        top: 0.2rem;
+        cursor: default;
+        color: rgba(64, 95, 168,0.6);
+    }
+
+.eqp {
+    width: auto;
+    color: #fff;
+    text-align: center;
+    font-size: 0.38rem;
+}
+
+.box1 {
+    border: 1px solid rgba(25,186,139,.17);
+    background: rgba(255,255,255,.04) url('../../images/dashboard/line.png');
+    background-size: 100% auto;
+    height: 1.1rem;
+    margin-left: 0.1rem;
+    margin-right: 0.1rem;
+}
+
+.box2 {
+    border: 1px solid rgba(25,186,139,.17);
+    background: rgba(255,255,255,.14) url('../../images/dashboard/line.png');
+    background-size: 100% auto;
+    height: 3.5rem;
+    margin-top: 0.1rem;
+    margin-bottom: 0.1rem;
+    margin-left: 0.05rem;
+    margin-right: 0.05rem;
+}
+
+.box3 {
+    border: 1px solid rgba(25,186,139,.17);
+    background: rgba(255,255,255,.14) url('../../images/dashboard/line.png');
+    background-size: 100% auto;
+    height: 7.1rem;
+    margin-top: 0.1rem;
+    margin-bottom: 0.1rem;
+    margin-left: 0.05rem;
+    margin-right: 0.05rem;
+}
+.box4 {
+    border: 1px solid rgba(25,186,139,.17);
+    background: rgba(255,255,255,.14) url('../../images/dashboard/line.png');
+    background-size: 100% auto;
+    height: 2.3rem;
+    margin-top: 0.1rem;
+    margin-bottom: 0.1rem;
+    margin-left: 0.05rem;
+    margin-right: 0.05rem;
+}
+
+
+
+.main_middle {
+    height: 7.1%;
+    width: 100%;
+}
+
+.main_middle_list {
+    position: relative;
+    float: left;
+    width: 16%;
+    height: 1.0rem;
+    background: rgba(11,76,151,0.10);
+    margin-left: 2%;
+    margin-right: 2%;
+    box-shadow: 1px 2px 10px 1px rgba(14,252,255,0.53), inset 5px 4px 100px 1px rgba(14,252,255,0.34);
+}
+
+    .main_middle_list img {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+
+    .main_middle_list:nth-child(1) {
+        margin-left: 0;
+    }
+
+.main_list_title {
+    font-size: .95vw;
+    color: #0EFCFF;
+    text-indent: .8vw;
+    padding-top: .5vw;
+}
+
+.main_middle_list span {
+    display: inline-block;
+    width: 100%;
+    font-size: 2.4vw;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+    letter-spacing: .2vw;
+    margin-top: -.5vw;
+}
+
+.main-chart ul {
+    padding: 0;
+    margin: 0;
+}
+
+    .main-chart ul li {
+        float: left;
+        list-style-type: none;
+        height: 100%;
+    }
+
+        .main-chart ul li .left {
+            float: left;
+            font-size: 0.4rem;
+        }
+
+        .main-chart ul li .right {
+            float: right;
+            font-size: 0.4rem;
+        }
+
+
+.footer {
+    width: 100%;
+    height: 1rem;
+    position: absolute;
+    text-align: center;
+    bottom: -0.7rem;
+}

@@ -1,0 +1,138 @@
+﻿
+@{
+}
+
+<a class="layui-btn layui-btn-normal" id="newrole">添加</a>
+<script type="text/html" id="toolbar">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="permission">权限</a>
+</script>
+<table class="layui-hide" id="role" lay-filter="role"></table>
+<script>
+    layui.use(['table', 'jquery'], function () {
+        var table = layui.table
+            , $ = layui.jquery;
+
+        table.render({
+            elem: '#role'
+            , height: 'full-250'
+            , url: '/Role/Get/' //数据接口
+            , title: '角色'
+            , id: "role"
+            , page: true
+            , limit: 20
+            , cols: [
+                [
+                    { field: 'ID', title: 'ID', filter: true }
+                    , { field: 'NAME', title: '角色名称' }
+                    , { field: 'DESCRIPTION', title: '描述' }
+                    , { fixed: 'right', width: 120, align: 'center', toolbar: '#toolbar' }
+                ]]
+
+        });
+
+        table.on('tool(role)', function (obj) {
+            console.log(obj);
+            var event = obj.event, //当前单元格事件属性值
+                selectdata = obj.data;
+            if (event === 'permission') {
+                layer.open({
+                    title: '更改权限'
+                    , type: 2
+                    , btn: ['确定', '取消']
+                    , content: 'ModuleRole?RoleID=' + selectdata.ID
+                    , area: ['40%', '85%']
+                    , success: function (layero, index) {
+
+
+                    }
+                    , yes: function (index) {
+                        var res = window["layui-layer-iframe" + index].callback();          
+                        console.log(res);
+                        var jdata = JSON.parse(res);       
+                        console.log(jdata);
+                        var moduleids = jdata.roles.map(obj => obj.ID);
+                        console.log(moduleids);
+                        $.ajax({
+                            url: '/Role/SetModuleRole',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                            data: {
+                                roleid: selectdata.ID,
+                                moduleids: moduleids
+                            },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
+                            type: 'POST',
+                            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
+                            async: false,
+                            success: function (data) {
+                                layer.open({ content: data.message });
+
+                            },
+                            error: function (message) {
+                                alert('error!');
+                            }
+                        });
+                        layer.close(index);
+
+
+                    }, btn2: function (index, layero) {
+                        layer.msg('取消操作');
+                    }
+
+                });
+            }
+
+        });
+        $(document).on('click', '#newrole', function () {
+            layer.open({
+                title: '新增角色'
+                , type: 2
+                , btn: ['确定', '取消']
+                , content: 'Add'
+                , area: ['40%', '50%']
+                , success: function (layero, index) {
+                    //向layer页面传值，传值主要代码
+                    //   var body = layer.getChildFrame('body', index);
+                }
+                , yes: function (index) {
+                    var res = window["layui-layer-iframe" + index].callback();
+                    var data = JSON.parse(res);
+
+                    if (data.id == "" || data.name == "") {
+                        layer.msg('请补全信息');
+                    }
+                    else {
+                        //layer.msg('添加用户成功');
+                        AddRole(data);
+                        table.reload('role');
+                        //console.log(data);
+                        // layer.msg(res);
+                        layer.close(index);
+                    }
+
+                }, btn2: function (index, layero) {
+                    layer.msg('取消操作');
+                }
+
+            });
+        });
+        function AddRole(data) {
+            $.ajax({
+                url: '/Role/AddRole',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                data: {
+                    data
+                },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
+                async: false,
+                success: function (data) {
+                    layer.open({ content: data.message });
+
+                },
+                error: function (message) {
+                    alert('error!');
+                }
+            });
+        }
+
+    })
+
+
+</script>

@@ -1,0 +1,156 @@
+﻿
+@{
+        var user = (Rms.Models.DataBase.Pms.PMS_USER)Session["user_account"];
+        var modules = (List< Rms.Models.DataBase.Pms.PMS_MODULE >)Session["modules"];
+        string name = "未登录";
+        string role = "NA";
+        if (user != null)
+        {
+            name = user.TRUENAME;
+            role = user.ROLEID;
+        }
+    }
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>DPS RMS</title>
+    @*<link rel="stylesheet" href="../src/css/layui.css">*@
+    <link href="~/Scripts/layui/css/layui.css" rel="stylesheet" />
+</head>
+
+<body class="layui-layout-body">
+    <script src="~/Scripts/layui/layui.js?v=1.1"></script>
+    <script src="~/Scripts/jquery-3.4.1.min.js?v=1.1"></script>
+
+    <div class="layui-layout layui-layout-admin">
+        <div class="layui-header">
+            <div class="layui-logo">DPS RMS</div>
+            <!-- 头部区域（可配合layui已有的水平导航） -->
+            @*<ul class="layui-nav layui-layout-left">
+                    <li class="layui-nav-item"><a href="">控制台</a></li>
+                    <li class="layui-nav-item"><a href="">用户</a></li>
+                    <li class="layui-nav-item">
+                        <a href="javascript:;">其它系统</a>
+                        <dl class="layui-nav-child">
+                            <dd><a href="">邮件管理</a></dd>
+                            <dd><a href="">消息管理</a></dd>
+                            <dd><a href="">授权管理</a></dd>
+                        </dl>
+                    </li>
+                </ul>*@
+            <ul class="layui-nav layui-layout-left">
+                @{
+                    var classes1 = modules?.Select(it => it.CLASSNAME).Distinct().ToList();
+                    foreach (var cl in classes1)
+                    {
+                        var modulesInClass = modules.Where(it => it.CLASSNAME.Equals(cl));
+                        if (modulesInClass.Any())
+                        {
+                            if (modulesInClass.Count() == 1)
+                            {
+                                var module = modulesInClass.First();
+                                <li class="layui-nav-item">
+                                    <a href="@module.LINKURL">@module.NAME</a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="layui-nav-item">
+                                    <a class="" href="javascript:;">@cl</a>
+                                    <dl class="layui-nav-child">
+                                        @foreach (var module in modulesInClass)
+                                        {
+                                            <dd><a href="@module.LINKURL">@module.NAME</a></dd>
+                                        }
+                                    </dl>
+                                </li>
+                            }
+                        }
+                    }
+                    
+                }
+                <li class="layui-nav-item"><a href = "/VersionAudit/Index">待签<span class="layui-badge" id="auditnum">0</span></a></li>
+            </ul>
+
+            <ul class="layui-nav layui-layout-right">
+                <li class="layui-nav-item">
+                    <a href="javascript:;">
+                        <!-- 头像 -->
+                        @*<img src="http://t.cn/RCzsdCq" class="layui-nav-img">*@
+                        <!-- 当前Session用户名 -->
+                        @name
+                    </a>
+                    <dl class="layui-nav-child">
+                        @*<dd><a href="">基本资料</a></dd>*@
+                        <dd><a href="">@name</a></dd>
+                        <dd><a href="">@role</a></dd>
+                        <dd><a href="\Account\ChangePassword">修改密码</a></dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item"><a href="javascript:LogOut();">Log out</a></li>
+            </ul>
+        </div>
+
+
+
+        <!-- 内容主体区域 -->
+        <div style="padding: 15px; margin-top: 10px;"> @RenderBody()</div>
+
+        <div class="layui-footer" style="left: 0; ">
+            <!-- 底部固定区域 -->
+            ©@DateTime.Now.Year DPS RMS - 智能制造开发中心
+        </div>
+
+    </div>
+
+
+    <script>
+        //JavaScript代码区域
+        layui.use('element', function () {
+            var element = layui.element;
+
+        });
+    </script>
+    <script>
+        function LogOut() {
+            $.ajax({
+                url: '/Account/LogOut',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
+                async: false,
+                success: function (data) {
+                    window.location.href = '/Account/Login';
+
+                },
+                error: function (message) {
+                    alert('error!');
+                }
+            });
+
+        }
+    </script>
+
+    <script>
+        layui.use(['jquery'], function () {
+            var $ = jQuery = layui.$;
+            // 你可以在下面的 js 代码中使用你熟悉的 $, jQuery
+            $.ajax({
+                type: 'post',
+                dataType: 'json',
+                url: '/VersionAudit/GetCurrentAuditVersions',
+                data: {
+                    page: 1,
+                    limit:99999
+                },
+                success: function (data) {                    
+                    document.getElementById("auditnum").innerHTML = data.count;
+                },
+                error: function () {
+                }
+            });
+        });
+    </script>
+</body>
+</html>

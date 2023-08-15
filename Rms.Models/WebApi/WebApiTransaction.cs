@@ -1,0 +1,70 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Rms.Models.WebApi
+{
+    public class ResponseMessage
+    {
+        public bool Result { get; set; } = false;
+        public string Message { get; set; }
+        //public Dictionary<string,object> Parameters { get; set; }
+    }
+
+    public class GetEppdRequest
+    {
+        public string EuipmentId { get; set; }
+    }
+    public class GetEppdResponse: ResponseMessage
+    {
+        public List<string> EPPD { get; set; }
+    }
+
+    public class AddNewRecipeRequest
+    {
+        public string TrueName { get; set; } = "Default";
+        public string EquipmentId { get; set; }
+        public string RecipeName { get; set; }
+    }
+    public class AddNewRecipeResponse : ResponseMessage
+    {
+        public string RECIPE_ID { get; set; }
+        public string VERSION_LATEST_ID { get; set; }
+    }
+
+    public class AddNewRecipeVersionRequest
+    {
+        public string TrueName { get; set; } = "Default";
+        public string EquipmentId { get; set; }
+        public string RecipeId { get; set; }
+        public string RecipeName { get; set; }
+    }
+    public class AddNewRecipeVersionResponse : ResponseMessage
+    {
+        public string VERSION_LATEST_ID { get; set; }
+    }
+    public class ReloadRecipeBodyRequest
+    {
+        public string TrueName { get; set; }
+        public string RecipeName { get; set; } //用于检查设备回复的Name是否一致
+        public string VersionId { get; set; }
+    }
+
+    public class ReloadRecipeBodyResponse : ResponseMessage
+    {
+        public string RECIPE_DATA_ID { get; set; }
+    }
+
+    public class CompareRecipeBodyRequest
+    {
+        public string EquipmentId { get; set; }
+        public string RecipeName { get; set; } 
+    }
+
+    public class CompareRecipeBodyResponse : ResponseMessage
+    {
+        public string RecipeName { get; set; }
+    }
+}

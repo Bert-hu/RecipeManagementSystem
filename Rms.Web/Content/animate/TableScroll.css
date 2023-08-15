@@ -1,0 +1,62 @@
+﻿.tablebox {
+    height: 3.2rem;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    margin-top: 0.1rem;
+}
+
+.tbl-header {
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 999;
+}
+.tbl-header2 {
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 999;
+}
+
+.tbl-body {
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.tbl-body2 {
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.tablebox table {
+    width: 100%;
+}
+
+    .tablebox table th,
+    .tablebox table td {
+        font-size: 0.2rem;
+        line-height: 0.3rem;
+        text-align: center;
+    }
+
+    .tablebox table tr th {
+        background-color: #010d4a;
+        cursor: pointer;
+    }
+
+    .tablebox table tr td {
+        background-color: transparent;
+    }
+
+
+        .tablebox table tr td span,
+        .tablebox table tr td span {
+            font-size: 0.15rem;
+        }

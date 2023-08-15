@@ -1,0 +1,134 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="refresh" content="3600">
+    <link rel="stylesheet" href="~/Scripts/layui-v2.7.6/css/layui.css" />
+    <script src="~/Scripts/layui-v2.7.6/layui.js"></script>
+    <script src="~/Scripts/jquery-3.4.1.min.js"></script>
+    <script src="~/Scripts/Alarm/xlsx.core.min.js"></script>
+    <script src="~/Scripts/Alarm/BoxAlarm.js"></script>
+    <style>
+        .required::after {
+            content: '*';
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <table class="layui-hide" id="alarmconfig" lay-filter="alarmconfig"></table>
+
+    <script type="text/html" id="toolbar">
+        <div>
+            <div class="layui-btn-container" style="float:left;display:inline">
+                <button class="layui-btn layui-btn-sm" lay-event="add">添加</button>
+                <button class="layui-btn layui-btn-warm layui-btn-sm" lay-event="import">导入</button>
+                <button class="layui-btn layui-btn-normal layui-btn-sm" lay-event="export">导出</button>
+            </div>
+            <div style="float:right;position:relative;left:120px">
+                <div class="layui-inline">
+                    <input class="layui-input" style="width:300px;margin-right:8px" id="searchfield" placeholder="请输入ALARM_CODE/CLASS" autocomplete="off">
+                </div>
+                <button type="button" class="layui-btn layui-btn-sm" lay-event="search">查找</button>
+            </div>
+        </div>
+    </script>
+
+    <div id="add-main" style="display:none;padding-top:10px">
+        <form class="layui-form" id="add-form" action="" lay-filter="addinfo">
+            <div class="layui-form-item">
+                <label class="layui-form-label required" style="width:20%">ALARM_CODE</label>
+                <div class="layui-input-block">
+                    <input type="text" placeholder="请输入ALARM_CODE" autocomplete="off" lay-verify="required" class="layui-input" name="alarmcode" style="width:80%">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label required" style="width:20%">LEVELS</label>
+                <div class="layui-input-block">
+                    <input type="text" placeholder="请输入LEVELS" autocomplete="off" lay-verify="required" class="layui-input" name="levels" style="width:80%">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label required" style="width:20%">TYPE</label>
+                <div class="layui-input-block">
+                    <input type="text" placeholder="请输入TYPE" autocomplete="off" lay-verify="required|type" class="layui-input" name="type" style="width:80%">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label required" style="width:20%">MESSAGE</label>
+                <div class="layui-input-block">
+                    <input type="text" placeholder="请输入MESSAGE" autocomplete="off" lay-verify="required" class="layui-input" name="message" style="width:80%">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label required" style="width:20%">CLASS</label>
+                <div class="layui-input-block">
+                    <input type="text" placeholder="请输入CLASS" autocomplete="off" lay-verify="required" class="layui-input" name="class" style="width:80%">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="text-align:center">
+                    <button type="submit" class="layui-btn" lay-submit lay-filter="save" style="position:relative;right:5%">提交</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div id="import-main" style="display:none;padding-top:10%">
+        <form class="layui-form" id="import-form" action="" lay-filter="importinfo">
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <input type="file" id="excel-file">
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        $('#excel-file').change(function (e) {
+            layui.layer.confirm('确认导入文件' + $("#excel-file").val() + '?', { icon: 3, title: '提示' }, function (index) {
+                layui.layer.close(index);
+
+                var files = e.target.files;
+                var fileReader = new FileReader();
+                fileReader.onload = function (ev) {
+                    try {
+                        var data = ev.target.result
+                        var workbook = XLSX.read(data, {
+                            type: 'binary'
+                        }) // 以二进制流方式读取得到整份excel表格对象
+                        var persons = []; // 存储获取到的数据
+                    } catch (e) {
+                        alert('文件类型不正确！');
+                        return;
+                    }
+                    // 表格的表格范围，可用于判断表头是否数量是否正确
+                    var fromTo = '';
+                    // 遍历每张表读取
+                    for (var sheet in workbook.Sheets) {
+                        if (workbook.Sheets.hasOwnProperty(sheet)) {
+                            fromTo = workbook.Sheets[sheet]['!ref'];
+                            // console.log(fromTo);
+                            persons = persons.concat(XLSX.utils.sheet_to_json(workbook.Sheets[sheet]));
+                            //break; // 如果只取第一张表，就取消注释这行
+                        }
+                    }
+                    //在控制台打印出来表格中的数据
+                    console.log(persons);
+                    ImportExcle(persons);
+                };
+                // 以二进制方式打开文件
+                fileReader.readAsBinaryString(files[0]);
+
+            })
+
+    });
+    </script>
+
+</body>
+</html>
