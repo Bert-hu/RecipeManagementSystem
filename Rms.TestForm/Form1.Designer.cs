@@ -41,6 +41,7 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_rabbit = new System.Windows.Forms.TabPage();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.button_compare = new System.Windows.Forms.Button();
             this.button_reloadbody = new System.Windows.Forms.Button();
             this.listBox_version = new System.Windows.Forms.ListBox();
             this.button_addversion = new System.Windows.Forms.Button();
@@ -49,10 +50,10 @@
             this.button_geteppd = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-            this.textBox_apiurl = new System.Windows.Forms.TextBox();
-            this.textBox_apieqid = new System.Windows.Forms.TextBox();
             this.button_clearlog = new System.Windows.Forms.Button();
-            this.button_compare = new System.Windows.Forms.Button();
+            this.button_downloadeffective = new System.Windows.Forms.Button();
+            this.comboBox_eqpselect = new System.Windows.Forms.ComboBox();
+            this.comboBox_urlselect = new System.Windows.Forms.ComboBox();
             this.tabControl1.SuspendLayout();
             this.tabPage_rabbit.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -182,6 +183,9 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.comboBox_urlselect);
+            this.tabPage1.Controls.Add(this.comboBox_eqpselect);
+            this.tabPage1.Controls.Add(this.button_downloadeffective);
             this.tabPage1.Controls.Add(this.button_compare);
             this.tabPage1.Controls.Add(this.button_reloadbody);
             this.tabPage1.Controls.Add(this.listBox_version);
@@ -191,8 +195,6 @@
             this.tabPage1.Controls.Add(this.button_geteppd);
             this.tabPage1.Controls.Add(this.label5);
             this.tabPage1.Controls.Add(this.label4);
-            this.tabPage1.Controls.Add(this.textBox_apiurl);
-            this.tabPage1.Controls.Add(this.textBox_apieqid);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
@@ -200,6 +202,16 @@
             this.tabPage1.TabIndex = 2;
             this.tabPage1.Text = "WebApi";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // button_compare
+            // 
+            this.button_compare.Location = new System.Drawing.Point(354, 166);
+            this.button_compare.Name = "button_compare";
+            this.button_compare.Size = new System.Drawing.Size(140, 23);
+            this.button_compare.TabIndex = 7;
+            this.button_compare.Text = "Compare Body";
+            this.button_compare.UseVisualStyleBackColor = true;
+            this.button_compare.Click += new System.EventHandler(this.button2_Click_1);
             // 
             // button_reloadbody
             // 
@@ -278,22 +290,6 @@
             this.label4.TabIndex = 1;
             this.label4.Text = "EQID";
             // 
-            // textBox_apiurl
-            // 
-            this.textBox_apiurl.Location = new System.Drawing.Point(90, 49);
-            this.textBox_apiurl.Name = "textBox_apiurl";
-            this.textBox_apiurl.Size = new System.Drawing.Size(199, 21);
-            this.textBox_apiurl.TabIndex = 0;
-            this.textBox_apiurl.Text = "http://192.168.53.210:8085";
-            // 
-            // textBox_apieqid
-            // 
-            this.textBox_apieqid.Location = new System.Drawing.Point(90, 22);
-            this.textBox_apieqid.Name = "textBox_apieqid";
-            this.textBox_apieqid.Size = new System.Drawing.Size(199, 21);
-            this.textBox_apieqid.TabIndex = 0;
-            this.textBox_apieqid.Text = "EQP002";
-            // 
             // button_clearlog
             // 
             this.button_clearlog.Location = new System.Drawing.Point(1161, 8);
@@ -304,15 +300,36 @@
             this.button_clearlog.UseVisualStyleBackColor = true;
             this.button_clearlog.Click += new System.EventHandler(this.button_clearlog_Click);
             // 
-            // button_compare
+            // button_downloadeffective
             // 
-            this.button_compare.Location = new System.Drawing.Point(354, 166);
-            this.button_compare.Name = "button_compare";
-            this.button_compare.Size = new System.Drawing.Size(140, 23);
-            this.button_compare.TabIndex = 7;
-            this.button_compare.Text = "Compare Body";
-            this.button_compare.UseVisualStyleBackColor = true;
-            this.button_compare.Click += new System.EventHandler(this.button2_Click_1);
+            this.button_downloadeffective.Location = new System.Drawing.Point(354, 231);
+            this.button_downloadeffective.Name = "button_downloadeffective";
+            this.button_downloadeffective.Size = new System.Drawing.Size(140, 42);
+            this.button_downloadeffective.TabIndex = 8;
+            this.button_downloadeffective.Text = "Download effective version";
+            this.button_downloadeffective.UseVisualStyleBackColor = true;
+            this.button_downloadeffective.Click += new System.EventHandler(this.button_downloadeffective_Click);
+            // 
+            // comboBox_eqpselect
+            // 
+            this.comboBox_eqpselect.FormattingEnabled = true;
+            this.comboBox_eqpselect.Location = new System.Drawing.Point(90, 22);
+            this.comboBox_eqpselect.Name = "comboBox_eqpselect";
+            this.comboBox_eqpselect.Size = new System.Drawing.Size(121, 20);
+            this.comboBox_eqpselect.TabIndex = 9;
+            // 
+            // comboBox_urlselect
+            // 
+            this.comboBox_urlselect.FormattingEnabled = true;
+            this.comboBox_urlselect.Items.AddRange(new object[] {
+            "http://192.168.53.210:8085",
+            "http://127.0.0.1:6657",
+            "http://10.5.128.207:6657",
+            "http://10.5.1.110:6657"});
+            this.comboBox_urlselect.Location = new System.Drawing.Point(90, 49);
+            this.comboBox_urlselect.Name = "comboBox_urlselect";
+            this.comboBox_urlselect.Size = new System.Drawing.Size(221, 20);
+            this.comboBox_urlselect.TabIndex = 10;
             // 
             // Form1
             // 
@@ -352,15 +369,16 @@
         private System.Windows.Forms.ListBox listBox_recipelist;
         private System.Windows.Forms.Button button_geteppd;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.TextBox textBox_apieqid;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.TextBox textBox_apiurl;
         private System.Windows.Forms.Button button_clearlog;
         private System.Windows.Forms.Button button_addrecipe;
         private System.Windows.Forms.Button button_addversion;
         private System.Windows.Forms.ListBox listBox_version;
         private System.Windows.Forms.Button button_reloadbody;
         private System.Windows.Forms.Button button_compare;
+        private System.Windows.Forms.Button button_downloadeffective;
+        private System.Windows.Forms.ComboBox comboBox_eqpselect;
+        private System.Windows.Forms.ComboBox comboBox_urlselect;
     }
 }
 

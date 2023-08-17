@@ -45,7 +45,9 @@ namespace Rms.Services.Services
         {
             try
             {
-                if (trans.NeedReply == true && string.IsNullOrEmpty(trans.ReplyChannel)) trans.ReplyChannel = "Rms.Services";
+                var ListenChannel = ConfigurationManager.AppSettings["ListenChannel"];
+
+                if (trans.NeedReply == true && string.IsNullOrEmpty(trans.ReplyChannel)) trans.ReplyChannel = ListenChannel;
                 var message = JsonConvert.SerializeObject(trans);
 
                 rabbitMq?.Produce(routingKey, message, trans.ExpireSecond);
@@ -63,15 +65,13 @@ namespace Rms.Services.Services
         {
             try
             {
-                Log.Debug(routingKey);
-                Log.Debug(trans);
+
                 var tcs = new TaskCompletionSource<RabbitMqTransaction>();
                 var message = JsonConvert.SerializeObject(trans);
                 rabbitMq?.Produce(routingKey, message, trans.ExpireSecond);
                 var tid = trans.TransactionID;
                 dictionary.TryAdd(tid, tcs);
                 var completedTaskIndex = Task.WaitAny(new Task[] { tcs.Task }, timeoutInSeconds * 1000);
-
                 if (completedTaskIndex == 0)
                 {
                     dictionary.TryRemove(tid, out _);
@@ -107,18 +107,9 @@ namespace Rms.Services.Services
         {
             try
             {
-                Log.Debug("Receive");
-                Log.Debug(trans);
+
                 mutex.WaitOne();
-                var result = trans;
-                //Log.Info(trans.TransactionName);
-                switch (trans.TransactionName)
-                {
-
-
-                    default:
-                        break;
-                }
+                //RabbitMqTransaction result = null;
 
                 if (trans.IsReply)
                 {
@@ -127,15 +118,21 @@ namespace Rms.Services.Services
                     var tid = trans.TransactionID;
                     if (dictionary.TryGetValue(tid, out TaskCompletionSource<RabbitMqTransaction> tcs))
                     {
-                        tcs.SetResult(result);
-                        dictionary.TryRemove(tid, out _);
+                        tcs.SetResult(trans);
+                       // dictionary.TryRemove(tid, out _);
                     }
                     mutex.ReleaseMutex();
                 }
                 else
                 {
                     //TODO handle primary in trans
-          
+                    switch (trans.TransactionName)
+                    {
+
+
+                        default:
+                            break;
+                    }
                 }
             }
             catch (Exception ex)

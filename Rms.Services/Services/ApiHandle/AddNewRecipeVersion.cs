@@ -46,8 +46,8 @@ namespace Rms.Services.Services.ApiHandle
                     FLOW_ID = recipe.FLOW_ID,
                     VERSION = lastversion.VERSION + 1,
                     FLOW_ROLES = flow.FLOW_ROLES,
-                    CURRENT_FLOW_INDEX = 0,
-                    CREATOR = req.TrueName
+                    CURRENT_FLOW_INDEX = -1,
+                    CREATOR = req.TrueName,                 
                 };
                 db.Insertable<RMS_RECIPE_VERSION>(newversion).ExecuteCommand();
                 //更新外键

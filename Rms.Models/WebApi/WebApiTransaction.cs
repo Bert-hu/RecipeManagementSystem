@@ -67,4 +67,15 @@ namespace Rms.Models.WebApi
     {
         public string RecipeName { get; set; }
     }
+
+    public class DownloadEffectiveRecipeToMachineRequest : ResponseMessage
+    {
+        public string EquipmentId { get; set; }
+        public string RecipeName { get; set; }
+    }
+
+    public class DownloadEffectiveRecipeToMachineResponse : ResponseMessage
+    {
+       // public string RecipeVersionId { get; set; }
+    }
 }

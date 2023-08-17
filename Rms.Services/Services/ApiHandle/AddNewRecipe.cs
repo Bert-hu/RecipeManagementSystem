@@ -33,7 +33,7 @@ namespace Rms.Services.Services.ApiHandle
                 return res;
             }
             //检查同名recipe
-            var recipe = db.Queryable<RMS_RECIPE>().Where(it => it.NAME == req.RecipeName)?.First();
+            var recipe = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == req.EquipmentId && it.NAME == req.RecipeName)?.First();
             if (recipe != null)//检查是否存在同名
             {
                 res.Message = $"Recipe '{req.RecipeName}' already exists!";

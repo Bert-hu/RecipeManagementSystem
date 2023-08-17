@@ -122,7 +122,7 @@ namespace Rms.TestForm
                     if (dictionary.TryGetValue(tid, out TaskCompletionSource<RabbitMqTransaction> tcs))
                     {
                         tcs.SetResult(result);
-                        dictionary.TryRemove(tid, out _);
+                        //dictionary.TryRemove(tid, out _);
                     }
                     mutex.ReleaseMutex();
                 }

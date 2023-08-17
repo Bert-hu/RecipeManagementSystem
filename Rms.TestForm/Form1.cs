@@ -45,12 +45,19 @@ namespace Rms.TestForm
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
+     
+ 
         }
 
         private void Form1_Shown(object sender, EventArgs e)
         {
-
+            var db = DbFactory.GetSqlSugarClient();
+            var eqps = db.Queryable<RMS_EQUIPMENT>().ToList();
+            var showlist = eqps.ToDictionary(it => it.ID, it => it.ID);
+            comboBox_eqpselect.DisplayMember = "Key";
+            comboBox_eqpselect.ValueMember = "Value";
+            comboBox_eqpselect.DataSource = new BindingSource(showlist, null);
+            comboBox_urlselect.SelectedIndex = 0;
         }
 
         private void RichTextBoxAddText(object text)
@@ -123,8 +130,8 @@ namespace Rms.TestForm
         {
             try
             {
-                string url = $"{textBox_apiurl.Text}" + "/api/geteppd";
-                var body = JsonConvert.SerializeObject(new GetEppdRequest { EuipmentId = this.textBox_apieqid.Text });
+                string url = $"{comboBox_urlselect.SelectedItem.ToString()}" + "/api/geteppd";
+                var body = JsonConvert.SerializeObject(new GetEppdRequest { EuipmentId = this.comboBox_eqpselect.SelectedValue.ToString() });
                 RichTextBoxAddText("Send Web Api");
                 RichTextBoxAddText(body);
                 var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(url, body);
@@ -156,8 +163,8 @@ namespace Rms.TestForm
 
         private void button_addrecipe_Click(object sender, EventArgs e)
         {
-            string url = $"{textBox_apiurl.Text}" + "/api/addnewrecipe";
-            var body = JsonConvert.SerializeObject(new AddNewRecipeRequest { EquipmentId = this.textBox_apieqid.Text, RecipeName = this.listBox_recipelist.SelectedValue.ToString() });
+            string url = $"{comboBox_urlselect.SelectedItem.ToString()}" + "/api/addnewrecipe";
+            var body = JsonConvert.SerializeObject(new AddNewRecipeRequest { EquipmentId = this.comboBox_eqpselect.SelectedValue.ToString(), RecipeName = this.listBox_recipelist.SelectedValue.ToString() });
             RichTextBoxAddText("Send Web Api");
             RichTextBoxAddText(body);
             var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(url, body);
@@ -169,7 +176,7 @@ namespace Rms.TestForm
         private void listBox_recipelist_SelectedValueChanged(object sender, EventArgs e)
         {
             var db = DbFactory.GetSqlSugarClient();
-            var recipe = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == this.textBox_apieqid.Text && it.NAME == listBox_recipelist.SelectedValue.ToString())?.First();
+            var recipe = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == this.comboBox_eqpselect.SelectedValue.ToString() && it.NAME == listBox_recipelist.SelectedValue.ToString())?.First();
             if (recipe == null)
             {
                 listBox_version.DataSource = null;
@@ -177,23 +184,27 @@ namespace Rms.TestForm
             }
             var versions = db.Queryable<RMS_RECIPE_VERSION>().Where(it => it.RECIPE_ID == recipe.ID).OrderBy(it => it.VERSION, SqlSugar.OrderByType.Desc).ToList();
             var showlist = versions.ToDictionary(it => it.VERSION, it => it.ID);
-            listBox_version.DisplayMember = "Key";
-            listBox_version.ValueMember = "Value";
-            listBox_version.DataSource = new BindingSource(showlist, null);
+            this.Invoke(new Action(() =>
+            {
+                listBox_version.DisplayMember = "Key";
+                listBox_version.ValueMember = "Value";
+                listBox_version.DataSource = new BindingSource(showlist, null);
+            }));
+       
 
         }
 
         private void button_addversion_Click(object sender, EventArgs e)
         {
-            string url = $"{textBox_apiurl.Text}" + "/api/addnewrecipeversion";
+            string url = $"{comboBox_urlselect.SelectedItem.ToString()}" + "/api/addnewrecipeversion";
             var db = DbFactory.GetSqlSugarClient();
-            var recipe = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == this.textBox_apieqid.Text && it.NAME == listBox_recipelist.SelectedValue.ToString())?.First();
+            var recipe = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == this.comboBox_eqpselect.SelectedValue.ToString() && it.NAME == listBox_recipelist.SelectedValue.ToString())?.First();
             if (recipe == null)
             {
                 MessageBox.Show("请先Add Recipe之后再Add Version");
                 return;
             }
-            var body = JsonConvert.SerializeObject(new AddNewRecipeVersionRequest { EquipmentId = this.textBox_apieqid.Text, RecipeName = this.listBox_recipelist.SelectedValue.ToString(), RecipeId = recipe.ID });
+            var body = JsonConvert.SerializeObject(new AddNewRecipeVersionRequest { EquipmentId = this.comboBox_eqpselect.SelectedValue.ToString(), RecipeName = this.listBox_recipelist.SelectedValue.ToString(), RecipeId = recipe.ID });
             RichTextBoxAddText("Send Web Api");
             RichTextBoxAddText(body);
             var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(url, body);
@@ -204,7 +215,7 @@ namespace Rms.TestForm
 
         private void button_reloadbody_Click(object sender, EventArgs e)
         {
-            string url = $"{textBox_apiurl.Text}" + "/api/reloadrecipebody";
+            string url = $"{comboBox_urlselect.SelectedItem.ToString()}" + "/api/reloadrecipebody";
             var body = JsonConvert.SerializeObject(new ReloadRecipeBodyRequest { VersionId = this.listBox_version.SelectedValue.ToString(), RecipeName = this.listBox_recipelist.SelectedValue.ToString() });
             RichTextBoxAddText("Send Web Api");
             RichTextBoxAddText(body);
@@ -215,10 +226,25 @@ namespace Rms.TestForm
 
         private void button2_Click_1(object sender, EventArgs e)
         {
-            string url = $"{textBox_apiurl.Text}" + "/api/comparerecipebody";
+            string url = $"{comboBox_urlselect.SelectedItem.ToString()}" + "/api/comparerecipebody";
             var body = JsonConvert.SerializeObject(new CompareRecipeBodyRequest
             {
-                EquipmentId = this.textBox_apieqid.Text,
+                EquipmentId = this.comboBox_eqpselect.SelectedValue.ToString(),
+                RecipeName = this.listBox_recipelist.SelectedValue.ToString()
+            });
+            RichTextBoxAddText("Send Web Api");
+            RichTextBoxAddText(body);
+            var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(url, body);
+            RichTextBoxAddText("Get api result");
+            RichTextBoxAddText(apiresult);
+        }
+
+        private void button_downloadeffective_Click(object sender, EventArgs e)
+        {
+            string url = $"{comboBox_urlselect.SelectedItem.ToString()}" + "/api/downloadeffectiverecipetomachine";
+            var body = JsonConvert.SerializeObject(new DownloadEffectiveRecipeToMachineRequest
+            {
+                EquipmentId = this.comboBox_eqpselect.SelectedValue.ToString(),
                 RecipeName = this.listBox_recipelist.SelectedValue.ToString()
             });
             RichTextBoxAddText("Send Web Api");

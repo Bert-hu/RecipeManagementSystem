@@ -44,6 +44,9 @@ namespace Rms.Services.Services.ApiHandle
                     case "/api/comparerecipebody":
                         res = CompareRecipeBody(jsoncontent);
                         break;
+                    case "/api/downloadeffectiverecipetomachine":
+                        res = DownloadEffectiveRecipeToMachine(jsoncontent);
+                        break;
                     default:
                         res.Result = false;
                         res.Message = "Unrecognized route";

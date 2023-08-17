@@ -26,7 +26,7 @@ namespace Rms.Services.Services.ApiHandle
                 res.Message = "Only the latest version can reload body!";
                 return res;
             }
-            if (recipe_version.CURRENT_FLOW_INDEX != 0)//检查是否未提交
+            if (recipe_version.CURRENT_FLOW_INDEX != -1)//检查是否未提交
             {
                 res.Message = "Only the unsubmitted recipe version can reload body!";
                 return res;
