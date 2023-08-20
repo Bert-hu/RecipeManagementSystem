@@ -54,6 +54,11 @@
             this.button_downloadeffective = new System.Windows.Forms.Button();
             this.comboBox_eqpselect = new System.Windows.Forms.ComboBox();
             this.comboBox_urlselect = new System.Windows.Forms.ComboBox();
+            this.button_geteqpstatus = new System.Windows.Forms.Button();
+            this.textBox_listenpath = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.button_getsv = new System.Windows.Forms.Button();
+            this.textBox_svs = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
             this.tabPage_rabbit.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -62,14 +67,14 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(23, 410);
+            this.label1.Location = new System.Drawing.Point(23, 209);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(0, 12);
             this.label1.TabIndex = 3;
             // 
             // textBox_recipename
             // 
-            this.textBox_recipename.Location = new System.Drawing.Point(294, 387);
+            this.textBox_recipename.Location = new System.Drawing.Point(294, 186);
             this.textBox_recipename.Name = "textBox_recipename";
             this.textBox_recipename.Size = new System.Drawing.Size(188, 21);
             this.textBox_recipename.TabIndex = 2;
@@ -78,7 +83,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(223, 390);
+            this.label3.Location = new System.Drawing.Point(223, 189);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(65, 12);
             this.label3.TabIndex = 3;
@@ -86,7 +91,7 @@
             // 
             // textBox_sendpath
             // 
-            this.textBox_sendpath.Location = new System.Drawing.Point(82, 330);
+            this.textBox_sendpath.Location = new System.Drawing.Point(108, 89);
             this.textBox_sendpath.Name = "textBox_sendpath";
             this.textBox_sendpath.Size = new System.Drawing.Size(188, 21);
             this.textBox_sendpath.TabIndex = 2;
@@ -95,7 +100,7 @@
             // button_getrecipe
             // 
             this.button_getrecipe.Enabled = false;
-            this.button_getrecipe.Location = new System.Drawing.Point(25, 387);
+            this.button_getrecipe.Location = new System.Drawing.Point(25, 186);
             this.button_getrecipe.Name = "button_getrecipe";
             this.button_getrecipe.Size = new System.Drawing.Size(186, 23);
             this.button_getrecipe.TabIndex = 4;
@@ -106,7 +111,7 @@
             // button1
             // 
             this.button1.Enabled = false;
-            this.button1.Location = new System.Drawing.Point(25, 357);
+            this.button1.Location = new System.Drawing.Point(25, 156);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(186, 23);
             this.button1.TabIndex = 0;
@@ -117,7 +122,7 @@
             // button_setrecipe
             // 
             this.button_setrecipe.Enabled = false;
-            this.button_setrecipe.Location = new System.Drawing.Point(25, 416);
+            this.button_setrecipe.Location = new System.Drawing.Point(25, 215);
             this.button_setrecipe.Name = "button_setrecipe";
             this.button_setrecipe.Size = new System.Drawing.Size(186, 23);
             this.button_setrecipe.TabIndex = 4;
@@ -146,7 +151,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(17, 333);
+            this.label2.Location = new System.Drawing.Point(29, 92);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(59, 12);
             this.label2.TabIndex = 3;
@@ -164,11 +169,16 @@
             // 
             // tabPage_rabbit
             // 
+            this.tabPage_rabbit.Controls.Add(this.textBox_svs);
+            this.tabPage_rabbit.Controls.Add(this.button_getsv);
+            this.tabPage_rabbit.Controls.Add(this.textBox_listenpath);
             this.tabPage_rabbit.Controls.Add(this.button4);
+            this.tabPage_rabbit.Controls.Add(this.button_geteqpstatus);
             this.tabPage_rabbit.Controls.Add(this.button1);
             this.tabPage_rabbit.Controls.Add(this.button_setrecipe);
             this.tabPage_rabbit.Controls.Add(this.button_getrecipe);
             this.tabPage_rabbit.Controls.Add(this.textBox_sendpath);
+            this.tabPage_rabbit.Controls.Add(this.label6);
             this.tabPage_rabbit.Controls.Add(this.label2);
             this.tabPage_rabbit.Controls.Add(this.textBox_recipename);
             this.tabPage_rabbit.Controls.Add(this.label3);
@@ -331,6 +341,51 @@
             this.comboBox_urlselect.Size = new System.Drawing.Size(221, 20);
             this.comboBox_urlselect.TabIndex = 10;
             // 
+            // button_geteqpstatus
+            // 
+            this.button_geteqpstatus.Enabled = false;
+            this.button_geteqpstatus.Location = new System.Drawing.Point(25, 127);
+            this.button_geteqpstatus.Name = "button_geteqpstatus";
+            this.button_geteqpstatus.Size = new System.Drawing.Size(186, 23);
+            this.button_geteqpstatus.TabIndex = 0;
+            this.button_geteqpstatus.Text = "Get Eqp Status";
+            this.button_geteqpstatus.UseVisualStyleBackColor = true;
+            this.button_geteqpstatus.Click += new System.EventHandler(this.button_geteqpstatus_Click);
+            // 
+            // textBox_listenpath
+            // 
+            this.textBox_listenpath.Location = new System.Drawing.Point(108, 50);
+            this.textBox_listenpath.Name = "textBox_listenpath";
+            this.textBox_listenpath.Size = new System.Drawing.Size(188, 21);
+            this.textBox_listenpath.TabIndex = 6;
+            this.textBox_listenpath.Text = "TestPath.999";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(29, 53);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(71, 12);
+            this.label6.TabIndex = 3;
+            this.label6.Text = "Listen Path";
+            // 
+            // button_getsv
+            // 
+            this.button_getsv.Location = new System.Drawing.Point(25, 253);
+            this.button_getsv.Name = "button_getsv";
+            this.button_getsv.Size = new System.Drawing.Size(152, 23);
+            this.button_getsv.TabIndex = 7;
+            this.button_getsv.Text = "Get Sv";
+            this.button_getsv.UseVisualStyleBackColor = true;
+            this.button_getsv.Click += new System.EventHandler(this.button_getsv_Click);
+            // 
+            // textBox_svs
+            // 
+            this.textBox_svs.Location = new System.Drawing.Point(25, 282);
+            this.textBox_svs.Name = "textBox_svs";
+            this.textBox_svs.Size = new System.Drawing.Size(457, 21);
+            this.textBox_svs.TabIndex = 8;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -379,6 +434,11 @@
         private System.Windows.Forms.Button button_downloadeffective;
         private System.Windows.Forms.ComboBox comboBox_eqpselect;
         private System.Windows.Forms.ComboBox comboBox_urlselect;
+        private System.Windows.Forms.Button button_geteqpstatus;
+        private System.Windows.Forms.TextBox textBox_listenpath;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Button button_getsv;
+        private System.Windows.Forms.TextBox textBox_svs;
     }
 }
 

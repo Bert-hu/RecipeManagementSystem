@@ -45,15 +45,16 @@ namespace Rms.Services.Services.ApiHandle
             if (rabbitres != null)
             {
                 res.EPPD = JsonConvert.DeserializeObject<List<string>>(rabbitres.Parameters["EPPD"].ToString());
+                res.Result = true;
             }
             else//Rabbit Mq失败
             {
                 Log.Debug($"Rabbit Mq send to {rabbitmqroute}\n:{JsonConvert.SerializeObject(trans, Formatting.Indented)}");
                 Log.Error($"GetEPPD Time out!");
-                res.Message = "GetEPPD Time out!";
+                res.Message = "Equipment offline or EAP client error!";
             }
 
-            res.Result = true;
+        
             return res;
         }
     }

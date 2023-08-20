@@ -55,6 +55,7 @@ namespace Rms.Services.Services.ApiHandle
             }
             catch (Exception ex)
             {
+                Log.Error(ex);
                 res.Result = false;
                 res.Message = ex.ToString();
             }

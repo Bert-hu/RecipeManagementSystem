@@ -35,10 +35,16 @@ namespace Rms.Services.Services.ApiHandle
                 return res;
             }
             var recipe_version = db.Queryable<RMS_RECIPE_VERSION>().In(recipe.VERSION_EFFECTIVE_ID).First();
-            
 
+            if (recipe_version.RECIPE_DATA_ID == null)
+            {
+                res.Result = false;
+                res.Message = "RMS ERROR! Effective version do not have recipe content!";
+                return res;
+            }
 
             var serverdata = db.Queryable<RMS_RECIPE_DATA>().In(recipe_version.RECIPE_DATA_ID)?.First()?.CONTENT;
+
             var rabbitRes = SetUnfomattedRecipe(eqp.RECIPE_TYPE, eqp.ID, recipe.NAME, serverdata);
 
             if (rabbitRes != null)
@@ -56,7 +62,7 @@ namespace Rms.Services.Services.ApiHandle
             }
             else//Rabbit Mq失败
             {
-                res.Message = "DownloadEffectiveRecipeToMachine Time out!";
+                res.Message = "Equipment offline or EAP client error!";
             }
 
 

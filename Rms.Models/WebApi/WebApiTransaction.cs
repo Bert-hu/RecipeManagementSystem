@@ -78,4 +78,16 @@ namespace Rms.Models.WebApi
     {
        // public string RecipeVersionId { get; set; }
     }
+
+    public class GetSvidValueRequest : ResponseMessage
+    {
+        public string EquipmentId { get; set; }
+        public int[] VidList { get; set; }
+    }
+    
+
+    public class GetSvidValueResponse : ResponseMessage
+    { 
+    
+    }
 }

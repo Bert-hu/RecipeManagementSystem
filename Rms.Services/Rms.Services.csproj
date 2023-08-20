@@ -121,8 +121,9 @@
       <DependentUpon>ProjectInstaller.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\ApiHandle\GetSvidValue.cs" />
     <Compile Include="Services\ApiHandle\AddNewRecipe.cs" />
-    <Compile Include="Services\ApiHandle\ApiMessageHandler.cs" />
+    <Compile Include="Services\ApiHandle\1.ApiMessageHandler.cs" />
     <Compile Include="Services\ApiHandle\DownloadEffectiveRecipeToMachine.cs" />
     <Compile Include="Services\ApiHandle\GetEPPD.cs" />
     <Compile Include="Services\ApiHandle\AddNewRecipeVersion.cs" />

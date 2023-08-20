@@ -60,7 +60,7 @@ namespace Rms.Services.Services.ApiHandle
             }
             else//Rabbit Mq失败
             {
-                res.Message = "ReloadRecipe Time out!";
+                res.Message = "Equipment offline or EAP client error!";
             }
 
 
