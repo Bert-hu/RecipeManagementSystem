@@ -30,8 +30,19 @@ namespace Rms.Services.Services.ApiHandle
             var eqp = db.Queryable<RMS_EQUIPMENT>().In(recipe.EQUIPMENT_ID).First();
 
             var rabbitRes = GetUnfomattedRecipe(eqp.RECIPE_TYPE, eqp.ID, recipe.NAME);
-
-
+            #region 返回是否是离线
+            bool isOffline = false;
+            if (rabbitRes.Parameters.TryGetValue("Status", out object status))
+            {
+                isOffline = status.ToString().ToUpper() == "OFFLINE";
+            }
+            if (isOffline)
+            {
+                res.Result = false;
+                res.Message = "Equipment offline!";
+                return res;
+            }
+            #endregion
             if (rabbitRes != null)
             {
                 if (!isdebugmode)//生产环境才检查 设备回复的RecipeName和请求中的RecipeName是否一致

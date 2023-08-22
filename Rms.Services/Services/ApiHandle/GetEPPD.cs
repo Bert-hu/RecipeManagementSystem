@@ -42,6 +42,20 @@ namespace Rms.Services.Services.ApiHandle
                 ReplyChannel = ListenChannel,
             };
             var rabbitres = RabbitMqService.ProduceWaitReply(rabbitmqroute, trans, 5);
+            #region 返回是否是离线
+            bool isOffline = false;
+            if (rabbitres.Parameters.TryGetValue("Status", out object status))
+            {
+                isOffline = status.ToString().ToUpper() == "OFFLINE";
+            }
+            if (isOffline)
+            {
+                res.Result = false;
+                res.Message = "Equipment offline!";
+                return res;
+            }
+            #endregion
+
             if (rabbitres != null)
             {
                 res.EPPD = JsonConvert.DeserializeObject<List<string>>(rabbitres.Parameters["EPPD"].ToString());

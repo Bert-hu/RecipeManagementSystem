@@ -24,7 +24,6 @@ namespace Rms.Services.Services
         private static log4net.ILog Log = log4net.LogManager.GetLogger("Logger");
 
         static RabbitMqHelper rabbitMq;
-        static Mutex mutex = new Mutex();
 
         static RabbitMqService()
         {
@@ -108,7 +107,6 @@ namespace Rms.Services.Services
             try
             {
 
-                mutex.WaitOne();
                 //RabbitMqTransaction result = null;
 
                 if (trans.IsReply)
@@ -121,7 +119,6 @@ namespace Rms.Services.Services
                         tcs.SetResult(trans);
                        // dictionary.TryRemove(tid, out _);
                     }
-                    mutex.ReleaseMutex();
                 }
                 else
                 {

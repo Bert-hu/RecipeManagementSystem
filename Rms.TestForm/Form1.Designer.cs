@@ -59,6 +59,8 @@
             this.label6 = new System.Windows.Forms.Label();
             this.button_getsv = new System.Windows.Forms.Button();
             this.textBox_svs = new System.Windows.Forms.TextBox();
+            this.button_lock = new System.Windows.Forms.Button();
+            this.button_unlock = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage_rabbit.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -169,6 +171,8 @@
             // 
             // tabPage_rabbit
             // 
+            this.tabPage_rabbit.Controls.Add(this.button_unlock);
+            this.tabPage_rabbit.Controls.Add(this.button_lock);
             this.tabPage_rabbit.Controls.Add(this.textBox_svs);
             this.tabPage_rabbit.Controls.Add(this.button_getsv);
             this.tabPage_rabbit.Controls.Add(this.textBox_listenpath);
@@ -386,6 +390,26 @@
             this.textBox_svs.Size = new System.Drawing.Size(457, 21);
             this.textBox_svs.TabIndex = 8;
             // 
+            // button_lock
+            // 
+            this.button_lock.Location = new System.Drawing.Point(25, 355);
+            this.button_lock.Name = "button_lock";
+            this.button_lock.Size = new System.Drawing.Size(152, 23);
+            this.button_lock.TabIndex = 9;
+            this.button_lock.Text = "Lock";
+            this.button_lock.UseVisualStyleBackColor = true;
+            this.button_lock.Click += new System.EventHandler(this.button_lock_Click);
+            // 
+            // button_unlock
+            // 
+            this.button_unlock.Location = new System.Drawing.Point(225, 355);
+            this.button_unlock.Name = "button_unlock";
+            this.button_unlock.Size = new System.Drawing.Size(152, 23);
+            this.button_unlock.TabIndex = 9;
+            this.button_unlock.Text = "Unlock";
+            this.button_unlock.UseVisualStyleBackColor = true;
+            this.button_unlock.Click += new System.EventHandler(this.button_unlock_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -439,6 +463,8 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Button button_getsv;
         private System.Windows.Forms.TextBox textBox_svs;
+        private System.Windows.Forms.Button button_unlock;
+        private System.Windows.Forms.Button button_lock;
     }
 }
 

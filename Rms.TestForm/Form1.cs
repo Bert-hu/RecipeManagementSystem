@@ -292,8 +292,15 @@ namespace Rms.TestForm
         {
             try
             {
-
-               var vidlist=  textBox_svs.Text.Split(',').Select(it => int.Parse(it)).ToArray();
+                int[] vidlist;
+                if (string.IsNullOrEmpty(textBox_svs.Text))
+                {
+                    vidlist = null;
+                }
+                else
+                {
+                    vidlist = textBox_svs.Text.Split(',').Select(it => int.Parse(it)).ToArray();
+                }
 
                 var trans = new RabbitMqTransaction
                 {
@@ -316,6 +323,40 @@ namespace Rms.TestForm
 
 
             }
+        }
+
+        private void button_lock_Click(object sender, EventArgs e)
+        {
+            var trans = new RabbitMqTransaction
+            {
+                TransactionName = "LockMachine",
+                EquipmentID = "EQTEST01",
+                NeedReply = true,
+                ReplyChannel = this.textBox_listenpath.Text,
+                Parameters = new Dictionary<string, object> { { "IsHeld", true }, { "Message","LockMessage" } }
+            };
+            RichTextBoxAddText("Send RMQ");
+            RichTextBoxAddText(trans);
+            var rep = RabbitMqService.ProduceWaitReply(this.textBox_sendpath.Text, trans, 5);
+            RichTextBoxAddText("Receive RMQ");
+            RichTextBoxAddText(rep);
+        }
+
+        private void button_unlock_Click(object sender, EventArgs e)
+        {
+            var trans = new RabbitMqTransaction
+            {
+                TransactionName = "LockMachine",
+                EquipmentID = "EQTEST01",
+                NeedReply = true,
+                ReplyChannel = this.textBox_listenpath.Text,
+                Parameters = new Dictionary<string, object> { { "IsHeld", false }, { "Message", "UnlockMessage" } }
+            };
+            RichTextBoxAddText("Send RMQ");
+            RichTextBoxAddText(trans);
+            var rep = RabbitMqService.ProduceWaitReply(this.textBox_sendpath.Text, trans, 5);
+            RichTextBoxAddText("Receive RMQ");
+            RichTextBoxAddText(rep);
         }
     }
 }

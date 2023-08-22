@@ -46,7 +46,19 @@ namespace Rms.Services.Services.ApiHandle
             var serverdata = db.Queryable<RMS_RECIPE_DATA>().In(recipe_version.RECIPE_DATA_ID)?.First()?.CONTENT;
 
             var rabbitRes = SetUnfomattedRecipe(eqp.RECIPE_TYPE, eqp.ID, recipe.NAME, serverdata);
-
+            #region 返回是否是离线
+            bool isOffline = false;
+            if (rabbitRes.Parameters.TryGetValue("Status", out object status))
+            {
+                isOffline = status.ToString().ToUpper() == "OFFLINE";
+            }
+            if (isOffline)
+            {
+                res.Result = false;
+                res.Message = "Equipment offline!";
+                return res;
+            }
+            #endregion
             if (rabbitRes != null)
             {
                 if (rabbitRes.Parameters["Result"].ToString().ToUpper() != "TRUE")

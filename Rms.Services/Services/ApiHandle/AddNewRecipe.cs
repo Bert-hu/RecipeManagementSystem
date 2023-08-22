@@ -40,7 +40,19 @@ namespace Rms.Services.Services.ApiHandle
                 return res;
             }
             var rabbitRes = GetUnfomattedRecipe(eqp.RECIPE_TYPE, req.EquipmentId, req.RecipeName);
-
+            #region 返回是否是离线
+            bool isOffline = false;
+            if (rabbitRes.Parameters.TryGetValue("Status", out object status))
+            {
+                isOffline = status.ToString().ToUpper() == "OFFLINE";
+            }
+            if (isOffline)
+            {
+                res.Result = false;
+                res.Message = "Equipment offline!";
+                return res;
+            }
+            #endregion
 
             if (rabbitRes != null)
             {
@@ -142,6 +154,8 @@ namespace Rms.Services.Services.ApiHandle
                 Parameters = new Dictionary<string, object>() { { "RecipeName", RecipeName } }
             };
             var rabbitres = RabbitMqService.ProduceWaitReply(rabbitmqroute, trans, 5);
+  
+
             if (rabbitres == null)//Rabbit Mq失败
             {
                 Log.Debug($"Rabbit Mq send content:\n{JsonConvert.SerializeObject(trans, Formatting.Indented)}");
