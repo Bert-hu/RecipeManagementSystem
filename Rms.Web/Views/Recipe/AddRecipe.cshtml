@@ -1,0 +1,25 @@
+
+@{
+    Layout = null;
+    ViewBag.Title = "AddRecipe";
+}
+<!DOCTYPE html>
+<link href="~/Scripts/layui/css/layui.css" rel="stylesheet" />
+<script src="~/Scripts/layui/layui.js"></script>
+<script src="~/Scripts/layui/layui.table.formdate.js"></script>
+<script src="~/Scripts/RMS/AddRecipe.js"></script>
+
+
+<fieldset class="layui-elem-field layui-field-title">
+    <legend id="info">Select a recipe:</legend>
+</fieldset>
+<table class="layui-hide" id="eqprecipe" lay-filter="eqprecipe"></table>
+<form class="layui-form  layui-form-pane" action="" lay-filter="rcpinfo" id="rcpinfo" style="display:none">
+    
+</form>
+
+
+    @*<fieldset class="layui-elem-field layui-field-title">
+            <legend>Ç©ºË¼ÇÂ¼</legend>
+        </fieldset>*@
+

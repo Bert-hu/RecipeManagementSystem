@@ -25,12 +25,12 @@
 
             <div class="layui-form-item">
                 <input type="text" name="ID" autocomplete="off" class="layui-input" style="display:none">
-                <div class="layui-inline">
+                @*<div class="layui-inline">
                     <label class="layui-form-label">版本号</label>
                     <div class="layui-input-block">
                         <input type="text" name="NAME" autocomplete="off" placeholder="请输入版本号" class="layui-input">
                     </div>
-                </div>
+                </div>*@
             </div>
 
 
@@ -67,10 +67,7 @@
     <a class="layui-btn layui-btn layui-btn-xs" lay-event="detail">查看</a>
 
 </script>
-<script type="text/html" id="filetoolbar">
-    <a class="layui-btn layui-btn layui-btn-xs" lay-event="download">下载</a>
 
-</script>
 <script src="~/Scripts/layui/layui.table.formdate.js"></script>
 <script>
     layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
@@ -88,12 +85,12 @@
             , limits: [1000]
             , height: 'full-220'
             , cols: [[
-                { field: 'PROJECT_NAME', title: '项目名', width: 200 }
-                ,{ field: 'VERSION', title: 'No', width: 50 }
-                , { field: 'NAME', title: '版本', width: 200 }
-                , { field: 'CREATOR', title: '创建者', width: 120 }
-                , { field: 'CREATE_TIME', title: '创建时间', templet: '<div>{{ FormDate(d.CREATE_TIME, "yyyy-MM-dd HH:mm:ss") }}</div>', width: 180 }
-                , { fixed: 'right', width: 100, align: 'center', toolbar: '#versiontoolbar' }
+                { field: 'RECIPE_NAME', title: '项目名', width: '45%' }
+                , { field: 'VERSION', title: '版本', width: '10%' }
+                //, { field: 'NAME', title: '版本', width: 200 }
+                , { field: 'CREATOR', title: '创建者', width: '10%' }
+                , { field: 'CREATE_TIME', title: '创建时间', templet: '<div>{{ FormDate(d.CREATE_TIME, "yyyy-MM-dd HH:mm:ss") }}</div>', width: '20%' }
+                , { fixed: 'right', width: '10%', align: 'center', toolbar: '#versiontoolbar' }
             ]]
         });
         //表中工具条
@@ -142,7 +139,7 @@
                     //文件table
                     var filetable = table.render({
                         elem: '#filetable'
-                        , url: '/VersionAudit/GetFileTable'
+                        , url: '/Recipe/GetFileTable'
                         //, toolbar: true
                         , id: "filetable"
                         , limit: 1000
@@ -162,15 +159,7 @@
 
                     });
 
-                    //表中工具条
-                    table.on('tool(filetable)', function (obj) { //注：tool 是工具条事件名，recipe 是 table 原始容器的属性 lay-filter="对应的值"
-                        var selectdata = obj.data //获得当前行数据
-                            , layEvent = obj.event; //获得 lay-event 对应的值
-                        if (layEvent === 'download') {
-                            DownladFile(selectdata.ID);
-                        }
-
-                    });
+                   
 
                     //表单拒绝
                     layui.$('#Reject').on('click', function () {
@@ -221,7 +210,7 @@
                                     remark: value,
                                 },
                                 success: function (data) {
-                                    layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: data.result ? 1 : 4 });
+                                    layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: data.result ? 1 : 4 });
                          
                                     location.reload();
                                 },
@@ -247,7 +236,7 @@
             });
             var processrecordtable = table.render({
                 elem: '#processrecordtable'
-                , url: '/VersionManage/GetProcessRecord'
+                , url: '/Recipe/GetProcessRecord'
                 //, toolbar: true
                 , id: "processrecordtable"
                 , limit: 1000
@@ -282,6 +271,8 @@
 
 
             });
+
+            
         }
 
         function GetVersionStatus(flows, index) {

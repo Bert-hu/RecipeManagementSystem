@@ -1,0 +1,54 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<table class="layui-hide" id="recipe" lay-filter="recipe"></table>
+<input id="selectedID" class="layui-input" lay-filter="selectedID" disabled="disabled" @*style="display:none;"*@>
+<link href="~/Scripts/layui/css/layui.css" rel="stylesheet" />
+<script src="~/Scripts/layui/layui.js"></script>
+<script>
+
+    layui.use(['table', 'jquery'], function () {
+        var table = layui.table
+            , $ = layui.jquery;
+        console.log($("#selectedID").val());
+        table.render({
+            elem: '#recipe'
+            , height: 'full'
+            , url: '/RecipeMapping/GetBindingRecipe/' //数据接口
+            , title: 'Recipe'
+            , id: "recipe"
+           // , page: true
+            , limit: 9999
+            , cols: [[
+                { type: 'radio', fixed: 'left', height: 'auto' }
+              //  , { field: 'ID', title: 'ID', filter: true }
+                , { field: 'NAME', title: 'NAME' }
+
+
+            ]]
+            ,where: {//这里传参 向后台
+                "EQUIPMENT_ID": '@ViewBag.EQUIPMENT_ID',
+                 "RECIPE_GROUP_ID": '@ViewBag.RECIPE_GROUP_ID',
+            }
+            , done: function (res, curr, count) {
+               // layui.table.cache["role"][0].LAY_CHECKED = true;
+               // res.data[0].LAY_CHECKED = true;
+                //console.log(res);
+            }
+        });
+
+        //回传给母页面的数据
+        var retdata = {};
+
+        window.callback = function () {
+            var selectData = layui.table.checkStatus('recipe').data;
+            retdata.selectData = selectData;
+            return JSON.stringify(retdata);
+        };
+
+    })
+</script>

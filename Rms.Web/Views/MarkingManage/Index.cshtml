@@ -1,0 +1,175 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+<style>
+    .scrollable-div {
+        max-height: 80vh;
+        overflow-y: auto; /* 或者使用 overflow-y: auto; */
+    }
+
+    .selected {
+        background-color: #89cff0 !important;
+    }
+</style>
+<script src="~/Scripts/Marking/markingmanage.js"></script>
+
+<script type="text/html" id="toolbar">
+    <div>
+        <div>
+            <div class="layui-inline">
+                <input class="layui-input" style="width:200px" id="searchfield" placeholder="请输入查询内容" autocomplete="off">
+            </div>
+            <button type="button" class="layui-btn layui-btn-sm" lay-event="search">查找</button>
+        </div>
+    </div>
+</script>
+
+<script type="text/html" id="configtoolbar">
+    <a class="layui-btn layui-btn layui-btn-xs" lay-event="delete">删除</a>
+</script>
+
+<div class="layui-row">
+    <div class="layui-col-xs4">
+        <table class="layui-hide" id="markingrecipe" lay-filter="markingrecipe"></table>
+    </div>
+    <div class="layui-col-xs8 scrollable-div">
+
+        <form class="layui-form" lay-filter="newitem" action="">
+            <fieldset class="layui-elem-field layui-field-title">
+                <legend id="lg_recipeinfo"></legend>
+            </fieldset>
+
+            <div class="layui-form-item">
+                <input type="text" name="recipeid" id="recipeid" hidden>
+                <div class="layui-inline">
+                    <label class="layui-form-label">版本</label>
+                    <div class="layui-input-block">
+                        <select name="version" id="version" lay-filter="version">
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <button type="button" class="layui-btn layui-btn-normal" id="addversion">新增版本</button>
+                </div>
+                <div class="layui-inline" style="float: right;">
+                    <button type="button" class="layui-btn layui-btn-danger" id="submitversion" >提交版本</button>
+                </div>
+            </div>
+            <fieldset class="layui-elem-field layui-field-title">
+                @*<legend id="lg_version"></legend>*@
+            </fieldset>
+
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">Select Text</label>
+                    <div class="layui-input-block">
+                        <select name="textselect">
+                            <option value="1">Text1</option>
+                            <option value="2">Text2</option>
+                            <option value="3">Text3</option>
+                            <option value="4">Text4</option>
+                            <option value="5">Text5</option>
+                            <option value="6">Text6</option>
+                            <option value="7">Text7</option>
+                            <option value="8">Text8</option>
+                            <option value="9">Text9</option>
+                            <option value="10">Text10</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">Type</label>
+                        <div class="layui-input-block">
+                            <input type="radio" name="marktype" lay-filter="marktype" value="Fixed" title="Fixed" checked="">
+                            <input type="radio" name="marktype" lay-filter="marktype" value="Code" title="Code">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">Fixed Text</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" id="fixedtext" name="fixedtext" lay-filter="fixedtext" lay-verify="fixedtext">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">Code 字段</label>
+                    <div class="layui-input-inline">
+                        <select name="field" id="field" disabled>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">Start</label>
+                    <div class="layui-input-inline">
+                        <select name="startindex" id="startindex" lay-verify="required" disabled>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">Length</label>
+                    <div class="layui-input-inline">
+                        <select name="length" id="length" lay-verify="required" disabled>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button type="submit" class="layui-btn" lay-submit="" lay-filter="additem" id="additem">添加</button>
+                </div>
+            </div>
+        </form>
+        <style>
+            .sample {
+                padding: 5% 10%;
+                background-color: black;
+                color: white;
+                height: 17rem;
+                margin-top: 5%;
+                margin-right: 10%;
+                margin-bottom: 10%;
+                margin-left: 10%;
+                font-size: 1.5rem
+            }
+        </style>
+        <div class="layui-row">
+            <div class="layui-col-xs6">
+                <table class="layui-hide" id="markingitem" lay-filter="markingitem"></table>
+            </div>
+            <div class="layui-col-xs6">
+                <div class="sample">           
+                  
+                </div>
+            </div>
+        </div>
+
+
+
+
+    </div>

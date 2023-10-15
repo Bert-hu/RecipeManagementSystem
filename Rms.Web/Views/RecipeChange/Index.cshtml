@@ -1,0 +1,41 @@
+﻿
+@{
+
+}
+<style>
+    .scrollable-div {
+        max-height: 80vh;
+        overflow-y: auto; /* 或者使用 overflow-y: auto; */
+    }
+</style>
+<script src="~/Scripts/layui/xm-select.js"></script>
+<script src="~/Scripts/layui/layui.table.formdate.js"></script>
+<script src="~/Scripts/RMS/RecipeChange.js"></script>
+<form class="layui-form layui-form-pane" action="">
+    <div class="layui-form-item layui-row">
+        <div class="layui-inline">
+            <div class="layui-input-inline">
+                <div id="eqps" lay-filter="index" class="xm-select-demo"></div>
+            </div>
+            <div class="layui-input-inline">
+                <fieldset class="layui-elem-field layui-field-title">
+                    <legend id="info"></legend>
+                </fieldset>
+            </div>
+        </div>
+        
+        @*<button class="layui-btn" lay-submit lay-filter="getdetail">查看</button>*@
+        @*<button class="layui-btn" lay-submit id="getversions">查看</button>*@
+    </div>
+
+   
+</form>
+<div class="layui-row layui-col-space10" style=" margin-bottom: 50px">
+
+    <table class="layui-hide" id="changetable" lay-filter="changetable"></table>
+
+</div>
+
+
+
+

@@ -4,9 +4,11 @@ using Rms.Models.RabbitMq;
 using Rms.Models.WebApi;
 using Rms.Utils;
 using RMS.Domain.Rms;
+using SqlSugar;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -43,22 +45,51 @@ namespace Rms.TestForm
             RichTextBoxAddText("Receive RMQ");
             RichTextBoxAddText(rep);
         }
+        class infotech_igbt
+        {
+            public string uuid { get; set; }
+        }
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            var db = new SqlSugarClient(new ConnectionConfig()
+            {
+                ConnectionString = "PORT=9999;DATABASE=sfis;HOST=10.0.4.220;PASSWORD=hiuser123;USER ID=hitachi", //必填
+                DbType = SqlSugar.DbType.PostgreSQL, //必填
+                IsAutoCloseConnection = true, //默认false
+                InitKeyType = InitKeyType.Attribute,
 
-
+            }); //默认SystemTable
+                //var db = DbFactory.GetSqlSugarClient();
+                //db.DbFirst.CreateClassFile("D:\\test\\1111", "Models");
+                //var aa = db.Queryable<infotech_igbt>().ToList();
         }
 
         private void Form1_Shown(object sender, EventArgs e)
         {
+
             var db = DbFactory.GetSqlSugarClient();
-            var eqps = db.Queryable<RMS_EQUIPMENT>().ToList();
+            //初始化EQ combo box
+            var eqps = db.Queryable<RMS_EQUIPMENT>().OrderBy(it => it.ORDERSORT).ToList();
             var showlist = eqps.ToDictionary(it => it.ID, it => it.ID);
             comboBox_eqpselect.DisplayMember = "Key";
             comboBox_eqpselect.ValueMember = "Value";
             comboBox_eqpselect.DataSource = new BindingSource(showlist, null);
             comboBox_urlselect.SelectedIndex = 0;
+            //初始化Marking eq 机种 combobox
+            var sql = @"select eq.ID EQID,eq.NAME EQNAME,eq.FLOW_ID FLOW_ID,r.ID RECIPEID,r.NAME RECIPENAME,
+r.MARKING_LATEST_ID MARKING_LATEST_ID,r.MARKING_EFFECTIVE_ID MARKING_EFFECTIVE_ID,
+mv.VERSION LATEST_VERSION,
+mv2.VERSION EFFECTIVE_VERSION
+ from RMS_EQUIPMENT eq
+inner join RMS_RECIPE r  on eq.ID = r.EQUIPMENT_ID 
+left join RMS_MARKING_VERSION mv  on mv.ID = r.MARKING_LATEST_ID
+left join RMS_MARKING_VERSION mv2  on mv2.ID = r.MARKING_EFFECTIVE_ID
+where eq.TYPE = 'WaferMarking'";
+            var recipes = db.SqlQueryable<MarkingRecipe>(sql).ToList();
+            var showrecipes = recipes.Select(it => it.EQID + "," + it.RECIPENAME).ToList();
+            comboBox_markingrecipes.DataSource = showrecipes;
+            comboBox_markingrecipes.SelectedIndex = 0;
         }
 
         private void RichTextBoxAddText(object text)
@@ -333,7 +364,7 @@ namespace Rms.TestForm
                 EquipmentID = "EQTEST01",
                 NeedReply = true,
                 ReplyChannel = this.textBox_listenpath.Text,
-                Parameters = new Dictionary<string, object> { { "IsHeld", true }, { "Message","LockMessage" } }
+                Parameters = new Dictionary<string, object> { { "IsHeld", true }, { "Message", "LockMessage" } }
             };
             RichTextBoxAddText("Send RMQ");
             RichTextBoxAddText(trans);
@@ -357,6 +388,70 @@ namespace Rms.TestForm
             var rep = RabbitMqService.ProduceWaitReply(this.textBox_sendpath.Text, trans, 5);
             RichTextBoxAddText("Receive RMQ");
             RichTextBoxAddText(rep);
+        }
+
+        private void button_getstatus_Click(object sender, EventArgs e)
+        {
+            string url = $"{comboBox_urlselect.SelectedItem.ToString()}" + "/api/getequipmentstatus";
+            var body = JsonConvert.SerializeObject(new GetEquipmentStatusRequest
+            {
+                EquipmentId = this.comboBox_eqpselect.SelectedValue.ToString(),
+            });
+            RichTextBoxAddText("Send Web Api");
+            RichTextBoxAddText(body);
+            var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(url, body);
+            RichTextBoxAddText("Get api result");
+            RichTextBoxAddText(apiresult);
+        }
+
+        private void button2_Click_2(object sender, EventArgs e)
+        {
+            //var db = DbFactory.GetSqlSugarClient();
+            //var aa = db.Queryable<RMS_MARKING_VERSION>().ToList();
+            //string str = "abcdefghijkl";
+            // var sub = str.Substring(1,)
+            //string cc = $"{str}";
+            //string dd = $cc;
+            int index1 = 0;
+            int index2 = 3;
+            string[] strArr = { "123", "456", "789", "aaa" };
+            string format = $"{{{index1}}}，{{{index2}}}";
+            string name = "B";
+            int age = 11;
+            string reslut = string.Format(format, strArr);
+        }
+
+        private void button_getmktext1_Click(object sender, EventArgs e)
+        {
+            var eqid = comboBox_markingrecipes.Text.Split(',')[0];
+            var recipename = comboBox_markingrecipes.Text.Split(',')[1];
+            var sfispara = new Dictionary<string, string> { { "MODEL_NAME", recipename } };
+            GetMarkingtext(eqid, recipename, sfispara);
+        }
+
+        private void GetMarkingtext(string eqid,string recipename,Dictionary<string,string> sfispara)
+        {
+            string url = $"{comboBox_urlselect.SelectedItem.ToString()}" + "/api/getmarkingtexts";
+            var body = JsonConvert.SerializeObject(new GetMarkingTextsRequest
+            {
+                TrueName = "Test",
+                EquipmentId = eqid,
+                RecipeName = recipename,
+                SfisParameter = sfispara
+            });
+            RichTextBoxAddText("Send Web Api");
+            RichTextBoxAddText(body);
+            var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(url, body);
+            RichTextBoxAddText("Get api result");
+            RichTextBoxAddText(apiresult);
+        }
+
+        private void button_getmktext2_Click(object sender, EventArgs e)
+        {
+            var eqid = textBox_mkeq.Text;
+            var recipename = textBox_mkmodelname.Text;
+            var sfispara = new Dictionary<string, string> { { "MODEL_NAME", recipename } };
+            GetMarkingtext(eqid, recipename, sfispara);
         }
     }
 }

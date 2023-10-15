@@ -46,6 +46,8 @@ namespace Rms.Services.Services.ApiHandle
             var serverdata = db.Queryable<RMS_RECIPE_DATA>().In(recipe_version.RECIPE_DATA_ID)?.First()?.CONTENT;
 
             var rabbitRes = SetUnfomattedRecipe(eqp.RECIPE_TYPE, eqp.ID, recipe.NAME, serverdata);
+
+
             #region 返回是否是离线
             bool isOffline = false;
             if (rabbitRes.Parameters.TryGetValue("Status", out object status))
@@ -68,6 +70,17 @@ namespace Rms.Services.Services.ApiHandle
                 else
                 {
                     res.Result = true;
+                    res.RecipeName = recipe.NAME;
+                    db.Insertable<RMS_CHANGE_RECORD>(new RMS_CHANGE_RECORD 
+                    {
+                        EQID = req.EquipmentId,
+                        TO_RECIPE_NAME = req.RecipeName,
+                        TO_RECIPE_VERSION = recipe_version.VERSION?.ToString(),
+                        CREATOR = req.TrueName,
+                        CREATETIME = DateTime.Now
+                    }).ExecuteCommand();
+
+                    PPSelect(eqp.ID, recipe.NAME);//不管回复了
                 }
 
 
@@ -108,6 +121,26 @@ namespace Rms.Services.Services.ApiHandle
                 Parameters = new Dictionary<string, object>() { { "RecipeName", RecipeName }, { "RecipeBody", body } }
             };
             var rabbitres = RabbitMqService.ProduceWaitReply(rabbitmqroute, trans, 5);
+
+            return rabbitres;
+        }
+
+        public RabbitMqTransaction PPSelect(string EquipmentID, string RecipeName)
+        {
+            string rabbitmqroute = rabbitmqroute = $"EAP.SecsClient.{EquipmentID}";
+            //识别设备类型和恢复queue
+            string body = string.Empty;
+
+            var ListenChannel = ConfigurationManager.AppSettings["ListenChannel"];
+            var trans = new RabbitMqTransaction
+            {
+                TransactionName = "PpSelect",
+                EquipmentID = EquipmentID,
+                NeedReply = true,
+                ReplyChannel = ListenChannel,
+                Parameters = new Dictionary<string, object>() { { "RecipeName", RecipeName } }
+            };
+            var rabbitres = RabbitMqService.ProduceWaitReply(rabbitmqroute, trans, 1);
 
             return rabbitres;
         }

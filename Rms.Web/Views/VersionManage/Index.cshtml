@@ -247,7 +247,7 @@
 
             console.log(versiontable);
             if (newversionlock) {
-                layer.msg('<em style="color:black;font-style:normal;font-weight:normal">有未完成的签核版本，禁止新增！</em>', { icon: 5 });
+                layer.msg('<em style="color:white;font-style:normal;font-weight:normal">有未完成的签核版本，禁止新增！</em>', { icon: 5 });
             }
             else {
                 switch (obj.event) {
@@ -262,7 +262,7 @@
                                 type: 'POST',
                                 contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
                                 success: function (response) {
-                                    layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + response.message + '</em>', { icon: response.result ? 1 : 4 });
+                                    layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + response.message + '</em>', { icon: response.result ? 1 : 4 });
                                     result = response.result;
                                     versiontable.reload();
                                     ShowVersionDetail(response.data.versionid);
@@ -301,7 +301,7 @@
                 url: '/VersionManage/SaveForm',
                 data: formdata,
                 success: function (data) {
-                    layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: data.result ? 1 : 4 });
+                    layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: data.result ? 1 : 4 });
                     versiontable.reload();
                 },
                 error: function () {
@@ -319,7 +319,7 @@
                     url: '/VersionManage/SubmitForm',
                     data: formdata,
                     success: function (data) {
-                        layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: data.result ? 1 : 4 });
+                        layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: data.result ? 1 : 4 });
                         versiontable.reload();
                     },
                     error: function () {

@@ -1,0 +1,62 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+<script src="~/Scripts/bootstrap-5.1.3-dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="~/Scripts/bootstrap-5.1.3-dist/css/bootstrap.min.css" />
+<hr/>
+<table class="layui-hide" id="operationlog" lay-filter="operationlog"></table>
+
+<script src="~/Scripts/layui/layui.table.formdate.js"></script>
+<script>
+    layui.config({
+        //version: '1610461958398' //为了更新 js 缓存，可忽略
+        // base: 'module/'
+    });
+
+
+
+    layui.use(['layer', 'table', 'upload', 'element'], function () {
+        var layer = layui.layer //弹层
+            , table = layui.table //表格
+
+
+
+
+
+        //执行一个 table 实例
+      table.render({
+            elem: '#operationlog'
+            , height: 'full-200'
+            , url: '/OperationLog/GetTableData/' //数据接口
+            , title: '操作日志'
+            , page: true //开启分页
+            // , toolbar: 'default' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
+            // , totalRow: true //开启合计行
+            , id: "operationlog"
+            , limits: [100]
+            , toolbar
+            , limit: 100
+            , defaultToolbar: ['filter']
+            , cols: [[ //表头
+                { field: 'IP', title: 'IP', width: '10%' }
+                , { field: 'MODULENAME', title: '模块', width: '10%' }
+                , { field: 'ACTIONNAME', title: '动作', width: '10%' }
+                , { field: 'RESULT', title: '结果', width: '10%' }
+                , { field: 'MESSAGE', title: '信息' }
+                , { field: 'CREATOR', title: '创建者', width: '10%' }
+                , { field: 'CREATETIME', title: '创建时间', templet: '<div>{{ FormDate(d.CREATETIME, "yyyy-MM-dd HH:mm:ss") }}</div>', width: '15%' }
+            ]]
+
+        });
+
+    });
+
+
+
+
+
+
+
+
+
+</script>

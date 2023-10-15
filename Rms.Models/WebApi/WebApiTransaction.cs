@@ -17,7 +17,7 @@ namespace Rms.Models.WebApi
     {
         public string EuipmentId { get; set; }
     }
-    public class GetEppdResponse: ResponseMessage
+    public class GetEppdResponse : ResponseMessage
     {
         public List<string> EPPD { get; set; }
     }
@@ -47,7 +47,7 @@ namespace Rms.Models.WebApi
     }
     public class ReloadRecipeBodyRequest
     {
-        public string TrueName { get; set; }
+        public string TrueName { get; set; } //上传人
         public string RecipeName { get; set; } //用于检查设备回复的Name是否一致
         public string VersionId { get; set; }
     }
@@ -60,7 +60,7 @@ namespace Rms.Models.WebApi
     public class CompareRecipeBodyRequest
     {
         public string EquipmentId { get; set; }
-        public string RecipeName { get; set; } 
+        public string RecipeName { get; set; }
     }
 
     public class CompareRecipeBodyResponse : ResponseMessage
@@ -68,26 +68,63 @@ namespace Rms.Models.WebApi
         public string RecipeName { get; set; }
     }
 
-    public class DownloadEffectiveRecipeToMachineRequest : ResponseMessage
+    public class DownloadEffectiveRecipeToMachineRequest
     {
+        public string TrueName { get; set; }
         public string EquipmentId { get; set; }
         public string RecipeName { get; set; }
     }
 
     public class DownloadEffectiveRecipeToMachineResponse : ResponseMessage
     {
-       // public string RecipeVersionId { get; set; }
+        public string RecipeName { get; set; }
     }
 
-    public class GetSvidValueRequest : ResponseMessage
+
+    public class DownloadEffectiveRecipeByRecipeGroupRequest
+    {
+        public string TrueName { get; set; }
+        public string EquipmentId { get; set; }
+        public string RecipeGroupName { get; set; }
+    }
+
+    public class DownloadEffectiveRecipeByRecipeGroupResponse : ResponseMessage
+    {
+        public string RecipeName { get; set; }
+    }
+
+
+    public class GetSvidValueRequest
     {
         public string EquipmentId { get; set; }
         public int[] VidList { get; set; }
     }
-    
+
 
     public class GetSvidValueResponse : ResponseMessage
-    { 
-    
+    {
+
     }
+    public class GetEquipmentStatusRequest
+    {
+        public string EquipmentId { get; set; }
+    }
+
+    public class GetEquipmentStatusResponse : ResponseMessage
+    {
+        public string Status { get; set; }
+    }
+
+    public class GetMarkingTextsRequest
+    {
+        public string TrueName { get; set; }
+        public string EquipmentId { get; set; }
+        public string RecipeName { get; set; }
+        public Dictionary<string, string> SfisParameter { get; set; }
+    }
+    public class GetMarkingTextsResponse : ResponseMessage
+    {
+        public string[] MarkingTexts { get; set; }
+    }
+
 }

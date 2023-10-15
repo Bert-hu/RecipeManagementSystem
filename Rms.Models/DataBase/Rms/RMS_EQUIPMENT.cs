@@ -15,13 +15,18 @@ namespace Rms.Models.DataBase.Rms
     public class RMS_EQUIPMENT
     {
         [SugarColumn(IsPrimaryKey = true)]
-        public string ID { get; set; } 
-        public string Name { get; set; }
+        public string ID { get; set; }
+        public string NAME { get; set; }
         public string CREATOR { get; set; } = "Default";
         public DateTime? CREATETIME { get; set; } = DateTime.Now;
         public string LASTEDITOR { get; set; } = "Default";
         public DateTime? LASTEDITTIME { get; set; } = DateTime.Now;
         public String RECIPE_TYPE { get; set; }  //secsString,secsByte,file
         public string FLOW_ID { get; set; }
+        public int ORDERSORT { get; set; }
+        public string TYPE { get; set; }
+        public string LINE { get; set; }
+        public string LASTRUN_RECIPE_ID { get; set; }
+        public DateTime LASTRUN_RECIPE_TIME { get; set; }
     }
 }

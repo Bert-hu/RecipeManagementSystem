@@ -79,12 +79,12 @@ namespace Rms.Web.Controllers
             if (ssouser == null && user != null && user.LOCALUSER == true && EncrypHelper.Encrypt32(model.Password) == user.PASSWORD)//SSO验证未通过的本地账户
             {
                 LoginTransaction(user);
-                return RedirectToAction("index", "home");
+                return RedirectToAction("index", "Home");
             }
             else if (ssouser == null && user != null && user.LOCALUSER == false && EncrypHelper.Encrypt32(model.Password) == user.PASSWORD) //非本地用户，且SSO验证失败，符合保留的密码
             {
                 LoginTransaction(user);
-                return RedirectToAction("index", "home");
+                return RedirectToAction("index", "Home");
             }
             else if (ssouser != null)//SSO 验证通过
             {
@@ -124,7 +124,7 @@ namespace Rms.Web.Controllers
                 }
 
                 LoginTransaction(user);
-                return RedirectToAction("index", "home");
+                return RedirectToAction("index", "Home");
             }
             else//SSO和本地验证均失败
             {
@@ -155,7 +155,7 @@ namespace Rms.Web.Controllers
             Session["controllers"] = controllers;
             Session.Timeout = 30;
             var ipAddress = HttpContext.Request.ServerVariables["REMOTE_ADDR"] ?? HttpContext.Request.ServerVariables["REMOTE_ADDR"];
-            db.Insertable(new PMS_OPERATIONLOG
+            db.Insertable(new RMS_PRODUCTIONLOG
             {
                 IP = ipAddress,
                 MODULENAME = "Account",

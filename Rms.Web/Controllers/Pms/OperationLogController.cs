@@ -23,7 +23,7 @@ namespace Rms.Web.Controllers
         {
             var db = DbFactory.GetSqlSugarClient();
             var totalNum = 0;
-            var pageList = db.Queryable< PMS_OPERATIONLOG>().OrderByDescending(it => it.CREATETIME).ToPageList(page, limit,ref totalNum);
+            var pageList = db.Queryable< RMS_PRODUCTIONLOG>().OrderByDescending(it => it.CREATETIME).ToPageList(page, limit,ref totalNum);
             return Json(new { data = pageList, code = 0, count = totalNum }, JsonRequestBehavior.AllowGet);
         }
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Newtonsoft.Json;
 using SqlSugar;
@@ -36,5 +37,18 @@ namespace RMS.Domain.Rms
             get { return JsonConvert.DeserializeObject<List<string>>(FLOW_ROLES); }
             set { FLOW_ROLES = JsonConvert.SerializeObject(value); }
         }
+    }
+
+    public class RecipeVersion
+    {
+        public string RECIPE_ID { get; set; }
+
+        public string RECIPE_NAME { get; set; }
+        public string RECIPE_GROUP_NAME { get; set; }
+
+        public decimal RECIPE_LATEST_VERSION { get; set; }
+
+        public decimal RECIPE_EFFECTIVE_VERSION { get; set; }
+
     }
 }

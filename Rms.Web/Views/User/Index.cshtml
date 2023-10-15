@@ -142,7 +142,7 @@
                         contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
                         async: false,
                         success: function (data) {
-                            layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: 4 });
+                            layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: 4 });
                             usertable.reload();
 
                         },
@@ -209,7 +209,7 @@
                     layer.close(index);
                 },
                     function (index) {
-                        layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: 4 });
+                        layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: 4 });
                         usertable.reload();
                     }
 

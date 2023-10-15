@@ -156,7 +156,7 @@ layui.use(['layer', 'table', 'form', 'upload'], function () {
                 contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
                 async: false,
                 success: function (data) {
-                    layer.msg('<em style="color:black;font-style:normal;font-weight:normal">修改成功！</em>', { icon: 1 });
+                    layer.msg('<em style="color:white;font-style:normal;font-weight:normal">修改成功！</em>', { icon: 1 });
                     alarmtable.reload();
                 },
                 error: function (message) {
@@ -187,11 +187,11 @@ layui.use(['layer', 'table', 'form', 'upload'], function () {
             async: false,
             success: function (data) {
                 if (data == 'True') {
-                    layer.msg('<em style="color:black;font-style:normal;font-weight:normal">添加成功！</em>', { icon: 1 });
+                    layer.msg('<em style="color:white;font-style:normal;font-weight:normal">添加成功！</em>', { icon: 1 });
                     parent.location.reload();
                 }
                 else
-                    layer.msg('<em style="color:black;font-style:normal;font-weight:normal">添加失败！</em>', { icon: 5 });
+                    layer.msg('<em style="color:white;font-style:normal;font-weight:normal">添加失败！</em>', { icon: 5 });
             },
             error: function (message) {
                 alert('Error!');
@@ -217,11 +217,11 @@ function ImportExcle(persons) {
             async: false,
             success: function (res) {
                 if (res == "True") {
-                    layui.layer.msg('<em style="color:black;font-style:normal;font-weight:normal">导入成功！</em>', { icon: 1 });
+                    layui.layer.msg('<em style="color:white;font-style:normal;font-weight:normal">导入成功！</em>', { icon: 1 });
                     parent.location.reload();
                 }
                 else
-                    layui.layer.msg('<em style="color:black;font-style:normal;font-weight:normal">导入失败！</em>', { icon: 5 });
+                    layui.layer.msg('<em style="color:white;font-style:normal;font-weight:normal">导入失败！</em>', { icon: 5 });
 
             },
             error: function (message) {

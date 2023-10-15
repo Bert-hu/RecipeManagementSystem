@@ -29,6 +29,9 @@ namespace Rms.Services.Services.ApiHandle
             {
                 switch (route.ToLower())
                 {
+                    case "/api/getequipmentstatus":
+                        res = GetEquipmentStatus(jsoncontent);
+                        break;
                     case "/api/geteppd":
                         res = GetEPPD(jsoncontent);
                         break;
@@ -46,6 +49,12 @@ namespace Rms.Services.Services.ApiHandle
                         break;
                     case "/api/downloadeffectiverecipetomachine":
                         res = DownloadEffectiveRecipeToMachine(jsoncontent);
+                        break;
+                    case "/api/downloadeffectiverecipebyrecipegroup":
+                        res = DownloadEffectiveRecipeByRecipeGroup(jsoncontent);
+                        break;
+                    case "/api/getmarkingtexts":
+                        res = GetMarkingTexts(jsoncontent);
                         break;
                     default:
                         res.Result = false;

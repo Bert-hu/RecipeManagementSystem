@@ -249,12 +249,19 @@
     <Compile Include="Controllers\Pms\ProcessController.cs" />
     <Compile Include="Controllers\Pms\RoleController.cs" />
     <Compile Include="Controllers\Pms\UserController.cs" />
+    <Compile Include="Controllers\Production\CommonProductionController.cs" />
+    <Compile Include="Controllers\Production\WaferGrindingController.cs" />
+    <Compile Include="Controllers\Rms\MarkingManageController.cs" />
+    <Compile Include="Controllers\Rms\RecipeChangeController.cs" />
+    <Compile Include="Controllers\Rms\RecipeMappingController.cs" />
+    <Compile Include="Controllers\Rms\VersionAuditController.cs" />
     <Compile Include="Controllers\Rms\RecipeController.cs" />
     <Compile Include="Extensions\LogAttribute.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\HttpClientHelper.cs" />
     <Compile Include="Utils\SsoHelper.cs" />
     <Compile Include="ViewModels\ChangePasswordViewModel.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
@@ -271,6 +278,7 @@
     <Content Include="Content\Dashboard\Image\Dashboard.css" />
     <Content Include="Content\Dashboard\Robot\Dashboard.css" />
     <Content Include="Content\DPPM\dppm.css" />
+    <Content Include="Content\fontawesome\css\all.min.css" />
     <Content Include="Content\fontawesome\css\font-awesome.css" />
     <Content Include="Content\fontawesome\css\font-awesome.min.css" />
     <Content Include="Content\fontawesome\fonts\fontawesome-webfont.svg" />
@@ -473,7 +481,16 @@
     <Content Include="Scripts\layui\lay\modules\util.js" />
     <Content Include="Scripts\layui\tableEdit.js" />
     <Content Include="Scripts\layui\xm-select.js" />
+    <Content Include="Scripts\Marking\markingfields.js" />
+    <Content Include="Scripts\Marking\markingmanage.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
+    <Content Include="Scripts\Production\WaferGrinding\Index.js" />
+    <Content Include="Scripts\RMS\AddRecipe.js" />
+    <Content Include="Scripts\RMS\AddVersion.js" />
+    <Content Include="Scripts\RMS\RecipeChange.js" />
+    <Content Include="Scripts\RMS\RecipeIndex.css" />
+    <Content Include="Scripts\RMS\RecipeMapping.js" />
+    <Content Include="Scripts\RMS\RecipeVersion.js" />
     <Content Include="Scripts\Robot\Robot.js" />
     <Content Include="Scripts\vue.js" />
     <Content Include="Web.config" />
@@ -511,10 +528,20 @@
     <Content Include="Views\VersionManage\Index.cshtml" />
     <Content Include="Views\VersionAudit\Index.cshtml" />
     <Content Include="Views\Recipe\Index.cshtml" />
+    <Content Include="Views\Recipe\AddVersion.cshtml" />
+    <Content Include="Views\Recipe\AddRecipe.cshtml" />
+    <Content Include="Views\OperationLog\Index.cshtml" />
+    <Content Include="Views\RecipeChange\Index.cshtml" />
+    <Content Include="Views\MarkingManage\Index.cshtml" />
+    <Content Include="Views\MarkingManage\MarkingFields.cshtml" />
+    <Content Include="Views\RecipeMapping\Index.cshtml" />
+    <Content Include="Views\RecipeMapping\BindingRecipePage.cshtml" />
+    <Content Include="Views\WaferGrinding\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Service\" />
+    <Folder Include="Views\Process\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />

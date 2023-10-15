@@ -56,74 +56,84 @@ namespace Rms.Services.Services.ApiHandle
 
             if (rabbitRes != null)
             {
-                if (!isdebugmode)//生产环境才检查 设备回复的RecipeName和请求中的RecipeName是否一致
+
+                if (rabbitRes.Parameters["Result"].ToString().ToUpper() == "TRUE")
                 {
-                    if (rabbitRes.Parameters["RecipeName"].ToString() != req.RecipeName)
+                    if (!isdebugmode)//生产环境才检查 设备回复的RecipeName和请求中的RecipeName是否一致
                     {
-                        res.Message = $"The RecipeName of the response({rabbitRes.Parameters["RecipeName"].ToString()}) is inconsistent with the request({req.RecipeName})";
-                        return res;
-                    }                   
+                        if (rabbitRes.Parameters["RecipeName"].ToString() != req.RecipeName)
+                        {
+                            res.Message = $"The RecipeName of the response({rabbitRes.Parameters["RecipeName"].ToString()}) is inconsistent with the request({req.RecipeName})";
+                            return res;
+                        }
+                    }
+
+                    byte[] body;
+                    //根据Recipe Type获取 ByteArray类型的Body
+                    switch (eqp.RECIPE_TYPE)
+                    {
+                        default:
+                            body = Convert.FromBase64String(rabbitRes.Parameters["RecipeBody"].ToString());
+                            break;
+                    }
+                    //开启事务，执行新建Recipe的任务
+                    db.BeginTran();
+                    try
+                    {
+                        //添加Recipe
+                        recipe = new RMS_RECIPE
+                        {
+                            EQUIPMENT_ID = req.EquipmentId,
+                            NAME = req.RecipeName,
+                            FLOW_ID = eqp.FLOW_ID,
+                            //  CREATOR = req.TrueName,
+                            //  LASTEDITOR = req.TrueName
+                        };
+                        db.Insertable<RMS_RECIPE>(recipe).ExecuteCommand();
+                        //添加Version
+                        var flow = db.Queryable<RMS_FLOW>().In(eqp.FLOW_ID).First();
+                        var version = new RMS_RECIPE_VERSION
+                        {
+                            RECIPE_ID = recipe.ID,
+                            FLOW_ID = recipe.FLOW_ID,
+                            FLOW_ROLES = flow.FLOW_ROLES,
+                            CURRENT_FLOW_INDEX = 100,
+                            REMARK = "First Version",
+                            CREATOR = req.TrueName
+                        };
+                        db.Insertable<RMS_RECIPE_VERSION>(version).ExecuteCommand();
+                        //添加Data
+                        var data = new RMS_RECIPE_DATA
+                        {
+                            NAME = req.RecipeName,
+                            CONTENT = body,
+                            CREATOR = req.TrueName,
+                        };
+                        db.Insertable<RMS_RECIPE_DATA>(data).ExecuteCommand();
+                        //更新外键
+                        version.RECIPE_DATA_ID = data.ID;
+                        db.Updateable<RMS_RECIPE_VERSION>(version).UpdateColumns(it => new { it.RECIPE_DATA_ID }).ExecuteCommand();
+                        recipe.VERSION_LATEST_ID = version.ID;
+                        recipe.VERSION_EFFECTIVE_ID = version.ID;
+                        db.Updateable<RMS_RECIPE>(recipe).UpdateColumns(it => new { it.VERSION_LATEST_ID, it.VERSION_EFFECTIVE_ID }).ExecuteCommand();
+                        res.RECIPE_ID = recipe.ID;
+                        res.VERSION_LATEST_ID = recipe.VERSION_LATEST_ID;
+                    }
+                    catch
+                    {
+                        db.RollbackTran();
+                        throw;
+                    }
+                    db.CommitTran();//提交事务
+                    res.Result = true;
+                }
+                else
+                {
+                    res.Result = false;
+                    res.Message = rabbitRes.Parameters["Message"].ToString();
                 }
 
-                byte[] body;
-                //根据Recipe Type获取 ByteArray类型的Body
-                switch (eqp.RECIPE_TYPE)
-                {
-                    default:
-                        body = Convert.FromBase64String(rabbitRes.Parameters["RecipeBody"].ToString());
-                        break;
-                }
-                //开启事务，执行新建Recipe的任务
-                db.BeginTran();
-                try
-                {
-                    //添加Recipe
-                    recipe = new RMS_RECIPE
-                    {
-                        EQUIPMENT_ID = req.EquipmentId,
-                        NAME = req.RecipeName,
-                        FLOW_ID = eqp.FLOW_ID,
-                        //  CREATOR = req.TrueName,
-                        //  LASTEDITOR = req.TrueName
-                    };
-                    db.Insertable<RMS_RECIPE>(recipe).ExecuteCommand();
-                    //添加Version
-                    var flow = db.Queryable<RMS_FLOW>().In(eqp.FLOW_ID).First();
-                    var version = new RMS_RECIPE_VERSION
-                    {
-                        RECIPE_ID = recipe.ID,
-                        FLOW_ID = recipe.FLOW_ID,
-                        FLOW_ROLES = flow.FLOW_ROLES,
-                        CURRENT_FLOW_INDEX = 100,
-                        REMARK = "First Version",
-                        CREATOR = req.TrueName
-                    };
-                    db.Insertable<RMS_RECIPE_VERSION>(version).ExecuteCommand();
-                    //添加Data
-                    var data = new RMS_RECIPE_DATA
-                    {
-                        NAME = req.RecipeName,
-                        CONTENT = body,
-                        CREATOR = req.TrueName,
-                    };
-                    db.Insertable<RMS_RECIPE_DATA>(data).ExecuteCommand();
-                    //更新外键
-                    version.RECIPE_DATA_ID = data.ID;
-                    db.Updateable<RMS_RECIPE_VERSION>(version).UpdateColumns(it => new { it.RECIPE_DATA_ID }).ExecuteCommand();
-                    recipe.VERSION_LATEST_ID = version.ID;
-                    recipe.VERSION_EFFECTIVE_ID = version.ID;
-                    db.Updateable<RMS_RECIPE>(recipe).UpdateColumns(it => new { it.VERSION_LATEST_ID, it.VERSION_EFFECTIVE_ID }).ExecuteCommand();
-                    res.RECIPE_ID = recipe.ID;
-                    res.VERSION_LATEST_ID = recipe.VERSION_LATEST_ID;
-                }
-                catch
-                {
-                    db.RollbackTran();
-                    throw;
-                }
-                db.CommitTran();//提交事务
-                res.Result = true;
-               
+
             }
             else//Rabbit Mq失败
             {
@@ -154,7 +164,7 @@ namespace Rms.Services.Services.ApiHandle
                 Parameters = new Dictionary<string, object>() { { "RecipeName", RecipeName } }
             };
             var rabbitres = RabbitMqService.ProduceWaitReply(rabbitmqroute, trans, 5);
-  
+
 
             if (rabbitres == null)//Rabbit Mq失败
             {

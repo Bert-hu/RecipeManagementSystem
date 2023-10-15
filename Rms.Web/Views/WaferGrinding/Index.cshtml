@@ -1,0 +1,113 @@
+﻿
+@{
+
+}
+<style>
+    .scrollable-div {
+        max-height: 80vh;
+        overflow-y: auto; /* 或者使用 overflow-y: auto; */
+    }
+
+
+    .layui-card-body {
+        height: calc(100vh - 45px); /* 45px is the combined height of other elements */
+        overflow-y: auto; /* Add vertical scrolling if content exceeds the screen height */
+    }
+</style>
+<script src="~/Scripts/layui/xm-select.js"></script>
+<script src="~/Scripts/layui/layui.table.formdate.js"></script>
+<script src="~/Scripts/Production/WaferGrinding/Index.js"></script>
+
+<div class="layui-card layui-bg-gray" style="padding: 5px;">
+    <div class="layui-card-header" style="font-weight: bold; font-size:25px">WaferGrinding</div>
+    <div id="equipments" class="xm-select-demo"></div>
+    <div class="layui-bg-gray" style="padding: 15px;">
+        <div class="layui-row layui-col-space10">
+            <div class="layui-col-md3">
+                <div class="layui-card">
+                    <div class="layui-card-header">设备信息</div>
+                    <div class="layui-card-body">
+                        <form class="layui-form layui-form-pane" style="padding: 15px;" lay-filter="eqinfoform">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">Equipment</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="ID" autocomplete="off" class="layui-input" readonly>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">Name</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="NAME" autocomplete="off" class="layui-input" readonly>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">Status</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="STATUS" autocomplete="off" class="layui-input" readonly>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">机种</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="RECIPE_GROUP" autocomplete="off" class="layui-input" readonly>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">Recipe</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="RECIPE_NAME" autocomplete="off" class="layui-input" readonly>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">下载时间</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="DATETIMESTR" autocomplete="off" class="layui-input" readonly>
+                                </div>
+                            </div>
+
+
+                        </form>
+                        <div class="layui-progress" lay-filter="reloadeqinfobar">
+                            <div class="layui-progress-bar" lay-percent="0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+            </div>
+            <div class="layui-col-md3">
+                <div class="layui-card">
+                    <div class="layui-card-header">功能</div>
+                    <div class="layui-card-body ">
+                        <div class="layui-btn-container">
+                            <button type="button" class="layui-btn">
+                                <i class="layui-icon layui-icon-upload layui-font-12"></i>下载机种
+                            </button>
+                        </div>
+                        <div class="layui-btn-container">
+                            <button type="button" class="layui-btn layui-btn-normal">
+                                <i class="layui-icon layui-icon-play layui-font-12"></i>A Port LotStart
+                            </button>
+                        </div>
+                        <div class="layui-btn-container">
+                            <button type="button" class="layui-btn layui-btn-normal">
+                                <i class="layui-icon layui-icon-play layui-font-12"></i>B Port LotStart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md6">
+                <div class="layui-card layui-bg-green">
+                    <div class="layui-card-header">历史记录</div>
+                    <div class="layui-card-body">
+                        222
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>

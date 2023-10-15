@@ -1,0 +1,80 @@
+﻿
+@{
+
+}
+<style>
+    .scrollable-div {
+        max-height: 80vh;
+        overflow-y: auto; /* 或者使用 overflow-y: auto; */
+    }
+    .selected {
+        background-color: #89cff0 !important;
+    }
+</style>
+<script src="~/Scripts/layui/xm-select.js"></script>
+<script src="~/Scripts/layui/layui.table.formdate.js"></script>
+<script src="~/Scripts/RMS/RecipeVersion.js"></script>
+
+<form class="layui-form layui-form-pane" action="">
+    <div class="layui-form-item layui-row">
+        <div class="layui-inline">
+            <div class="layui-input-inline">
+                <div id="eqps" lay-filter="index" class="xm-select-demo"></div>
+            </div>
+            <div class="layui-input-inline">
+                <fieldset class="layui-elem-field layui-field-title">
+                    <legend id="info">EQP:</legend>
+                </fieldset>
+            </div>
+            @*<button class="layui-btn" lay-submit lay-filter="getdetail">查看</button>*@
+            @*<button class="layui-btn" lay-submit id="getversions">查看</button>*@
+        </div>
+        <div class="layui-col-lg8">
+            
+        </div>
+    </div>
+</form>
+<div class="layui-row layui-col-space10" style=" margin-bottom: 50px">
+    <div class="layui-col-md5">
+
+        <table class="layui-hide" id="rcptable" lay-filter="rcptable"></table>
+    </div>
+    <div class="layui-col-md7 scrollable-div">
+
+        <table class="layui-hide" id="versiontable" lay-filter="versiontable"></table>
+    </div>
+
+</div>
+
+<script type="text/html" id="addnewversion">
+    <div>
+        <div class="layui-btn-container" style="float:left;display:inline">
+            <button class="layui-btn layui-btn-sm" lay-event="add">添加新版本</button>
+        </div>
+
+    </div>
+</script>
+<script type="text/html" id="addnewrcp">
+    <div>
+        <div class="layui-btn-container" style="float:left;display:inline">
+            <button class="layui-btn layui-btn-sm" lay-event="add">添加新Recipe</button>
+            <button class="layui-btn layui-btn-sm" lay-event="downloadbylot">Download by Lot</button>
+        </div>
+
+    </div>
+</script>
+
+<script type="text/html" id="recipetoolbar">
+    <a class="layui-btn layui-btn layui-btn-xs" lay-event="download">Download</a>
+</script>
+
+<script type="text/html" id="versiontoolbar">
+    <a class="layui-btn layui-btn layui-btn-xs" lay-event="detail">查看</a>
+</script>
+
+
+<script type="text/html" id="rcptoolbar">
+    <a class="layui-btn layui-btn layui-btn-xs" lay-event="update">更新版本</a>
+</script>
+
+

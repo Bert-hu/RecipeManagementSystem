@@ -40,7 +40,18 @@
             this.label2 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_rabbit = new System.Windows.Forms.TabPage();
+            this.button_unlock = new System.Windows.Forms.Button();
+            this.button_lock = new System.Windows.Forms.Button();
+            this.textBox_svs = new System.Windows.Forms.TextBox();
+            this.button_getsv = new System.Windows.Forms.Button();
+            this.textBox_listenpath = new System.Windows.Forms.TextBox();
+            this.button_geteqpstatus = new System.Windows.Forms.Button();
+            this.label6 = new System.Windows.Forms.Label();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.button_getstatus = new System.Windows.Forms.Button();
+            this.comboBox_urlselect = new System.Windows.Forms.ComboBox();
+            this.comboBox_eqpselect = new System.Windows.Forms.ComboBox();
+            this.button_downloadeffective = new System.Windows.Forms.Button();
             this.button_compare = new System.Windows.Forms.Button();
             this.button_reloadbody = new System.Windows.Forms.Button();
             this.listBox_version = new System.Windows.Forms.ListBox();
@@ -50,20 +61,24 @@
             this.button_geteppd = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
             this.button_clearlog = new System.Windows.Forms.Button();
-            this.button_downloadeffective = new System.Windows.Forms.Button();
-            this.comboBox_eqpselect = new System.Windows.Forms.ComboBox();
-            this.comboBox_urlselect = new System.Windows.Forms.ComboBox();
-            this.button_geteqpstatus = new System.Windows.Forms.Button();
-            this.textBox_listenpath = new System.Windows.Forms.TextBox();
-            this.label6 = new System.Windows.Forms.Label();
-            this.button_getsv = new System.Windows.Forms.Button();
-            this.textBox_svs = new System.Windows.Forms.TextBox();
-            this.button_lock = new System.Windows.Forms.Button();
-            this.button_unlock = new System.Windows.Forms.Button();
+            this.comboBox_markingrecipes = new System.Windows.Forms.ComboBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.textBox_mkeq = new System.Windows.Forms.TextBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.textBox_mkmodelname = new System.Windows.Forms.TextBox();
+            this.button_getmktext1 = new System.Windows.Forms.Button();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.button_getmktext2 = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage_rabbit.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.tabPage2.SuspendLayout();
+            this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -163,10 +178,11 @@
             // 
             this.tabControl1.Controls.Add(this.tabPage_rabbit);
             this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Location = new System.Drawing.Point(12, 15);
+            this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Location = new System.Drawing.Point(12, 54);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(508, 518);
+            this.tabControl1.Size = new System.Drawing.Size(508, 479);
             this.tabControl1.TabIndex = 6;
             // 
             // tabPage_rabbit
@@ -195,9 +211,74 @@
             this.tabPage_rabbit.Text = "RabbitMq";
             this.tabPage_rabbit.UseVisualStyleBackColor = true;
             // 
+            // button_unlock
+            // 
+            this.button_unlock.Location = new System.Drawing.Point(225, 355);
+            this.button_unlock.Name = "button_unlock";
+            this.button_unlock.Size = new System.Drawing.Size(152, 23);
+            this.button_unlock.TabIndex = 9;
+            this.button_unlock.Text = "Unlock";
+            this.button_unlock.UseVisualStyleBackColor = true;
+            this.button_unlock.Click += new System.EventHandler(this.button_unlock_Click);
+            // 
+            // button_lock
+            // 
+            this.button_lock.Location = new System.Drawing.Point(25, 355);
+            this.button_lock.Name = "button_lock";
+            this.button_lock.Size = new System.Drawing.Size(152, 23);
+            this.button_lock.TabIndex = 9;
+            this.button_lock.Text = "Lock";
+            this.button_lock.UseVisualStyleBackColor = true;
+            this.button_lock.Click += new System.EventHandler(this.button_lock_Click);
+            // 
+            // textBox_svs
+            // 
+            this.textBox_svs.Location = new System.Drawing.Point(25, 282);
+            this.textBox_svs.Name = "textBox_svs";
+            this.textBox_svs.Size = new System.Drawing.Size(457, 21);
+            this.textBox_svs.TabIndex = 8;
+            // 
+            // button_getsv
+            // 
+            this.button_getsv.Location = new System.Drawing.Point(25, 253);
+            this.button_getsv.Name = "button_getsv";
+            this.button_getsv.Size = new System.Drawing.Size(152, 23);
+            this.button_getsv.TabIndex = 7;
+            this.button_getsv.Text = "Get Sv";
+            this.button_getsv.UseVisualStyleBackColor = true;
+            this.button_getsv.Click += new System.EventHandler(this.button_getsv_Click);
+            // 
+            // textBox_listenpath
+            // 
+            this.textBox_listenpath.Location = new System.Drawing.Point(108, 50);
+            this.textBox_listenpath.Name = "textBox_listenpath";
+            this.textBox_listenpath.Size = new System.Drawing.Size(188, 21);
+            this.textBox_listenpath.TabIndex = 6;
+            this.textBox_listenpath.Text = "TestPath.999";
+            // 
+            // button_geteqpstatus
+            // 
+            this.button_geteqpstatus.Enabled = false;
+            this.button_geteqpstatus.Location = new System.Drawing.Point(25, 127);
+            this.button_geteqpstatus.Name = "button_geteqpstatus";
+            this.button_geteqpstatus.Size = new System.Drawing.Size(186, 23);
+            this.button_geteqpstatus.TabIndex = 0;
+            this.button_geteqpstatus.Text = "Get Eqp Status";
+            this.button_geteqpstatus.UseVisualStyleBackColor = true;
+            this.button_geteqpstatus.Click += new System.EventHandler(this.button_geteqpstatus_Click);
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(29, 53);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(71, 12);
+            this.label6.TabIndex = 3;
+            this.label6.Text = "Listen Path";
+            // 
             // tabPage1
             // 
-            this.tabPage1.Controls.Add(this.comboBox_urlselect);
+            this.tabPage1.Controls.Add(this.button_getstatus);
             this.tabPage1.Controls.Add(this.comboBox_eqpselect);
             this.tabPage1.Controls.Add(this.button_downloadeffective);
             this.tabPage1.Controls.Add(this.button_compare);
@@ -207,15 +288,56 @@
             this.tabPage1.Controls.Add(this.button_addrecipe);
             this.tabPage1.Controls.Add(this.listBox_recipelist);
             this.tabPage1.Controls.Add(this.button_geteppd);
-            this.tabPage1.Controls.Add(this.label5);
             this.tabPage1.Controls.Add(this.label4);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(500, 492);
+            this.tabPage1.Size = new System.Drawing.Size(500, 453);
             this.tabPage1.TabIndex = 2;
             this.tabPage1.Text = "WebApi";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // button_getstatus
+            // 
+            this.button_getstatus.Location = new System.Drawing.Point(354, 46);
+            this.button_getstatus.Name = "button_getstatus";
+            this.button_getstatus.Size = new System.Drawing.Size(143, 23);
+            this.button_getstatus.TabIndex = 11;
+            this.button_getstatus.Text = "Get Status";
+            this.button_getstatus.UseVisualStyleBackColor = true;
+            this.button_getstatus.Click += new System.EventHandler(this.button_getstatus_Click);
+            // 
+            // comboBox_urlselect
+            // 
+            this.comboBox_urlselect.FormattingEnabled = true;
+            this.comboBox_urlselect.Items.AddRange(new object[] {
+            "http://192.168.53.210:8085",
+            "http://127.0.0.1:6657",
+            "http://10.5.128.207:6657",
+            "http://10.5.1.110:6657",
+            "http://127.0.0.1:6658"});
+            this.comboBox_urlselect.Location = new System.Drawing.Point(243, 28);
+            this.comboBox_urlselect.Name = "comboBox_urlselect";
+            this.comboBox_urlselect.Size = new System.Drawing.Size(221, 20);
+            this.comboBox_urlselect.TabIndex = 10;
+            // 
+            // comboBox_eqpselect
+            // 
+            this.comboBox_eqpselect.FormattingEnabled = true;
+            this.comboBox_eqpselect.Location = new System.Drawing.Point(90, 22);
+            this.comboBox_eqpselect.Name = "comboBox_eqpselect";
+            this.comboBox_eqpselect.Size = new System.Drawing.Size(121, 20);
+            this.comboBox_eqpselect.TabIndex = 9;
+            // 
+            // button_downloadeffective
+            // 
+            this.button_downloadeffective.Location = new System.Drawing.Point(354, 231);
+            this.button_downloadeffective.Name = "button_downloadeffective";
+            this.button_downloadeffective.Size = new System.Drawing.Size(140, 42);
+            this.button_downloadeffective.TabIndex = 8;
+            this.button_downloadeffective.Text = "Download effective version";
+            this.button_downloadeffective.UseVisualStyleBackColor = true;
+            this.button_downloadeffective.Click += new System.EventHandler(this.button_downloadeffective_Click);
             // 
             // button_compare
             // 
@@ -289,7 +411,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(25, 52);
+            this.label5.Location = new System.Drawing.Point(178, 31);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(47, 12);
             this.label5.TabIndex = 1;
@@ -304,6 +426,18 @@
             this.label4.TabIndex = 1;
             this.label4.Text = "EQID";
             // 
+            // tabPage2
+            // 
+            this.tabPage2.Controls.Add(this.groupBox2);
+            this.tabPage2.Controls.Add(this.groupBox1);
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(500, 492);
+            this.tabPage2.TabIndex = 3;
+            this.tabPage2.Text = "Marking";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
             // button_clearlog
             // 
             this.button_clearlog.Location = new System.Drawing.Point(1161, 8);
@@ -314,101 +448,101 @@
             this.button_clearlog.UseVisualStyleBackColor = true;
             this.button_clearlog.Click += new System.EventHandler(this.button_clearlog_Click);
             // 
-            // button_downloadeffective
+            // comboBox_markingrecipes
             // 
-            this.button_downloadeffective.Location = new System.Drawing.Point(354, 231);
-            this.button_downloadeffective.Name = "button_downloadeffective";
-            this.button_downloadeffective.Size = new System.Drawing.Size(140, 42);
-            this.button_downloadeffective.TabIndex = 8;
-            this.button_downloadeffective.Text = "Download effective version";
-            this.button_downloadeffective.UseVisualStyleBackColor = true;
-            this.button_downloadeffective.Click += new System.EventHandler(this.button_downloadeffective_Click);
+            this.comboBox_markingrecipes.FormattingEnabled = true;
+            this.comboBox_markingrecipes.Location = new System.Drawing.Point(59, 42);
+            this.comboBox_markingrecipes.Name = "comboBox_markingrecipes";
+            this.comboBox_markingrecipes.Size = new System.Drawing.Size(315, 20);
+            this.comboBox_markingrecipes.TabIndex = 1;
             // 
-            // comboBox_eqpselect
+            // label7
             // 
-            this.comboBox_eqpselect.FormattingEnabled = true;
-            this.comboBox_eqpselect.Location = new System.Drawing.Point(90, 22);
-            this.comboBox_eqpselect.Name = "comboBox_eqpselect";
-            this.comboBox_eqpselect.Size = new System.Drawing.Size(121, 20);
-            this.comboBox_eqpselect.TabIndex = 9;
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(6, 45);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(47, 12);
+            this.label7.TabIndex = 2;
+            this.label7.Text = "EQ,机种";
             // 
-            // comboBox_urlselect
+            // textBox_mkeq
             // 
-            this.comboBox_urlselect.FormattingEnabled = true;
-            this.comboBox_urlselect.Items.AddRange(new object[] {
-            "http://192.168.53.210:8085",
-            "http://127.0.0.1:6657",
-            "http://10.5.128.207:6657",
-            "http://10.5.1.110:6657"});
-            this.comboBox_urlselect.Location = new System.Drawing.Point(90, 49);
-            this.comboBox_urlselect.Name = "comboBox_urlselect";
-            this.comboBox_urlselect.Size = new System.Drawing.Size(221, 20);
-            this.comboBox_urlselect.TabIndex = 10;
+            this.textBox_mkeq.Location = new System.Drawing.Point(102, 31);
+            this.textBox_mkeq.Name = "textBox_mkeq";
+            this.textBox_mkeq.Size = new System.Drawing.Size(199, 21);
+            this.textBox_mkeq.TabIndex = 3;
+            this.textBox_mkeq.Text = "EQTEST02";
             // 
-            // button_geteqpstatus
+            // label8
             // 
-            this.button_geteqpstatus.Enabled = false;
-            this.button_geteqpstatus.Location = new System.Drawing.Point(25, 127);
-            this.button_geteqpstatus.Name = "button_geteqpstatus";
-            this.button_geteqpstatus.Size = new System.Drawing.Size(186, 23);
-            this.button_geteqpstatus.TabIndex = 0;
-            this.button_geteqpstatus.Text = "Get Eqp Status";
-            this.button_geteqpstatus.UseVisualStyleBackColor = true;
-            this.button_geteqpstatus.Click += new System.EventHandler(this.button_geteqpstatus_Click);
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(9, 34);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(17, 12);
+            this.label8.TabIndex = 2;
+            this.label8.Text = "EQ";
             // 
-            // textBox_listenpath
+            // label9
             // 
-            this.textBox_listenpath.Location = new System.Drawing.Point(108, 50);
-            this.textBox_listenpath.Name = "textBox_listenpath";
-            this.textBox_listenpath.Size = new System.Drawing.Size(188, 21);
-            this.textBox_listenpath.TabIndex = 6;
-            this.textBox_listenpath.Text = "TestPath.999";
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(9, 77);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(65, 12);
+            this.label9.TabIndex = 2;
+            this.label9.Text = "MODEL_NAME";
             // 
-            // label6
+            // textBox_mkmodelname
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(29, 53);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(71, 12);
-            this.label6.TabIndex = 3;
-            this.label6.Text = "Listen Path";
+            this.textBox_mkmodelname.Location = new System.Drawing.Point(102, 77);
+            this.textBox_mkmodelname.Name = "textBox_mkmodelname";
+            this.textBox_mkmodelname.Size = new System.Drawing.Size(199, 21);
+            this.textBox_mkmodelname.TabIndex = 4;
             // 
-            // button_getsv
+            // button_getmktext1
             // 
-            this.button_getsv.Location = new System.Drawing.Point(25, 253);
-            this.button_getsv.Name = "button_getsv";
-            this.button_getsv.Size = new System.Drawing.Size(152, 23);
-            this.button_getsv.TabIndex = 7;
-            this.button_getsv.Text = "Get Sv";
-            this.button_getsv.UseVisualStyleBackColor = true;
-            this.button_getsv.Click += new System.EventHandler(this.button_getsv_Click);
+            this.button_getmktext1.Location = new System.Drawing.Point(380, 39);
+            this.button_getmktext1.Name = "button_getmktext1";
+            this.button_getmktext1.Size = new System.Drawing.Size(72, 23);
+            this.button_getmktext1.TabIndex = 5;
+            this.button_getmktext1.Text = "Get";
+            this.button_getmktext1.UseVisualStyleBackColor = true;
+            this.button_getmktext1.Click += new System.EventHandler(this.button_getmktext1_Click);
             // 
-            // textBox_svs
+            // groupBox1
             // 
-            this.textBox_svs.Location = new System.Drawing.Point(25, 282);
-            this.textBox_svs.Name = "textBox_svs";
-            this.textBox_svs.Size = new System.Drawing.Size(457, 21);
-            this.textBox_svs.TabIndex = 8;
+            this.groupBox1.Controls.Add(this.comboBox_markingrecipes);
+            this.groupBox1.Controls.Add(this.button_getmktext1);
+            this.groupBox1.Controls.Add(this.label7);
+            this.groupBox1.Location = new System.Drawing.Point(6, 25);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(473, 100);
+            this.groupBox1.TabIndex = 6;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "获取打印内容1";
             // 
-            // button_lock
+            // groupBox2
             // 
-            this.button_lock.Location = new System.Drawing.Point(25, 355);
-            this.button_lock.Name = "button_lock";
-            this.button_lock.Size = new System.Drawing.Size(152, 23);
-            this.button_lock.TabIndex = 9;
-            this.button_lock.Text = "Lock";
-            this.button_lock.UseVisualStyleBackColor = true;
-            this.button_lock.Click += new System.EventHandler(this.button_lock_Click);
+            this.groupBox2.Controls.Add(this.button_getmktext2);
+            this.groupBox2.Controls.Add(this.textBox_mkeq);
+            this.groupBox2.Controls.Add(this.label8);
+            this.groupBox2.Controls.Add(this.textBox_mkmodelname);
+            this.groupBox2.Controls.Add(this.label9);
+            this.groupBox2.Location = new System.Drawing.Point(6, 131);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(473, 355);
+            this.groupBox2.TabIndex = 7;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "传参获取打印内容";
             // 
-            // button_unlock
+            // button_getmktext2
             // 
-            this.button_unlock.Location = new System.Drawing.Point(225, 355);
-            this.button_unlock.Name = "button_unlock";
-            this.button_unlock.Size = new System.Drawing.Size(152, 23);
-            this.button_unlock.TabIndex = 9;
-            this.button_unlock.Text = "Unlock";
-            this.button_unlock.UseVisualStyleBackColor = true;
-            this.button_unlock.Click += new System.EventHandler(this.button_unlock_Click);
+            this.button_getmktext2.Location = new System.Drawing.Point(377, 31);
+            this.button_getmktext2.Name = "button_getmktext2";
+            this.button_getmktext2.Size = new System.Drawing.Size(75, 23);
+            this.button_getmktext2.TabIndex = 5;
+            this.button_getmktext2.Text = "Get";
+            this.button_getmktext2.UseVisualStyleBackColor = true;
+            this.button_getmktext2.Click += new System.EventHandler(this.button_getmktext2_Click);
             // 
             // Form1
             // 
@@ -416,8 +550,10 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1248, 545);
             this.Controls.Add(this.button_clearlog);
+            this.Controls.Add(this.comboBox_urlselect);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.richTextBox_compare);
+            this.Controls.Add(this.label5);
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
@@ -427,7 +563,13 @@
             this.tabPage_rabbit.PerformLayout();
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
+            this.tabPage2.ResumeLayout(false);
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -465,6 +607,18 @@
         private System.Windows.Forms.TextBox textBox_svs;
         private System.Windows.Forms.Button button_unlock;
         private System.Windows.Forms.Button button_lock;
+        private System.Windows.Forms.Button button_getstatus;
+        private System.Windows.Forms.TabPage tabPage2;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.ComboBox comboBox_markingrecipes;
+        private System.Windows.Forms.TextBox textBox_mkeq;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.TextBox textBox_mkmodelname;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.Button button_getmktext1;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.Button button_getmktext2;
     }
 }
 
