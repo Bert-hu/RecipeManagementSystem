@@ -70,6 +70,12 @@
       <HintPath>..\packages\Pipelines.Sockets.Unofficial.2.2.0\lib\net472\Pipelines.Sockets.Unofficial.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
+    <Reference Include="RabbitMQ.Client, Version=6.0.0.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
+      <HintPath>..\packages\RabbitMQ.Client.6.6.0\lib\net462\RabbitMQ.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Renci.SshNet, Version=2023.0.0.0, Culture=neutral, PublicKeyToken=1cee9f8bde3db106, processorArchitecture=MSIL">
+      <HintPath>..\packages\SSH.NET.2023.0.0\lib\net462\Renci.SshNet.dll</HintPath>
+    </Reference>
     <Reference Include="SqlSugar, Version=5.1.4.90, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\SqlSugar.5.1.4.91\lib\SqlSugar.dll</HintPath>
     </Reference>
@@ -105,8 +111,8 @@
     <Reference Include="System.IO.Pipelines, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.IO.Pipelines.5.0.0\lib\net461\System.IO.Pipelines.dll</HintPath>
     </Reference>
-    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
+    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http, Version=4.1.1.3, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Net.Http.4.3.4\lib\net46\System.Net.Http.dll</HintPath>
@@ -155,8 +161,8 @@
     <Reference Include="System.Text.Json, Version=5.0.0.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Text.Json.5.0.2\lib\net461\System.Text.Json.dll</HintPath>
     </Reference>
-    <Reference Include="System.Threading.Channels, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Threading.Channels.5.0.0\lib\net461\System.Threading.Channels.dll</HintPath>
+    <Reference Include="System.Threading.Channels, Version=7.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Channels.7.0.0\lib\net462\System.Threading.Channels.dll</HintPath>
     </Reference>
     <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -241,6 +247,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\SwaggerConfig.cs" />
+    <Compile Include="Controllers\Ems\EquipmentTypeController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\Pms\AccountController.cs" />
     <Compile Include="Controllers\Pms\BaseController.cs" />
@@ -250,7 +257,15 @@
     <Compile Include="Controllers\Pms\RoleController.cs" />
     <Compile Include="Controllers\Pms\UserController.cs" />
     <Compile Include="Controllers\Production\CommonProductionController.cs" />
+    <Compile Include="Controllers\Production\WaferToReelController.cs" />
+    <Compile Include="Controllers\Production\FviController.cs" />
+    <Compile Include="Controllers\Production\WaferAOI.cs" />
+    <Compile Include="Controllers\Production\WaferMarkingController.cs" />
+    <Compile Include="Controllers\Production\WaferGrindingLaminationController.cs" />
+    <Compile Include="Controllers\Production\DicingSawController.cs" />
+    <Compile Include="Controllers\Production\LaserGroovingController.cs" />
     <Compile Include="Controllers\Production\WaferGrindingController.cs" />
+    <Compile Include="Controllers\Ems\EquipmentController.cs" />
     <Compile Include="Controllers\Rms\MarkingManageController.cs" />
     <Compile Include="Controllers\Rms\RecipeChangeController.cs" />
     <Compile Include="Controllers\Rms\RecipeMappingController.cs" />
@@ -261,9 +276,11 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\RabbitMqService.cs" />
     <Compile Include="Utils\HttpClientHelper.cs" />
     <Compile Include="Utils\SsoHelper.cs" />
     <Compile Include="ViewModels\ChangePasswordViewModel.cs" />
+    <Compile Include="ViewModels\EquipmentViewModel.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -351,6 +368,7 @@
     <Content Include="Scripts\ECharts\echarts.min.js" />
     <Content Include="Scripts\ECharts\theme-macarons.js" />
     <Content Include="Scripts\ECharts\theme-vintage.js" />
+    <Content Include="Scripts\Ems\EquipmentType.js" />
     <Content Include="Scripts\Image\Image.js" />
     <Content Include="Scripts\jquery-3.4.1.js" />
     <Content Include="Scripts\jquery-3.4.1.min.js" />
@@ -484,12 +502,20 @@
     <Content Include="Scripts\Marking\markingfields.js" />
     <Content Include="Scripts\Marking\markingmanage.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
+    <Content Include="Scripts\Production\Fvi\Index.js" />
+    <Content Include="Scripts\Production\WaferAOI\Index.js" />
+    <Content Include="Scripts\Production\WaferToReel\Index.js" />
+    <Content Include="Scripts\Production\WaferMarking\Index.js" />
+    <Content Include="Scripts\Production\WaferGrindingLamination\Index.js" />
+    <Content Include="Scripts\Production\DicingSaw\Index.js" />
+    <Content Include="Scripts\Production\LaserGrooving\Index.js" />
     <Content Include="Scripts\Production\WaferGrinding\Index.js" />
     <Content Include="Scripts\RMS\AddRecipe.js" />
     <Content Include="Scripts\RMS\AddVersion.js" />
     <Content Include="Scripts\RMS\RecipeChange.js" />
     <Content Include="Scripts\RMS\RecipeIndex.css" />
     <Content Include="Scripts\RMS\RecipeMapping.js" />
+    <Content Include="Scripts\Ems\Equipment.js" />
     <Content Include="Scripts\RMS\RecipeVersion.js" />
     <Content Include="Scripts\Robot\Robot.js" />
     <Content Include="Scripts\vue.js" />
@@ -537,10 +563,19 @@
     <Content Include="Views\RecipeMapping\Index.cshtml" />
     <Content Include="Views\RecipeMapping\BindingRecipePage.cshtml" />
     <Content Include="Views\WaferGrinding\Index.cshtml" />
+    <Content Include="Views\DicingSaw\Index.cshtml" />
+    <Content Include="Views\LaserGrooving\Index.cshtml" />
+    <Content Include="Views\WaferGrindingLamination\Index.cshtml" />
+    <Content Include="Views\WaferMarking\Index.cshtml" />
+    <Content Include="Views\Fvi\Index.cshtml" />
+    <Content Include="Views\WaferAOI\Index.cshtml" />
+    <Content Include="Views\WaferToReel\Index.cshtml" />
+    <Content Include="Views\Equipment\Index.cshtml" />
+    <Content Include="Views\EquipmentType\Index.cshtml" />
+    <Content Include="Views\EquipmentType\TypeRole.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Service\" />
     <Folder Include="Views\Process\" />
   </ItemGroup>
   <ItemGroup>

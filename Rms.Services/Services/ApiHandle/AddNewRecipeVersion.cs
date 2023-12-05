@@ -26,6 +26,11 @@ namespace Rms.Services.Services.ApiHandle
                 res.Message = $"Euipment '{req.EquipmentId}' not exists!";
                 return res;
             }
+            if (eqp.RECIPE_TYPE == "onlyName")
+            {
+                res.Message = $"Recipe Type 'onlyName' can not add new version!";
+                return res;
+            }
 
            var recipe =db.Queryable<RMS_RECIPE>().Where(it => it.ID==req.RecipeId  && it.EQUIPMENT_ID == req.EquipmentId).First();
             if (recipe.VERSION_EFFECTIVE_ID != recipe.VERSION_LATEST_ID) //检查是否存在未完成版本

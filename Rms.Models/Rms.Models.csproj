@@ -54,6 +54,7 @@
     <Compile Include="DataBase\Pms\PMS_PROCESS.cs" />
     <Compile Include="DataBase\Pms\PMS_ROLE.cs" />
     <Compile Include="DataBase\Pms\PMS_USER.cs" />
+    <Compile Include="DataBase\Rms\RMS_EQUIPMENT_TYPE.cs" />
     <Compile Include="DataBase\Rms\RMS_PRODUCTIONLOG.cs" />
     <Compile Include="DataBase\Rms\RMS_FLOW.cs" />
     <Compile Include="DataBase\Rms\RMS_FLOW_HITS.cs" />
@@ -63,6 +64,7 @@
     <Compile Include="DataBase\Rms\RMS_MARKING_VERSION.cs" />
     <Compile Include="DataBase\Rms\RMS_RECIPE_GROUP.cs" />
     <Compile Include="DataBase\Rms\RMS_RECIPE_DATA.cs" />
+    <Compile Include="DataBase\Rms\RMS_RECIPE_GROUP_MAPPING.cs" />
     <Compile Include="DataBase\Rms\RMS_RECIPE_VERSION.cs" />
     <Compile Include="DataBase\Rms\RMS_EQUIPMENT.cs" />
     <Compile Include="DataBase\Rms\RMS_RECIPE.cs" />

@@ -58,8 +58,17 @@ namespace Rms.Services.Services.ApiHandle
 
             if (rabbitres != null)
             {
-                res.EPPD = JsonConvert.DeserializeObject<List<string>>(rabbitres.Parameters["EPPD"].ToString());
-                res.Result = true;
+                if (rabbitres.Parameters["Result"].ToString().ToUpper() == "TRUE")
+                {
+                    res.EPPD = JsonConvert.DeserializeObject<List<string>>(rabbitres.Parameters["EPPD"].ToString());
+                    res.Result = true;
+                }
+                else
+                {
+                    res.Result = false;
+                    res.Message = rabbitres.Parameters["Message"].ToString();
+                }
+
             }
             else//Rabbit Mq失败
             {
@@ -68,7 +77,7 @@ namespace Rms.Services.Services.ApiHandle
                 res.Message = "Equipment offline or EAP client error!";
             }
 
-        
+
             return res;
         }
     }

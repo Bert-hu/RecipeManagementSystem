@@ -39,6 +39,23 @@ namespace Rms.Services.Services.ApiHandle
                 res.Message = $"Recipe '{req.RecipeName}' already exists!";
                 return res;
             }
+
+            //TODO Unfomatted/Fomatted/onlyName
+            switch (eqp.RECIPE_TYPE)
+            {
+                case "secsByte":
+                    return AddUnfomattedRecipeTransaction(eqp, req);
+                case "onlyName":
+                    return AddOnlyNameRecipeTransaction(eqp, req);
+                default:
+                    return AddUnfomattedRecipeTransaction(eqp, req);
+            }
+
+        }
+
+        private AddNewRecipeResponse AddUnfomattedRecipeTransaction(RMS_EQUIPMENT eqp, AddNewRecipeRequest req)
+        {
+            AddNewRecipeResponse res = new AddNewRecipeResponse();
             var rabbitRes = GetUnfomattedRecipe(eqp.RECIPE_TYPE, req.EquipmentId, req.RecipeName);
             #region 返回是否是离线
             bool isOffline = false;
@@ -77,11 +94,12 @@ namespace Rms.Services.Services.ApiHandle
                             break;
                     }
                     //开启事务，执行新建Recipe的任务
+                    var db = DbFactory.GetSqlSugarClient();
                     db.BeginTran();
                     try
                     {
                         //添加Recipe
-                        recipe = new RMS_RECIPE
+                        var recipe = new RMS_RECIPE
                         {
                             EQUIPMENT_ID = req.EquipmentId,
                             NAME = req.RecipeName,
@@ -113,6 +131,7 @@ namespace Rms.Services.Services.ApiHandle
                         //更新外键
                         version.RECIPE_DATA_ID = data.ID;
                         db.Updateable<RMS_RECIPE_VERSION>(version).UpdateColumns(it => new { it.RECIPE_DATA_ID }).ExecuteCommand();
+                        //更新生效版和最新版
                         recipe.VERSION_LATEST_ID = version.ID;
                         recipe.VERSION_EFFECTIVE_ID = version.ID;
                         db.Updateable<RMS_RECIPE>(recipe).UpdateColumns(it => new { it.VERSION_LATEST_ID, it.VERSION_EFFECTIVE_ID }).ExecuteCommand();
@@ -147,7 +166,7 @@ namespace Rms.Services.Services.ApiHandle
         public RabbitMqTransaction GetUnfomattedRecipe(string RecipeType, string EquipmentID, string RecipeName)
         {
             string rabbitmqroute = string.Empty;
-            //识别设备类型和恢复queue
+            //识别设备类型和回复queue
             switch (RecipeType)
             {
                 default:
@@ -163,7 +182,7 @@ namespace Rms.Services.Services.ApiHandle
                 ReplyChannel = ListenChannel,
                 Parameters = new Dictionary<string, object>() { { "RecipeName", RecipeName } }
             };
-            var rabbitres = RabbitMqService.ProduceWaitReply(rabbitmqroute, trans, 5);
+            var rabbitres = RabbitMqService.ProduceWaitReply(rabbitmqroute, trans, 120);
 
 
             if (rabbitres == null)//Rabbit Mq失败
@@ -172,6 +191,51 @@ namespace Rms.Services.Services.ApiHandle
                 Log.Error($"GetNewRecipeVersion Time out!");
             }
             return rabbitres;
+        }
+
+
+
+        private AddNewRecipeResponse AddOnlyNameRecipeTransaction(RMS_EQUIPMENT eqp, AddNewRecipeRequest req)
+        {
+            AddNewRecipeResponse res = new AddNewRecipeResponse();
+            var db = DbFactory.GetSqlSugarClient();
+            db.BeginTran();
+            try
+            {
+                //添加Recipe
+                var recipe = new RMS_RECIPE
+                {
+                    EQUIPMENT_ID = req.EquipmentId,
+                    NAME = req.RecipeName,
+                    FLOW_ID = eqp.FLOW_ID,
+                };
+                db.Insertable<RMS_RECIPE>(recipe).ExecuteCommand();
+                //添加Version
+                var flow = db.Queryable<RMS_FLOW>().In(eqp.FLOW_ID).First();
+                var version = new RMS_RECIPE_VERSION
+                {
+                    RECIPE_ID = recipe.ID,
+                    FLOW_ID = recipe.FLOW_ID,
+                    FLOW_ROLES = flow.FLOW_ROLES,
+                    CURRENT_FLOW_INDEX = 100,
+                    REMARK = "First Version",
+                    CREATOR = req.TrueName
+                };
+                db.Insertable<RMS_RECIPE_VERSION>(version).ExecuteCommand();
+                recipe.VERSION_LATEST_ID = version.ID;
+                recipe.VERSION_EFFECTIVE_ID = version.ID;
+                db.Updateable<RMS_RECIPE>(recipe).UpdateColumns(it => new { it.VERSION_LATEST_ID, it.VERSION_EFFECTIVE_ID }).ExecuteCommand();
+                res.RECIPE_ID = recipe.ID;
+                res.VERSION_LATEST_ID = recipe.VERSION_LATEST_ID;
+            }
+            catch 
+            {
+                db.RollbackTran();
+                throw;
+            }
+            db.CommitTran();//提交事务
+            res.Result = true;
+            return res;
         }
     }
 }

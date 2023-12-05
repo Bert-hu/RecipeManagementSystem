@@ -11,6 +11,7 @@ using System.Threading;
 using System.Web.Mvc;
 using Rms.Models.DataBase.Pms;
 using Rms.Utils;
+using Rms.Models.DataBase.Rms;
 
 namespace Rms.Web.Controllers
 {
@@ -140,22 +141,28 @@ namespace Rms.Web.Controllers
             Session["user_account"] = user;
 
             List<string> moduleids;
+            List<string> equipmenttypeids;
+            var aa = db.Queryable<RMS_EQUIPMENT_TYPE>().ToList();
+            
 
             if (user.ROLEID?.Equals("SuperAdmin") ?? false)//管理员默认拥有所有权限，不需要添加
             {
                 moduleids = db.Queryable<PMS_MODULE>().Select(it => it.ID).ToList();
+                equipmenttypeids = db.Queryable<RMS_EQUIPMENT_TYPE>().ToList().Select(it => it.ID).ToList();
             }
             else
             {
                 moduleids = db.Queryable<PMS_MODULEROLE>().Where(it => it.ROLE_ID == user.ROLEID).Select(it => it.MODULE_ID).ToList();
+                equipmenttypeids = db.Queryable<RMS_EQUIPMENT_TYPE>().ToList().Where(it => it.ROLEIDS.Contains(user.ROLEID)).Select(it => it.ID).ToList();
             }
             var modules = db.Queryable<PMS_MODULE>().Where(it => moduleids.Contains(it.ID)).OrderBy(it => it.ORDERSORT).ToList();
             var controllers = modules.Select(it => it.CONTROLLER).ToList();
             Session["modules"] = modules;
             Session["controllers"] = controllers;
+            Session["equipmenttypeids"] = equipmenttypeids;
             Session.Timeout = 30;
             var ipAddress = HttpContext.Request.ServerVariables["REMOTE_ADDR"] ?? HttpContext.Request.ServerVariables["REMOTE_ADDR"];
-            db.Insertable(new RMS_PRODUCTIONLOG
+            db.Insertable(new PMS_OPERATIONLOG
             {
                 IP = ipAddress,
                 MODULENAME = "Account",

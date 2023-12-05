@@ -22,7 +22,7 @@ namespace Rms.Services.Services.ApiHandle
             var req = JsonConvert.DeserializeObject<DownloadEffectiveRecipeByRecipeGroupRequest>(jsoncontent);
             var eqp = db.Queryable<RMS_EQUIPMENT>().In(req.EquipmentId).First();
             var recipegroup = db.Queryable<RMS_RECIPE_GROUP>().First(it => it.NAME == req.RecipeGroupName);
-            if(recipegroup == null )
+            if (recipegroup == null )
             {
                 db.Insertable<RMS_RECIPE_GROUP>(new RMS_RECIPE_GROUP { NAME = req.RecipeGroupName }).ExecuteCommand();
                 res.Result = false;
@@ -35,13 +35,16 @@ namespace Rms.Services.Services.ApiHandle
                 res.Message = "Equipment does not exist in RMS";
                 return res;
             }
-            var recipe = db.Queryable<RMS_RECIPE>().Where(it =>it.EQUIPMENT_ID ==req.EquipmentId && it.RECIPE_GROUP_ID ==recipegroup.ID).First();
-            if (recipe == null)
+            var data = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == req.EquipmentId).ToList();
+            var eqrecipeids = data.Select(it => it.ID).ToList();
+            var binding = db.Queryable<RMS_RECIPE_GROUP_MAPPING>().Where(it => it.RECIPE_GROUP_ID == recipegroup.ID && eqrecipeids.Contains(it.RECIPE_ID)).First();     
+            if (binding == null)
             {
                 res.Result = false;
                 res.Message = $"Unable to find recipe bound to '{req.RecipeGroupName}'";
                 return res;
             }
+            var recipe = db.Queryable<RMS_RECIPE>().In(binding.RECIPE_ID).First();
             var recipe_version = db.Queryable<RMS_RECIPE_VERSION>().In(recipe.VERSION_EFFECTIVE_ID).First();
 
             if (recipe_version.RECIPE_DATA_ID == null)
@@ -87,8 +90,10 @@ namespace Rms.Services.Services.ApiHandle
                         CREATOR = req.TrueName,
                         CREATETIME = DateTime.Now
                     }).ExecuteCommand();
+                    eqp.LASTRUN_RECIPE_ID = recipe.ID;
+                    eqp.LASTRUN_RECIPE_TIME = DateTime.Now;
+                    db.Updateable<RMS_EQUIPMENT>(eqp).ExecuteCommand();
 
-                    PPSelect(eqp.ID, recipe.NAME);//不管回复了
                 }
 
 

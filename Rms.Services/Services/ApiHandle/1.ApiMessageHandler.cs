@@ -56,6 +56,9 @@ namespace Rms.Services.Services.ApiHandle
                     case "/api/getmarkingtexts":
                         res = GetMarkingTexts(jsoncontent);
                         break;
+                    case "/api/checkrecipegroup":
+                        res = CheckRecipeGroup(jsoncontent);
+                        break;
                     default:
                         res.Result = false;
                         res.Message = "Unrecognized route";

@@ -13,13 +13,14 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
         el: '#lines',
         //initValue: [0],
         radio: true,
+        clickClose: true,
         model: {
             icon: 'hidden',
             label: {
                 type: 'text'
             }
         },
-        tips: '请选择线别',
+        tips: '请选择Process',
         block: {
             //最大显示数量, 0:不限制
             showCount: 0,
@@ -55,14 +56,12 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             elem: '#rcpgrouptable'
             , url: '/RecipeMapping/GetRecipeGroups'
             , toolbar: '#addnewgroup'
-            , id: "rcpgrouptable"
-            
+            , id: "rcpgrouptable"            
             , limit: 1000
             , limits: [1000]
             , height: 'full-235'
             , cols: [[
                 { field: 'NAME', title: 'Name', sort: true }
-
             ]]
            
         });
@@ -75,7 +74,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
         console.log(selectedline);
         window.rcptable = table.render({
             elem: '#equipmenttable'
-            , url: '/RecipeMapping/GetEquipment'
+            , url: '/RecipeMapping/GetEquipments'
             //, toolbar: '#addnewrcp'
             , id: "equipmenttable"
             , limit: 1000
@@ -83,32 +82,21 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             , height: 'full-235'
             , cols: [[
                 { field: 'EQUIPMENT_ID', title: 'EQID' }
+                , { field: 'EQUIPMENT_TYPE_NAME', title: 'EQ Type' }
                 , { field: 'EQUIPMENT_NAME', title: 'Name' }
                 , { field: 'RECIPE_NAME', title: 'Recipe Name' }
+
                // , { field: 'RECIPE_EFFECTIVE_VERSION', title: '生效版本', width: '15%' }
                 , { fixed: 'right', width: '15%', align: 'center', toolbar: '#equipmenttoolbar' }
             ]]
             , where: {
                 recipegroup_id: recipegroup_id,
-                line: selectedline
+                line: selectedline,
+                processfilter: selectedline
             }
           
             , done: function (data) {
-                //newversionlock = data.newversionlock;
-                //var that = $("#rcptable").siblings();
-                //console.log(data);
-                //data.data.forEach(function (item, index) {
-                //    var tr = that.find(".layui-table-box tbody tr[data-index='" + index + "']");
-
-                   
-                //    console.log(item.RECIPE_LATEST_VERSION)
-                //    if (item.RECIPE_LATEST_VERSION > item.RECIPE_EFFECTIVE_VERSION) {//黄色
-                //        console.log('here')
-                //        tr.css("background-color", "#fdfd96");
-                //    }
-                   
-                //});
-                //ShowVersionTable(data.data[0].RECIPE_ID)
+    
             }
         });
 
@@ -124,7 +112,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             let result1 = await $.ajax({
                 type: 'post',
                 dataType: 'json',
-                url: '/RecipeMapping/GetLines',
+                url:'/Equipment/GetProcesses',//'/RecipeMapping/GetLines',
                 data: {
        
                 },
@@ -136,7 +124,6 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                         selected: index===0
                     }));
 
-                    console.log(seldata);
              
                     LineSel.update({
                         data: seldata,

@@ -1,0 +1,37 @@
+﻿
+@{
+
+}
+<style>
+    .scrollable-div {
+        max-height: 80vh;
+        overflow-y: auto; /* 或者使用 overflow-y: auto; */
+    }
+
+    .selected {
+        background-color: #89cff0 !important;
+    }
+</style>
+<script src="~/Scripts/layui/xm-select.js"></script>
+<script src="~/Scripts/layui/layui.table.formdate.js"></script>
+<script src="~/Scripts/Ems/EquipmentType.js"></script>
+<form class="layui-form layui-form-pane" action="">
+    <div class="layui-form-item layui-row">
+        <div class="layui-row">
+            <div class="layui-input-inline" style="width:15%">
+                <select name="process" id="process" lay-filter="process" lay-verify="required">
+
+                </select>
+            </div>
+
+        </div>
+    </div>
+</form>
+<script type="text/html" id="toolbar">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="permission">权限</a>
+</script>
+<table class="layui-hide" id="equipmenttypetable" lay-filter="equipmenttypetable"></table>
+
+
+
+

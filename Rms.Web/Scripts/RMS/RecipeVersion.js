@@ -7,12 +7,14 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
         , form = layui.form
         , upload = layui.upload
         , element = layui.element;
-
+    var processselect = document.getElementById("process");
     var EQPsel = xmSelect.render({
         el: '#eqps',
-        initValue: [9],
+        initValue: [0],
+        filterable: true,
         radio: true,
         tips: '请选择设备',
+        clickClose: true,
         block: {
             //最大显示数量, 0:不限制
             showCount: 0,
@@ -80,7 +82,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             , done: function (data) {
                 newversionlock = data.newversionlock;
                 var that = $("#versiontable").siblings();
-                console.log(data);
+                //console.log(data);
                 data.data.forEach(function (item, index) {
                     var tr = that.find(".layui-table-box tbody tr[data-index='" + index + "']");
 
@@ -112,8 +114,8 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             , limits: [1000]
             , height: 'full-235'
             , cols: [[
-                { field: 'RECIPE_NAME', title: 'Recipe名', width: '35%' }
-                , { field: 'RECIPE_GROUP_NAME', title: 'ModelName', width: '20%' }
+                { field: 'RECIPE_NAME', title: 'Recipe名', width: '55%' }
+                //, { field: 'RECIPE_GROUP_NAME', title: 'ModelName', width: '20%' }
                 , { field: 'RECIPE_LATEST_VERSION', title: '最新版本', width: '15%' }
                 , { field: 'RECIPE_EFFECTIVE_VERSION', title: '生效版本', width: '15%' }
                 //, { field: 'CREATE_TIME', title: '创建时间', templet: '<div>{{ FormDate(d.CREATE_TIME, "yyyy-MM-dd HH:mm:ss") }}</div>', width: 180 }
@@ -146,31 +148,69 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
     }
 
 
+    getProcess();
 
+    form.on('select(process)', function (data) {
+        var selectedValue = data.value; // 获取选中的值
+        getEQP(selectedValue);
+    });
 
-    getEQP();
-
-    async function getEQP() {
+    async function getProcess() {
         try {
             let result1 = await $.ajax({
                 type: 'post',
                 dataType: 'json',
-                url: '/Home/GetEQPs',
+                url: '/Equipment/GetProcesses',
                 data: {
-                    page: 1,
-                    limit: 9999
                 },
                 success: function (data) {
                     console.log(data);
-                    var seldata = data.eqpData.map(it => {
-                        console.log(it.NAME)
+
+                    processselect.innerHTML = "";
+                    // 添加默认选项
+                    //var defaultOption = document.createElement("option");
+                    //defaultOption.value = "";
+                    //defaultOption.text = "请选择Process";
+                    //processselect.add(defaultOption);
+                    // 自动生成其他选项
+                    for (var i = 0; i < data.length; i++) {
+                        var option = document.createElement("option");
+                        option.text = data[i];
+                        processselect.add(option);
+                    }
+                    form.render('select');
+                    getEQP(data[0]);
+                },
+                error: function () {
+                }
+            });
+
+
+        } catch (error) {
+            //处理错误
+        }
+    }
+
+    async function getEQP(process) {
+        try {
+            let result1 = await $.ajax({
+                type: 'post',
+                dataType: 'json',
+                url: '/Equipment/GetEQPs',
+                data: {
+                    page: 1,
+                    limit: 9999,
+                    processfilter: process
+                },
+                success: function (data) {       var seldata = data.data.map(it => {
+                        //console.log(it.NAME)
                         return {
-                            name: it.NAME,
+                            name: it.TYPEPROCESS + "--" + it.TYPENAME + "--" + it.ID,
                             value: it.ID
                         };
                     });
                     
-                    var eqpid = data.eqpData[0].ID;
+                    var eqpid = data.data[0].ID;
                     document.getElementById("info").innerHTML = eqpid;
                     ShowRCPTable(eqpid);
 
@@ -178,6 +218,9 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                         data: seldata,
                         
                     });
+                    EQPsel.setValue([
+                        seldata[0]
+                    ])
                     
                     console.log(EQPsel)
 
@@ -330,15 +373,12 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                     var body = layer.getChildFrame('body', index);
                     //将弹窗页面中属性名id="xxxx"的标签赋值
                     //body.find("[id='rcpversionID']").val(versionid);
-
-
-
                 }
                 , yes: function (index) {
                     var res = window["layui-layer-iframe" + index].callback();
                     //console.log(res);
                     var data = JSON.parse(res);
-
+                    var loadingIndex = layer.load();
                     $.ajax({
                         type: 'post',
                         dataType: 'json',
@@ -348,6 +388,9 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                             rcpname: data.rcpname
                         },
                         success: function (data) {
+                            setTimeout(function () {
+                                layer.close(loadingIndex);
+                            }, 10);
                             var resultData = data.replyItem
 
                             if (resultData.Result) {

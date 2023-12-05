@@ -89,6 +89,7 @@ namespace Rms.Services
                 var RabbitMqUser = ConfigurationManager.AppSettings["RabbitMqUser"];
                 var RabbitMqPassword = ConfigurationManager.AppSettings["RabbitMqPassword"];
                 var ListenChannel = ConfigurationManager.AppSettings["ListenChannel"];
+                var ListenReplyChannel = ConfigurationManager.AppSettings["ListenReplyChannel"];
                 var isdebugmode = ConfigurationManager.AppSettings["IsDebugMode"].ToUpper() == "TRUE";
                 if (isdebugmode) //测试模式
                 {
@@ -100,6 +101,7 @@ namespace Rms.Services
                     Log.Debug($"{RabbitMqHost}, {RabbitMqUser}, {RabbitMqPassword}, {RabbitMqPort}");
                     RabbitMqService.Initiate(RabbitMqHost, RabbitMqUser, RabbitMqPassword, RabbitMqPort);
                     RabbitMqService.BeginConsume(ListenChannel);
+                    RabbitMqService.BeginConsume(ListenReplyChannel);
                 }
 
             }

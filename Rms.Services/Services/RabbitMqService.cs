@@ -64,7 +64,8 @@ namespace Rms.Services.Services
         {
             try
             {
-
+                var ListenReplyChannel = ConfigurationManager.AppSettings["ListenReplyChannel"];
+                trans.ReplyChannel = ListenReplyChannel;
                 var tcs = new TaskCompletionSource<RabbitMqTransaction>();
                 var message = JsonConvert.SerializeObject(trans);
                 rabbitMq?.Produce(routingKey, message, trans.ExpireSecond);

@@ -10,8 +10,8 @@
 
 
     .layui-card-body {
-        height: calc(100vh - 45px); /* 45px is the combined height of other elements */
-        overflow-y: auto; /* Add vertical scrolling if content exceeds the screen height */
+        height: 60vh; /* 45px is the combined height of other elements */
+        overflow-y: auto; /*Add vertical scrolling if content exceeds the screen height */
     }
 </style>
 <script src="~/Scripts/layui/xm-select.js"></script>
@@ -81,28 +81,34 @@
                     <div class="layui-card-header">功能</div>
                     <div class="layui-card-body ">
                         <div class="layui-btn-container">
-                            <button type="button" class="layui-btn">
-                                <i class="layui-icon layui-icon-upload layui-font-12"></i>下载机种
+                            <button type="button" class="layui-btn" id="downloadbylotbtn">
+                                <i class="layui-icon layui-icon-upload layui-font-12"></i>By lot下载机种
                             </button>
                         </div>
                         <div class="layui-btn-container">
-                            <button type="button" class="layui-btn layui-btn-normal">
+                            <button type="button" class="layui-btn layui-btn-normal" id="portalotstart">
                                 <i class="layui-icon layui-icon-play layui-font-12"></i>A Port LotStart
                             </button>
                         </div>
                         <div class="layui-btn-container">
-                            <button type="button" class="layui-btn layui-btn-normal">
+                            <button type="button" class="layui-btn layui-btn-normal" id="portblotstart">
                                 <i class="layui-icon layui-icon-play layui-font-12"></i>B Port LotStart
+                            </button>
+                        </div>
+                        <div class="layui-btn-container">
+                            <button type="button" class="layui-btn" id="lotend" style="background-color:chartreuse">
+                                <i class="layui-icon layui-icon-release layui-font-12"></i>LotEnd
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
+
             <div class="layui-col-md6">
-                <div class="layui-card layui-bg-green">
+                <div class="layui-card">
                     <div class="layui-card-header">历史记录</div>
-                    <div class="layui-card-body">
-                        222
+                    <div class="layui-card-body" id="logCardContainer">
+                        <div id="logContainer" style="overflow-y: scroll auto;font-size:20px"></div>
                     </div>
                 </div>
             </div>

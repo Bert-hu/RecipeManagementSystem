@@ -127,4 +127,15 @@ namespace Rms.Models.WebApi
         public string[] MarkingTexts { get; set; }
     }
 
+    public class CheckRecipeGroupRequest
+    {
+        public string EquipmentId { get; set; }
+        public string RecipeGroupName { get; set; }
+    }
+
+    public class CheckRecipeGroupResponse : ResponseMessage
+    {
+        public string RecipeName { get; set; }
+    }
+
 }

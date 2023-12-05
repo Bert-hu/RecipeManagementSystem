@@ -80,7 +80,7 @@ namespace Rms.Services.Services.ApiHandle
                         CREATETIME = DateTime.Now
                     }).ExecuteCommand();
 
-                    PPSelect(eqp.ID, recipe.NAME);//不管回复了
+                    //PPSelect(eqp.ID, recipe.NAME);//不管回复了
                 }
 
 
@@ -120,7 +120,7 @@ namespace Rms.Services.Services.ApiHandle
                 ReplyChannel = ListenChannel,
                 Parameters = new Dictionary<string, object>() { { "RecipeName", RecipeName }, { "RecipeBody", body } }
             };
-            var rabbitres = RabbitMqService.ProduceWaitReply(rabbitmqroute, trans, 5);
+            var rabbitres = RabbitMqService.ProduceWaitReply(rabbitmqroute, trans, 120);
 
             return rabbitres;
         }

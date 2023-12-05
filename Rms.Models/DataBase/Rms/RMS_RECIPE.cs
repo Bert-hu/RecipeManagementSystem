@@ -29,7 +29,9 @@ namespace Rms.Models.DataBase.Rms
         // public string LASTEDITOR { get; set; } = "Default";
         // public DateTime? LASTEDITTIME { get; set; } = DateTime.Now;
 
-        public string RECIPE_GROUP_ID { get; set; }
+        //public string RECIPE_GROUP_ID { get; set; }
+
+
     }
 
 

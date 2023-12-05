@@ -1,23 +1,18 @@
 ﻿using Newtonsoft.Json;
-using Pipelines.Sockets.Unofficial.Arenas;
 using Rms.Models.DataBase.Rms;
 using Rms.Models.WebApi;
 using Rms.Utils;
-using Rms.Web.Utils;
 using Rms.Web.Extensions;
+using Rms.Web.Utils;
 using RMS.Domain.Rms;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using System.Web.UI;
-using System.Windows.Media.Media3D;
-using System.Net.Http;
 using System.Configuration;
-using System.Net.Sockets;
+using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
+using System.Web.Mvc;
 
 namespace Rms.Web.Controllers.Rms
 {
@@ -39,12 +34,12 @@ namespace Rms.Web.Controllers.Rms
                 .Where(it => it.EQUIPMENT_ID == EQID)
                 .LeftJoin<RMS_RECIPE_VERSION>((r, rv) => r.VERSION_LATEST_ID == rv.ID)
                 .LeftJoin<RMS_RECIPE_VERSION>((r, rv, rv2) => r.VERSION_EFFECTIVE_ID == rv2.ID)
-                .LeftJoin<RMS_RECIPE_GROUP>((r, rv, rv2, rrg) => r.RECIPE_GROUP_ID == rrg.ID)
-                .Select((r, rv, rv2,rrg) => new RecipeVersion 
+                //.LeftJoin<RMS_RECIPE_GROUP>((r, rv, rv2, rrg) => r.RECIPE_GROUP_ID == rrg.ID)
+                .Select((r, rv, rv2) => new RecipeVersion 
                 { 
                     RECIPE_ID = r.ID,
                     RECIPE_NAME = r.NAME,
-                    RECIPE_GROUP_NAME = rrg.NAME,
+                    //RECIPE_GROUP_NAME = rrg.NAME,
                     RECIPE_LATEST_VERSION = (decimal)rv.VERSION, 
                     RECIPE_EFFECTIVE_VERSION = (decimal)rv2.VERSION 
                 })
@@ -141,6 +136,8 @@ namespace Rms.Web.Controllers.Rms
             {
                 var rcp = db.Queryable<RMS_RECIPE>().In(projectid).First();
                 if (rcp.VERSION_LATEST_ID != rcp.VERSION_EFFECTIVE_ID) return Json(new ResponseResult { result = false, message = "有未完成的签核版本，禁止新增！" });
+                var eqp = db.Queryable<RMS_EQUIPMENT>().In(rcp.EQUIPMENT_ID).First();
+                if (eqp.RECIPE_TYPE == "onlyName") { return Json( new ResponseResult { result = false, message = "Recipe Type 'onlyName' can not add new version!" }); }
                 var lastversion = rcp.VERSION_LATEST_ID == null ? null : db.Queryable<RMS_RECIPE_VERSION>().In(rcp.VERSION_LATEST_ID).First();
                 var flow = db.Queryable<RMS_FLOW>().In(rcp.FLOW_ID).First();
                 //插入新版本
@@ -378,11 +375,12 @@ namespace Rms.Web.Controllers.Rms
             }
         }
 
-        TcpClient tcpSync;
+        
         private bool SendMessageToSfis(string message, ref string receiveMsg, ref string errMsg)
         {
             try
             {
+                TcpClient tcpSync;
                 string sfisip = ConfigurationManager.AppSettings["SfisIp"].ToString();
                 int sfisport = int.Parse(ConfigurationManager.AppSettings["SfisPort"]);
                 IPAddress serverip = IPAddress.Parse(sfisip);

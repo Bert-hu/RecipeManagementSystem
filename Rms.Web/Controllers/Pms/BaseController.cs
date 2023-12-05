@@ -5,6 +5,8 @@ using System.Linq;
 using Newtonsoft.Json.Converters;
 using System.Text;
 using Rms.Models.DataBase.Pms;
+using Rms.Utils;
+using SqlSugar;
 
 namespace Rms.Web.Controllers
 {
@@ -25,15 +27,16 @@ namespace Rms.Web.Controllers
         protected new PMS_USER User => Session["user_account"] as PMS_USER;
 
         protected List<string> controllers => Session["controllers"] as List<string>;
+        protected List<string> equipmenttypeids => Session["equipmenttypeids"] as List<string>;
 
-
+        public SqlSugarClient db = DbFactory.GetSqlSugarClient();
         /// <summary>
         ///     重写OnActionExecuting，在调用action之前获取路由和账户信息
         /// </summary>
         /// <param name="filterContext">过滤器</param>
         protected override void OnActionExecuting(ActionExecutingContext filterContext)
         {
-       
+
             //获取controller
             if (string.IsNullOrEmpty(controllerName))
             {
@@ -45,7 +48,7 @@ namespace Rms.Web.Controllers
                 actionName = filterContext.RouteData.Values["action"].ToString().ToLower();
             }
 
-       
+
         }
 
         protected override void OnAuthorization(AuthorizationContext filterContext)
@@ -62,7 +65,7 @@ namespace Rms.Web.Controllers
                 return;
             }
 
-            if (!controllers.Contains(filterContext.RouteData.Values["controller"].ToString()))
+            if (!controllers.Contains(filterContext.RouteData.Values["controller"].ToString()) && filterContext.RouteData.Values["controller"].ToString() != "Equipment")
             {
                 ContentResult Content = new ContentResult
                 {
@@ -73,7 +76,7 @@ namespace Rms.Web.Controllers
             }
         }
 
-      
+
 
     }
 }

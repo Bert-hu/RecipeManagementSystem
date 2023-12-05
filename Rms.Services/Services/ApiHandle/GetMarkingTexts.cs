@@ -7,6 +7,7 @@ using RMS.Domain.Rms;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,7 +30,14 @@ namespace Rms.Services.Services.ApiHandle
 
             #region 初始化所有的codevalue
             var codevalues = req.SfisParameter;
+            //DATECODE
             codevalues.Add("DATECODE", DateTime.Now.ToString("yyyyMMdd"));
+            //WEEKCODE
+            DateTime currentDate = DateTime.Now;
+            CultureInfo cultureInfo = CultureInfo.CurrentCulture;
+            Calendar calendar = cultureInfo.Calendar;
+            int weekNumber = calendar.GetWeekOfYear(currentDate, cultureInfo.DateTimeFormat.CalendarWeekRule, cultureInfo.DateTimeFormat.FirstDayOfWeek);
+            codevalues.Add("WEEKCODE", weekNumber.ToString("D2"));
             #endregion
 
             try
@@ -89,11 +97,6 @@ namespace Rms.Services.Services.ApiHandle
                 res.Message = ex.Message;
                 return res;
             }
-
-
-
-
-
         }
 
     }

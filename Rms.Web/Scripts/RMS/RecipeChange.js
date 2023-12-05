@@ -9,7 +9,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
 
     var EQPsel = xmSelect.render({
         el: '#eqps',
-        initValue: [9],
+        initValue: [0],
         radio: true,
         tips: '请选择设备',
         block: {
@@ -142,22 +142,20 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             let result1 = await $.ajax({
                 type: 'post',
                 dataType: 'json',
-                url: '/Home/GetEQPs',
+                url: '/Equipment/GetEQPs',
                 data: {
                     page: 1,
                     limit: 9999
                 },
                 success: function (data) {
-                    console.log(data);
-                    var seldata = data.eqpData.map(it => {
-                        console.log(it.Name)
+                    var seldata = data.data.map(it => {
                         return {
-                            name: it.Name,
+                            name: it.TYPEPROCESS + "--" + it.TYPENAME + "--" + it.ID,
                             value: it.ID
                         };
                     });
                     
-                    var eqpid = data.eqpData[0].ID;
+                    var eqpid = data.data[0].ID;
                     document.getElementById("info").innerHTML = eqpid;
                     ShowTable(eqpid);
 

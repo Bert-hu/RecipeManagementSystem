@@ -11,6 +11,9 @@ using System.Web;
 using System.Web.Mvc;
 using System.Xml.Linq;
 using Rms.Models.DataBase.Pms;
+using System.Web.UI;
+using System.Windows.Media.Media3D;
+using System.Security.Cryptography;
 
 namespace Rms.Web.Controllers.Rms
 {
@@ -24,7 +27,6 @@ namespace Rms.Web.Controllers.Rms
 
         public JsonResult GetRecipeGroups(int page, int limit)
         {
-            var db = DbFactory.GetSqlSugarClient();
             var totalnum = 0;
             var data = db.Queryable<RMS_RECIPE_GROUP>().ToPageList(page, limit, ref totalnum);
 
@@ -34,8 +36,6 @@ namespace Rms.Web.Controllers.Rms
 
         public JsonResult GetLines()
         {
-            var db = DbFactory.GetSqlSugarClient();
-            var totalnum = 0;
             var data = db.Queryable<RMS_EQUIPMENT>().Select(it => it.LINE).Distinct().ToList();
 
 
@@ -59,21 +59,54 @@ namespace Rms.Web.Controllers.Rms
 
         public JsonResult GetEquipment(int page, int limit, string recipegroup_id, string line)
         {
-            var db = DbFactory.GetSqlSugarClient();
+
             var sql = string.Format(@"select equipment.ID EQUIPMENT_ID,equipment.NAME EQUIPMENT_NAME,'{1}' RECIPE_GROUP_ID,recipe.RECIPE_NAME,recipe.VERSION_EFFECTIVE_ID from 
 (select * from RMS_EQUIPMENT
 where line = '{0}' 
-and RECIPE_TYPE = 'secsByte'
+and (RECIPE_TYPE = 'secsByte' or RECIPE_TYPE = 'onlyName')
 ) equipment
 LEFT JOIN
 (select rr.RECIPE_GROUP_ID,rg.NAME RECIPE_GROUP_NAME,rr.NAME RECIPE_NAME,rr.VERSION_EFFECTIVE_ID ,rr.EQUIPMENT_ID 
-from RMS_RECIPE_GROUP rg,RMS_RECIPE rr
+from RMS_RECIPE_GROUP rg,RMS_RECIPE rr,RMS_RECIPE_GROUP_MAPPING rgm
 where rg.ID = '{1}'
-and rg.ID = rr.RECIPE_GROUP_ID) recipe
+and rg.ID = rgm.RECIPE_GROUP_ID
+and rr.ID = rgm.RECIPE_ID
+) recipe
 on equipment.ID = recipe.EQUIPMENT_ID
 ORDER BY equipment.ORDERSORT", line, recipegroup_id);
             var totalnum = 0;
             var data = db.SqlQueryable<EqupmentTableData>(sql).ToPageList(page, limit, ref totalnum);
+            return Json(new { data = data, code = 0, count = totalnum }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult GetEquipments(int page, int limit, string recipegroup_id, string processfilter)
+        {
+            var totalnum = 0;
+            var eqptypes = db.Queryable<RMS_EQUIPMENT_TYPE>().In(equipmenttypeids).ToList();
+            if (!string.IsNullOrEmpty(processfilter))
+            {
+                eqptypes = eqptypes.Where(it => it.PROCESS == processfilter).OrderBy(it => it.ORDERSORT).ToList();
+            }
+            var eqps = db.Queryable<RMS_EQUIPMENT>().OrderBy(it => it.ORDERSORT).ToList();
+            var mappings = db.Queryable<RMS_RECIPE_GROUP_MAPPING>().Where(it => it.RECIPE_GROUP_ID == recipegroup_id).ToList();
+            var recipes = db.Queryable<RMS_RECIPE>().In(mappings.Select(it => it.RECIPE_ID)).ToList();
+
+            var data = eqps.Join(eqptypes, eqp => eqp.TYPE, eqptype => eqptype.ID, (eqp, eqptype) => new { eqp = eqp, eqptype = eqptype }) //全连接筛选设备
+                 .OrderBy(x => x.eqptype.ORDERSORT)  //按type排序设备
+                 .GroupJoin(recipes, filtereqp => filtereqp.eqp.ID, rcp => rcp.EQUIPMENT_ID, (filtereqps, rcps) =>
+                 new EqupmentTableData
+                 {
+                     EQUIPMENT_ID = filtereqps.eqp.ID,
+                     EQUIPMENT_NAME = filtereqps.eqp.NAME,
+                     EQUIPMENT_TYPE_NAME = filtereqps.eqptype.NAME,
+                     RECIPE_GROUP_ID = recipegroup_id,
+                     RECIPE_NAME = rcps.Select(x => x.NAME).FirstOrDefault(),
+                     VERSION_EFFECTIVE_ID =rcps.Select(x =>x.VERSION_EFFECTIVE_ID).FirstOrDefault(),
+
+                 }).ToList();
+
+
+
             return Json(new { data = data, code = 0, count = totalnum }, JsonRequestBehavior.AllowGet);
         }
 
@@ -87,27 +120,32 @@ ORDER BY equipment.ORDERSORT", line, recipegroup_id);
         public JsonResult GetBindingRecipe(int page, int limit, string EQUIPMENT_ID, string RECIPE_GROUP_ID)
         {
             var db = DbFactory.GetSqlSugarClient();
-            int totalnum = 0;
-            var data = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == EQUIPMENT_ID).ToPageList(page, limit, ref totalnum);
+            var data = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == EQUIPMENT_ID).ToList();
+            var eqrecipeids = data.Select(it => it.ID).ToList();
+            var oldbinding = db.Queryable<RMS_RECIPE_GROUP_MAPPING>().Where(it => it.RECIPE_GROUP_ID == RECIPE_GROUP_ID && eqrecipeids.Contains(it.RECIPE_ID)).First();
             var viewdata = data.Select(it => new
             {
                 ID = it.ID,
                 NAME = it.NAME,
-                LAY_CHECKED = it.RECIPE_GROUP_ID == RECIPE_GROUP_ID,
+                LAY_CHECKED = it.ID == oldbinding?.RECIPE_ID,
             });
-            return Json(new { data = viewdata, code = 0, count = totalnum }, JsonRequestBehavior.AllowGet);
+            return Json(new { data = viewdata, code = 0, count = viewdata.Count() }, JsonRequestBehavior.AllowGet);
         }
 
         public JsonResult SetRecipeBinding(string EQUIPMENT_ID, string RECIPE_GROUP_ID, string RECIPE_ID)
         {
             var db = DbFactory.GetSqlSugarClient();
+            //当前eqid下所有recipe
+            var recipes = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == EQUIPMENT_ID).ToList();
+            var eqrecipeids = recipes.Select(it => it.ID).ToList();
             //删除旧的绑定
-            db.Updateable<RMS_RECIPE>().SetColumns(it => it.RECIPE_GROUP_ID ==null).Where(it => it.EQUIPMENT_ID == EQUIPMENT_ID && it.RECIPE_GROUP_ID == RECIPE_GROUP_ID).ExecuteCommand();
+            var oldbindings = db.Queryable<RMS_RECIPE_GROUP_MAPPING>().Where(it => it.RECIPE_GROUP_ID == RECIPE_GROUP_ID && eqrecipeids.Contains(it.RECIPE_ID)).ToList();
+            db.Deleteable<RMS_RECIPE_GROUP_MAPPING>(oldbindings).ExecuteCommand();
 
             //加入新的
             if (!string.IsNullOrEmpty(RECIPE_ID))
             {
-                db.Updateable<RMS_RECIPE>().SetColumns(it => it.RECIPE_GROUP_ID == RECIPE_GROUP_ID).Where(it => it.EQUIPMENT_ID == EQUIPMENT_ID && it.ID == RECIPE_ID).ExecuteCommand();
+                db.Insertable<RMS_RECIPE_GROUP_MAPPING>(new RMS_RECIPE_GROUP_MAPPING { RECIPE_ID = RECIPE_ID, RECIPE_GROUP_ID = RECIPE_GROUP_ID }).ExecuteCommand();
             }
            
             return Json(new { result = true, message = "更新成功" });
@@ -118,6 +156,7 @@ ORDER BY equipment.ORDERSORT", line, recipegroup_id);
         {
             public string EQUIPMENT_ID { get; set; }
             public string EQUIPMENT_NAME { get; set; }
+            public string EQUIPMENT_TYPE_NAME { get; set; }
             public string RECIPE_GROUP_ID { get; set; }
             public string RECIPE_NAME { get; set; }
             public string VERSION_EFFECTIVE_ID { get; set; }

@@ -27,7 +27,7 @@ namespace Rms.Web.Controllers
         {
             var db = DbFactory.GetSqlSugarClient();
             var totalnum = 0;
-            var eqpData = db.Queryable<RMS_EQUIPMENT>().Where(it => it.RECIPE_TYPE == "secsByte").OrderBy(it => it.ORDERSORT).ToPageList(page, limit,ref totalnum);
+            var eqpData = db.Queryable<RMS_EQUIPMENT>().Where(it => it.RECIPE_TYPE == "secsByte" || it.RECIPE_TYPE == "onlyName").OrderBy(it => it.ORDERSORT).ToPageList(page, limit,ref totalnum);
 
 
             return Json(new { eqpData, code = 0, count = totalnum}, JsonRequestBehavior.AllowGet);

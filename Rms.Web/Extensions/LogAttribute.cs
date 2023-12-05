@@ -54,7 +54,7 @@ namespace Rms.Web.Extensions
             // 获取状态码
             var status = context.HttpContext.Response.StatusCode;
             var db = DbFactory.GetSqlSugarClient();
-            db.Insertable(new RMS_PRODUCTIONLOG
+            db.Insertable(new PMS_OPERATIONLOG
             {
                 IP = ipAddress,
                 MODULENAME = controllerName,

@@ -1,0 +1,120 @@
+﻿using Rms.Models.DataBase.Pms;
+using Rms.Models.DataBase.Rms;
+using Rms.Utils;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Security;
+
+namespace Rms.Web.Controllers.Ems
+{
+    public class EquipmentTypeController : BaseController
+    {
+        // GET: EquipmentType
+        public ActionResult Index()
+        {
+            return View();
+        }
+
+        public ActionResult TypeRole(string TYPEID)
+        {
+            ViewBag.TYPEID = TYPEID;
+            return View();
+        }
+
+        public JsonResult GetProcesses()
+        {
+            var eqptypes = db.Queryable<RMS_EQUIPMENT_TYPE>().ToList();
+            var processes = eqptypes.Select(it => it.PROCESS).Distinct().ToList();
+            return Json(processes, JsonRequestBehavior.AllowGet);
+        }
+        public JsonResult GetEquipmentTypes(int page, int limit, string processfilter = "")
+        {
+            var totalnum = 0;
+            var eqptypes = db.Queryable<RMS_EQUIPMENT_TYPE>().ToList();
+            if (!string.IsNullOrEmpty(processfilter))
+            {
+                eqptypes = eqptypes.Where(it => it.PROCESS == processfilter).OrderBy(it => it.ORDERSORT).ToList();
+            }
+            totalnum = eqptypes.Count;
+            var pageeqptypes = eqptypes.Skip((page - 1) * limit).Take(limit);
+            return Json(new { data = pageeqptypes, code = 0, count = totalnum }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult Edit(string ID, string field, string value)
+        {
+            try
+            {
+                var item = db.Queryable<RMS_EQUIPMENT_TYPE>().In(ID).First();
+                PropertyInfo property = item.GetType().GetProperty(field);
+                string message = "更新成功";
+                if (property != null)
+                {
+                    // 修改字段的值
+                    if (property.PropertyType == typeof(string))
+                    {
+                        property.SetValue(item, value);
+                    }
+                    else if (property.PropertyType == typeof(int))
+                    {
+                        int intValue;
+                        if (int.TryParse(value, out intValue))
+                        {
+                            property.SetValue(item, intValue);
+                        }
+                        else
+                        {
+                            message = "Invalid value for int field";
+                        }
+                    }
+                    else
+                    {
+                        message = "Unsupported field type";
+                    }
+                }
+                else
+                {
+                    message = "Field not found";
+                }
+                db.Updateable<RMS_EQUIPMENT_TYPE>(item).ExecuteCommand();
+
+                return Json(new { message = message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { message = "更新失败，" + ex.Message });
+            }
+
+        }
+
+
+        public JsonResult GetTypeRoles(string TypeId)
+        {
+            int totalnum = 0;
+            var selectdata = db.Queryable<RMS_EQUIPMENT_TYPE>().In(TypeId).First().ROLEIDS;
+            var roles = db.Queryable<PMS_ROLE>().ToList();
+            var data = roles.Select(it => new
+            {
+                ID = it.ID,
+                NAME = it.NAME,
+                DESCRIPTION = it.DESCRIPTION,
+                LAY_CHECKED = selectdata.Contains(it.ID)
+            }).ToList();
+            totalnum = data.Count;
+            return Json(new { data = data, code = 0, count = totalnum }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult SetTypeRoles(string TypeId, string[] RoleIds)
+        {
+            var db = DbFactory.GetSqlSugarClient();
+            var item = db.Queryable<RMS_EQUIPMENT_TYPE>().In(TypeId).First();
+            item.ROLEIDS = RoleIds.ToList();
+            db.Updateable<RMS_EQUIPMENT_TYPE>(item).ExecuteCommand();
+            return Json(new { result = true, message = "更新成功" });
+
+        }
+    }
+}
