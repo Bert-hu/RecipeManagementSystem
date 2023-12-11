@@ -22,7 +22,6 @@ namespace Rms.Models.DataBase.Rms
         public string LASTEDITOR { get; set; } = "Default";
         public DateTime? LASTEDITTIME { get; set; } = DateTime.Now;
         public String RECIPE_TYPE { get; set; }  //secsString,secsByte,file
-        public string FLOW_ID { get; set; }
         public int ORDERSORT { get; set; }
         public string TYPE { get; set; }
         public string LINE { get; set; }

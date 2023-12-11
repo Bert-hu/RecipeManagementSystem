@@ -258,6 +258,11 @@ layui.use(['jquery','layer', 'table', 'form', 'upload', 'element'], function () 
                             var index = window.parent.layer.getFrameIndex(window.name)
                             window.parent.layer.close(index);
                             //reload version table
+                            window.parent.rcptable.reload({
+                                where: {
+                                    EQID: window.parent.currenteqid
+                                }
+                            });
                             window.parent.versiontable.reload();
                         } else {
                             window.parent.layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: data.result ? 1 : 4 });

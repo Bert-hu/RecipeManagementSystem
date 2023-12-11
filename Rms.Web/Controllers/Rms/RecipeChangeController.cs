@@ -86,7 +86,6 @@ namespace Rms.Web.Controllers.Rms
                 var flowhist = new RMS_FLOW_HIST
                 {
                     RECIPE_VERSION_ID = versionid,
-                    FLOW_ID = version.FLOW_ID,
                     FLOW_INDEX = version.CURRENT_FLOW_INDEX,
                     ACTION = FlowAction.Approve,
                     CREATOR = User.TRUENAME,
@@ -131,7 +130,6 @@ namespace Rms.Web.Controllers.Rms
                 var flowhist = new RMS_FLOW_HIST
                 {
                     RECIPE_VERSION_ID = versionid,
-                    FLOW_ID = version.FLOW_ID,
                     FLOW_INDEX = version.CURRENT_FLOW_INDEX,
                     ACTION = FlowAction.Reject,
                     CREATOR = User.TRUENAME,

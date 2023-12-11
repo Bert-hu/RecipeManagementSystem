@@ -39,11 +39,12 @@ namespace Rms.Web.Controllers.Rms
         {
             var db = DbFactory.GetSqlSugarClient();
             var recipe = db.Queryable<RMS_RECIPE>().In(recipeid).First();
+            var eqp = db.Queryable<RMS_EQUIPMENT>().In(recipe.EQUIPMENT_ID).First();
+            var eqtype = db.Queryable<RMS_EQUIPMENT_TYPE>().In(eqp.TYPE).First();
             if (recipe.MARKING_LATEST_ID != null && recipe.MARKING_EFFECTIVE_ID != recipe.MARKING_LATEST_ID)
             {
                 return Json(new ResponseResult { result = false, message = "请先完成未提交版本" });
             }
-            var flow = db.Queryable<RMS_FLOW>().In(recipe.FLOW_ID).First();
             RMS_MARKING_VERSION lastmarkingversion = null;
             if (recipe.MARKING_LATEST_ID != null)
             {
@@ -52,9 +53,9 @@ namespace Rms.Web.Controllers.Rms
             var markingversion = new RMS_MARKING_VERSION
             {
                 RECIPE_ID = recipeid,
-                FLOW_ID = recipe.FLOW_ID,
+                
                 VERSION = (lastmarkingversion?.VERSION ?? 0) + 1,
-                FLOW_ROLES = flow._FLOW_ROLES,
+                FLOW_ROLES = eqtype.FLOWROLEIDS,
                 CURRENT_FLOW_INDEX = 0,
                 CREATOR = User.TRUENAME
             };

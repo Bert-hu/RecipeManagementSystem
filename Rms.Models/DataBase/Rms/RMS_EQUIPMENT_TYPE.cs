@@ -19,5 +19,7 @@ namespace Rms.Models.DataBase.Rms
         public string TYPE { get; set; }
         [SugarColumn(IsJson = true)]
         public List<string> ROLEIDS { get; set; }
+        [SugarColumn(IsJson = true)]
+        public List<string> FLOWROLEIDS { get; set; }
     }
 }

@@ -94,7 +94,6 @@ ORDER BY RV.CREATE_TIME";
                 var flowhist = new RMS_FLOW_HIST
                 {
                     RECIPE_VERSION_ID = versionid,
-                    FLOW_ID = version.FLOW_ID,
                     FLOW_INDEX = version.CURRENT_FLOW_INDEX,
                     ACTION = FlowAction.Approve,
                     CREATOR = User.TRUENAME,
@@ -114,7 +113,6 @@ ORDER BY RV.CREATE_TIME";
                     db.Updateable<RMS_RECIPE>(project).UpdateColumns(it => it.VERSION_EFFECTIVE_ID).ExecuteCommand();
                 }
                 db.Updateable<RMS_RECIPE_VERSION>(version).UpdateColumns(it => it.CURRENT_FLOW_INDEX).ExecuteCommand();
-                db.Updateable<RMS_RECIPE_VERSION>(flowhist).UpdateColumns(it => new { it.CURRENT_FLOW_INDEX }).ExecuteCommand();
 
                 db.CommitTran();
                 return Json(new ResponseResult { result = true, message = "签核成功" ,data = "签核版本："+versionid });
@@ -139,7 +137,6 @@ ORDER BY RV.CREATE_TIME";
                 var flowhist = new RMS_FLOW_HIST
                 {
                     RECIPE_VERSION_ID = versionid,
-                    FLOW_ID = version.FLOW_ID,
                     FLOW_INDEX = version.CURRENT_FLOW_INDEX,
                     ACTION = FlowAction.Reject,
                     CREATOR = User.TRUENAME,

@@ -103,18 +103,18 @@ namespace Rms.Services.Services.ApiHandle
                         {
                             EQUIPMENT_ID = req.EquipmentId,
                             NAME = req.RecipeName,
-                            FLOW_ID = eqp.FLOW_ID,
                             //  CREATOR = req.TrueName,
                             //  LASTEDITOR = req.TrueName
                         };
                         db.Insertable<RMS_RECIPE>(recipe).ExecuteCommand();
+                        var eqtype = db.Queryable<RMS_EQUIPMENT_TYPE>().In(eqp.TYPE).First();
                         //添加Version
-                        var flow = db.Queryable<RMS_FLOW>().In(eqp.FLOW_ID).First();
+                        //var flow = db.Queryable<RMS_FLOW>().In(eqp.FLOW_ID).First();
                         var version = new RMS_RECIPE_VERSION
                         {
                             RECIPE_ID = recipe.ID,
-                            FLOW_ID = recipe.FLOW_ID,
-                            FLOW_ROLES = flow.FLOW_ROLES,
+                            //FLOW_ID = recipe.FLOW_ID,
+                            _FLOW_ROLES = eqtype.FLOWROLEIDS,
                             CURRENT_FLOW_INDEX = 100,
                             REMARK = "First Version",
                             CREATOR = req.TrueName
@@ -207,16 +207,14 @@ namespace Rms.Services.Services.ApiHandle
                 {
                     EQUIPMENT_ID = req.EquipmentId,
                     NAME = req.RecipeName,
-                    FLOW_ID = eqp.FLOW_ID,
                 };
                 db.Insertable<RMS_RECIPE>(recipe).ExecuteCommand();
                 //添加Version
-                var flow = db.Queryable<RMS_FLOW>().In(eqp.FLOW_ID).First();
+                var eqtype = db.Queryable<RMS_EQUIPMENT_TYPE>().In(eqp.TYPE).First();
                 var version = new RMS_RECIPE_VERSION
                 {
                     RECIPE_ID = recipe.ID,
-                    FLOW_ID = recipe.FLOW_ID,
-                    FLOW_ROLES = flow.FLOW_ROLES,
+                    _FLOW_ROLES = eqtype.FLOWROLEIDS,
                     CURRENT_FLOW_INDEX = 100,
                     REMARK = "First Version",
                     CREATOR = req.TrueName
@@ -228,7 +226,7 @@ namespace Rms.Services.Services.ApiHandle
                 res.RECIPE_ID = recipe.ID;
                 res.VERSION_LATEST_ID = recipe.VERSION_LATEST_ID;
             }
-            catch 
+            catch
             {
                 db.RollbackTran();
                 throw;

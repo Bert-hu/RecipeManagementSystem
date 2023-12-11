@@ -20,7 +20,7 @@ namespace Rms.Models.DataBase.Rms
         [SugarColumn(IsPrimaryKey = true)]
         public string ID { get; set; } = Guid.NewGuid().ToString("N");
         public string RECIPE_VERSION_ID { get; set; }
-        public string FLOW_ID { get; set; }
+        //public string FLOW_ID { get; set; }
         public int FLOW_INDEX { get; set; }
 
         public string CREATOR { get; set; }

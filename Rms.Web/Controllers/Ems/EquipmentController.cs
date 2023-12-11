@@ -45,7 +45,6 @@ namespace Rms.Web.Controllers.Ems
                      LASTEDITOR = x.eqp.LASTEDITOR,
                      LASTEDITTIME = x.eqp.LASTEDITTIME,
                      RECIPE_TYPE = x.eqp.RECIPE_TYPE,
-                     FLOW_ID = x.eqp.FLOW_ID,
                      ORDERSORT = x.eqp.ORDERSORT,
                      TYPE = x.eqp.TYPE,
                      LINE = x.eqp.LINE,

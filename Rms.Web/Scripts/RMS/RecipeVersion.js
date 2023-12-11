@@ -1,6 +1,7 @@
 
 window.versiontable;
 window.rcptable;
+window.currenteqid;
 layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
     var layer = layui.layer
         , table = layui.table
@@ -33,8 +34,10 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             //var projectid = change[0].value;
 
             var eqpid = change[0].value;
+            window.currenteqid = change[0].value;
             document.getElementById("info").innerHTML = eqpid;
             ShowRCPTable(eqpid);
+            
         },
 
     })
@@ -141,7 +144,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                     }
                    
                 });
-                ShowVersionTable(data.data[0].RECIPE_ID)
+                //ShowVersionTable(data.data[0].RECIPE_ID)
             }
         });
 
@@ -254,13 +257,14 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                         $.ajax({
                             url: '/Recipe/AddNewVersion',
                             data: {
-                                projectid: versiontable.config.currentrcpid,
+                                recipeid: versiontable.config.currentrcpid,
                             },
                             async: false,
                             type: 'POST',
                             contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
                             success: function (response) {
                                 if (response.result) {
+                                    ShowRCPTable(window.currenteqid)
                                     ShowVersionDetail(response.data.versionid);
                                 } else {
                                     layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + response.message + '</em>', { icon: response.result ? 1 : 4 });
@@ -296,7 +300,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
 
     });
 
-    table.on('rowDouble(rcptable)', function (obj) {
+    table.on('row(rcptable)', function (obj) {
 
         var data = obj.data;//data为当前点击行的数据
         //console.log(data)

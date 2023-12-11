@@ -26,13 +26,14 @@ namespace Rms.Services.Services.ApiHandle
                 res.Message = $"Euipment '{req.EquipmentId}' not exists!";
                 return res;
             }
+            var eqtype = db.Queryable<RMS_EQUIPMENT_TYPE>().In(eqp.TYPE).First();
             if (eqp.RECIPE_TYPE == "onlyName")
             {
                 res.Message = $"Recipe Type 'onlyName' can not add new version!";
                 return res;
             }
 
-           var recipe =db.Queryable<RMS_RECIPE>().Where(it => it.ID==req.RecipeId  && it.EQUIPMENT_ID == req.EquipmentId).First();
+            var recipe = db.Queryable<RMS_RECIPE>().Where(it => it.ID == req.RecipeId && it.EQUIPMENT_ID == req.EquipmentId).First();
             if (recipe.VERSION_EFFECTIVE_ID != recipe.VERSION_LATEST_ID) //检查是否存在未完成版本
             {
                 res.Message = $"Last vsersion is not finished, can not add a new version!";
@@ -43,24 +44,27 @@ namespace Rms.Services.Services.ApiHandle
             try
             {
                 var lastversion = db.Queryable<RMS_RECIPE_VERSION>().In(recipe.VERSION_LATEST_ID).First();
-                var flow = db.Queryable<RMS_FLOW>().In(eqp.FLOW_ID).First();
+                RMS_RECIPE_VERSION newversion;
+
                 //添加Version
-                var newversion = new RMS_RECIPE_VERSION
+                newversion = new RMS_RECIPE_VERSION
                 {
                     RECIPE_ID = req.RecipeId,
-                    FLOW_ID = recipe.FLOW_ID,
+                    //FLOW_ID = recipe.FLOW_ID,
                     VERSION = lastversion.VERSION + 1,
-                    FLOW_ROLES = flow.FLOW_ROLES,
+                    _FLOW_ROLES = eqtype.FLOWROLEIDS,
                     CURRENT_FLOW_INDEX = -1,
-                    CREATOR = req.TrueName,                 
+                    CREATOR = req.TrueName,
                 };
                 db.Insertable<RMS_RECIPE_VERSION>(newversion).ExecuteCommand();
                 //更新外键
                 recipe.VERSION_LATEST_ID = newversion.ID;
+                recipe.VERSION_EFFECTIVE_ID = newversion.ID;
                 db.Updateable<RMS_RECIPE>(recipe).UpdateColumns(it => new { it.VERSION_LATEST_ID }).ExecuteCommand();
                 res.VERSION_LATEST_ID = newversion.ID;
+
             }
-            catch 
+            catch
             {
                 db.RollbackTran();
                 throw;

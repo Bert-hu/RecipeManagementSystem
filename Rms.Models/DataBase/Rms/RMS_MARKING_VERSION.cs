@@ -13,7 +13,7 @@ namespace Rms.Models.DataBase.Rms
         public string ID { get; set; } = Guid.NewGuid().ToString("N");
 
         public string RECIPE_ID { get; set; }
-        public string FLOW_ID { get; set; }
+        //public string FLOW_ID { get; set; }
         public decimal? VERSION { get; set; } = 1;
         [SugarColumn(IsJson = true)]
         public List<string> FLOW_ROLES { get; set; } 
