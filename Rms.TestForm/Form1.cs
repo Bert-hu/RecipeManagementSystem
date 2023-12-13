@@ -189,7 +189,7 @@ where eq.TYPE = 'WaferMarking'";
             try
             {
                 string url = $"{comboBox_urlselect.SelectedItem.ToString()}" + "/api/geteppd";
-                var body = JsonConvert.SerializeObject(new GetEppdRequest { EuipmentId = this.comboBox_eqpselect.SelectedValue.ToString() });
+                var body = JsonConvert.SerializeObject(new GetEppdRequest { EquipmentId = this.comboBox_eqpselect.SelectedValue.ToString() });
                 RichTextBoxAddText("Send Web Api");
                 RichTextBoxAddText(body);
                 var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(url, body);

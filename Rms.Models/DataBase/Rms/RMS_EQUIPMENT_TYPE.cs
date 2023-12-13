@@ -21,5 +21,6 @@ namespace Rms.Models.DataBase.Rms
         public List<string> ROLEIDS { get; set; }
         [SugarColumn(IsJson = true)]
         public List<string> FLOWROLEIDS { get; set; }
+        public bool DELETEBEFOREDOWNLOAD { get; set; }
     }
 }

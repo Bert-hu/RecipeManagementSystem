@@ -32,9 +32,6 @@ namespace Rms.Web.Controllers.Production
             return Json(data, JsonRequestBehavior.AllowGet);
         }
 
-      
-
-
 
     }
 }

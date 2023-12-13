@@ -21,6 +21,7 @@ namespace Rms.Services.Services.ApiHandle
             var res = new DownloadEffectiveRecipeToMachineResponse();
             var req = JsonConvert.DeserializeObject<DownloadEffectiveRecipeToMachineRequest>(jsoncontent);
             var eqp = db.Queryable<RMS_EQUIPMENT>().In(req.EquipmentId).First();
+            var eqtpye = db.Queryable<RMS_EQUIPMENT_TYPE>().In(eqp.TYPE).First();
             if (eqp == null)
             {
                 res.Result = false;
@@ -42,7 +43,10 @@ namespace Rms.Services.Services.ApiHandle
                 res.Message = "RMS ERROR! Effective version do not have recipe content!";
                 return res;
             }
-
+            if (eqtpye.DELETEBEFOREDOWNLOAD)
+            {
+                var delteres = DeleteAllRecipes(eqp.RECIPE_TYPE, eqp.ID);//暂时不处理删除的答复
+            }
             var serverdata = db.Queryable<RMS_RECIPE_DATA>().In(recipe_version.RECIPE_DATA_ID)?.First()?.CONTENT;
 
             var rabbitRes = SetUnfomattedRecipe(eqp.RECIPE_TYPE, eqp.ID, recipe.NAME, serverdata);
@@ -142,6 +146,28 @@ namespace Rms.Services.Services.ApiHandle
             };
             var rabbitres = RabbitMqService.ProduceWaitReply(rabbitmqroute, trans, 1);
 
+            return rabbitres;
+        }
+
+        public RabbitMqTransaction DeleteAllRecipes(string RecipeType, string EquipmentID)
+        {
+            string rabbitmqroute = string.Empty;
+
+            switch (RecipeType)
+            {
+                default:
+                    rabbitmqroute = $"EAP.SecsClient.{EquipmentID}";
+                    break;
+            }
+            var ListenChannel = ConfigurationManager.AppSettings["ListenChannel"];
+            var trans = new RabbitMqTransaction
+            {
+                TransactionName = "DeleteAllRecipes",
+                EquipmentID = EquipmentID,
+                NeedReply = true,
+                ReplyChannel = ListenChannel,
+            };
+            var rabbitres = RabbitMqService.ProduceWaitReply(rabbitmqroute, trans, 30);
             return rabbitres;
         }
     }

@@ -59,6 +59,9 @@ namespace Rms.Services.Services.ApiHandle
                     case "/api/checkrecipegroup":
                         res = CheckRecipeGroup(jsoncontent);
                         break;
+                    case "/api/deleteallrecipes":
+                        res = DeleteAllRecipes(jsoncontent);
+                        break;
                     default:
                         res.Result = false;
                         res.Message = "Unrecognized route";

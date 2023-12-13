@@ -74,7 +74,7 @@ ORDER BY CREATE_TIME", string.IsNullOrEmpty(logid) ? "" : $"AND CREATE_TIME>(SEL
 
 
         //[LogAttribute]
-        public JsonResult DownloadRecipeByLot(string eqid, string lotid)
+        public virtual JsonResult DownloadRecipeByLot(string eqid, string lotid)
         {
             string sfis_step7_req = $"{eqid},{lotid},7,M068397,JORDAN,,OK,MODEL_NAME=???";
             string sfis_step7_res = string.Empty;
@@ -90,7 +90,7 @@ ORDER BY CREATE_TIME", string.IsNullOrEmpty(logid) ? "" : $"AND CREATE_TIME>(SEL
                     string rcpgroupname = sfispara["MODEL_NAME"];
 
                     var db = DbFactory.GetSqlSugarClient();
-                    //var recipe = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == eqid && it.NAME.TrimEnd() == rcpname).First();
+
 
                     string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/downloadeffectiverecipebyrecipegroup";
                     var body = JsonConvert.SerializeObject(new DownloadEffectiveRecipeByRecipeGroupRequest { TrueName = User?.TRUENAME??"NA", EquipmentId = eqid, RecipeGroupName = rcpgroupname });

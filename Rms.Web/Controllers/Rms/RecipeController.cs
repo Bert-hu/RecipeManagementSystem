@@ -65,7 +65,7 @@ namespace Rms.Web.Controllers.Rms
             try
             {
                 string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/geteppd";
-                var body = JsonConvert.SerializeObject(new GetEppdRequest { EuipmentId = EQID });
+                var body = JsonConvert.SerializeObject(new GetEppdRequest { EquipmentId = EQID });
 
                 var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(apiURL, body);
                 var rep = JsonConvert.DeserializeObject<GetEppdResponse>(apiresult);

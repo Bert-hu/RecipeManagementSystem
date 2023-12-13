@@ -138,6 +138,7 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\ApiHandle\DownloadEffectiveRecipeByRecipeGroup.cs" />
+    <Compile Include="Services\ApiHandle\DeleteAllRecipes.cs" />
     <Compile Include="Services\ApiHandle\GetEquipmentStatus.cs" />
     <Compile Include="Services\ApiHandle\GetMarkingTexts.cs" />
     <Compile Include="Services\ApiHandle\CheckRecipeGroup.cs" />

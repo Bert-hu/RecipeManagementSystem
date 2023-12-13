@@ -21,6 +21,7 @@ namespace Rms.Services.Services.ApiHandle
             var res = new DownloadEffectiveRecipeByRecipeGroupResponse();
             var req = JsonConvert.DeserializeObject<DownloadEffectiveRecipeByRecipeGroupRequest>(jsoncontent);
             var eqp = db.Queryable<RMS_EQUIPMENT>().In(req.EquipmentId).First();
+            var eqtpye = db.Queryable<RMS_EQUIPMENT_TYPE>().In(eqp.TYPE).First();
             var recipegroup = db.Queryable<RMS_RECIPE_GROUP>().First(it => it.NAME == req.RecipeGroupName);
             if (recipegroup == null )
             {
@@ -54,8 +55,12 @@ namespace Rms.Services.Services.ApiHandle
                 return res;
             }
 
-            var serverdata = db.Queryable<RMS_RECIPE_DATA>().In(recipe_version.RECIPE_DATA_ID)?.First()?.CONTENT;
+            if (eqtpye.DELETEBEFOREDOWNLOAD)
+            {
+                var delteres = DeleteAllRecipes(eqp.RECIPE_TYPE, eqp.ID);//暂时不处理删除的答复
+            }
 
+            var serverdata = db.Queryable<RMS_RECIPE_DATA>().In(recipe_version.RECIPE_DATA_ID)?.First()?.CONTENT;
             var rabbitRes = SetUnfomattedRecipe(eqp.RECIPE_TYPE, eqp.ID, recipe.NAME, serverdata);
 
 

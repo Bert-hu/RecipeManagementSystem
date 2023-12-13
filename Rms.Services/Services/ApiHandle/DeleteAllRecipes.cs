@@ -14,11 +14,11 @@ namespace Rms.Services.Services.ApiHandle
 {
     public partial class ApiMessageHandler
     {
-        public ResponseMessage GetEPPD(string jsoncontent)
+        public ResponseMessage DeleteAllRecipes(string jsoncontent)
         {
             var db = DbFactory.GetSqlSugarClient();
-            var res = new GetEppdResponse();
-            var req = JsonConvert.DeserializeObject<GetEppdRequest>(jsoncontent);
+            var res = new DeleteAllRecipesResponse();
+            var req = JsonConvert.DeserializeObject<DeleteAllRecipesRequest>(jsoncontent);
             var eqp = db.Queryable<RMS_EQUIPMENT>().In(req.EquipmentId)?.First();
             string rabbitmqroute = string.Empty;
             if (eqp == null)
@@ -26,22 +26,9 @@ namespace Rms.Services.Services.ApiHandle
                 res.Message = "EQID not exists!";
                 return res;
             }
-            //识别设备类型和恢复queue
-            switch (eqp.RECIPE_TYPE)
-            {
-                default:
-                    rabbitmqroute = $"EAP.SecsClient.{req.EquipmentId}";
-                    break;
-            }
-            var ListenChannel = ConfigurationManager.AppSettings["ListenChannel"];
-            var trans = new RabbitMqTransaction
-            {
-                TransactionName = "GetEPPD",
-                EquipmentID = req.EquipmentId,
-                NeedReply = true,
-                ReplyChannel = ListenChannel,
-            };
-            var rabbitres = RabbitMqService.ProduceWaitReply(rabbitmqroute, trans, 5);
+
+            var rabbitres = DeleteAllRecipes(eqp.RECIPE_TYPE, req.EquipmentId);
+
             #region 返回是否是离线
             bool isOffline = false;
             if (rabbitres.Parameters.TryGetValue("Status", out object status))
@@ -58,20 +45,13 @@ namespace Rms.Services.Services.ApiHandle
 
             if (rabbitres != null)
             {
-
-                    res.EPPD = JsonConvert.DeserializeObject<List<string>>(rabbitres.Parameters["EPPD"].ToString());
-                    res.Result = true;
-
-
+                res.Result = rabbitres.Parameters["Result"].ToString().ToUpper() == "TRUE";
             }
             else//Rabbit Mq失败
             {
-                Log.Debug($"Rabbit Mq send to {rabbitmqroute}\n:{JsonConvert.SerializeObject(trans, Formatting.Indented)}");
-                Log.Error($"GetEPPD Time out!");
+                Log.Error($"Delete all recipe Time out!");
                 res.Message = "Equipment offline or EAP client error!";
             }
-
-
             return res;
         }
     }

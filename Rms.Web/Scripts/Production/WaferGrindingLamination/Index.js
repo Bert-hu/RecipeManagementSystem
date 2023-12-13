@@ -214,7 +214,7 @@
             $.ajax({
                 type: 'post',
                 dataType: 'json',
-                url: '/CommonProduction/DownloadRecipeByLot',
+                url: '/WaferGrindingLamination/DownloadRecipeByLot',
                 data: {
                     eqid: equipmentSel.getValue()[0].value,
                     lotid: value

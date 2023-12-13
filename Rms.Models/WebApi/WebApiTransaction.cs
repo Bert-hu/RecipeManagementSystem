@@ -15,7 +15,7 @@ namespace Rms.Models.WebApi
 
     public class GetEppdRequest
     {
-        public string EuipmentId { get; set; }
+        public string EquipmentId { get; set; }
     }
     public class GetEppdResponse : ResponseMessage
     {
@@ -136,6 +136,14 @@ namespace Rms.Models.WebApi
     public class CheckRecipeGroupResponse : ResponseMessage
     {
         public string RecipeName { get; set; }
+    }
+
+    public class DeleteAllRecipesRequest
+    {
+        public string EquipmentId { get; set; }
+    }
+    public class DeleteAllRecipesResponse : ResponseMessage
+    {
     }
 
 }
