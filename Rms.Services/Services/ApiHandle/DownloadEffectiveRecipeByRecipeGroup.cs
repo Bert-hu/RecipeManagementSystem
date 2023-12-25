@@ -61,7 +61,7 @@ namespace Rms.Services.Services.ApiHandle
             }
 
             var serverdata = db.Queryable<RMS_RECIPE_DATA>().In(recipe_version.RECIPE_DATA_ID)?.First()?.CONTENT;
-            var rabbitRes = SetUnfomattedRecipe(eqp.RECIPE_TYPE, eqp.ID, recipe.NAME, serverdata);
+            var rabbitRes = SetSecsRecipe(eqp.RECIPE_TYPE, eqp.ID, recipe.NAME, serverdata);
 
 
             #region 返回是否是离线

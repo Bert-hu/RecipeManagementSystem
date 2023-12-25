@@ -15,9 +15,9 @@
 </fieldset>
 <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief" style="width: 80%;margin: 0 auto;margin-top: 20px">
     <ul class="layui-tab-title">
-        <li class="layui-this">版本信息</li>
-        <li>签核记录</li>
-
+        <li class="layui-this">Version Info</li>
+        <li>Approval Record</li>
+        <li>Recipe Content</li>
     </ul>
     <div class="layui-tab-content" style="height: 100px;">
         <div class="layui-tab-item layui-show">
@@ -27,7 +27,7 @@
                 <div class="layui-form-item">
                     <input type="text" name="ID" autocomplete="off" class="layui-input" style="display:none">
                     <div class="layui-inline">
-                        <label class="layui-form-label">版本ID</label>
+                        <label class="layui-form-label">Version ID</label>
                         <div class="layui-input-block">
                             <input id='rcpversionID' type="text" name="NAME" autocomplete="off" class="layui-input" disabled>
                         </div>
@@ -37,16 +37,14 @@
 
 
                 <fieldset class="layui-elem-field layui-field-title">
-                    <legend>版本文件</legend>
+                    <legend>Version Body</legend>
                 </fieldset>
 
 
                 <div class="layui-upload">
                     <div style="display: flex; align-items: center;">
-                        <button type="button" class="layui-btn" id="loadbody">上传Recipe</button>
-                        <div class="layui-progress layui-progress" lay-showpercent="yes" lay-filter="demo" style="flex-grow: 1; margin-left: 10px; width: auto;">
-                            <div class="layui-progress-bar" lay-percent=""></div>
-                        </div>
+                        <button type="button" class="layui-btn" id="loadbody">Load Recipe from Machine</button>
+                        <button type="button" class="layui-btn" id="loadbodyfromeffectiveversion">Load Recipe from Effective Version</button>
                     </div>
                     <div class="layui-upload-list">
                         <img class="layui-upload" id="demo1">
@@ -55,19 +53,19 @@
                 </div>
                 <table class="layui-hide" id="filetable" lay-filter="filetable"></table>
                 <fieldset class="layui-elem-field layui-field-title">
-                    <legend>更新说明</legend>
+                    <legend>Update Remark</legend>
                 </fieldset>
 
                 <div class="layui-form-item layui-form-text">
-                    <label class="layui-form-label">备注</label>
+                    <label class="layui-form-label">Remark</label>
                     <div class="layui-input-block">
-                        <textarea placeholder="请输入更新内容" class="layui-textarea" name="REMARK"></textarea>
+                        <textarea placeholder="Update reason" class="layui-textarea" name="REMARK"></textarea>
                     </div>
                 </div>
 
                 <div class="layui-form-item">
-                    <button type="button" class="layui-btn layui-btn-normal" id="saveform">保存</button>
-                    <button type="submit" class="layui-btn" lay-submit="" lay-filter="sbm">立即提交</button>
+                    <button type="button" class="layui-btn layui-btn-normal" id="saveform">Save</button>
+                    <button type="submit" class="layui-btn" lay-submit="" lay-filter="sbm">Submit</button>
                 </div>
             </form>
         </div>
@@ -76,13 +74,18 @@
             <table class="layui-hide" id="processrecordtable" lay-filter="processrecordtable"></table>
 
         </div>
+        <div class="layui-tab-item">
+
+            <textarea id="textarea_recipebody" class="layui-textarea" rows="30" readonly></textarea>
+
+        </div>
 
     </div>
 
 </div>
 <script type="text/html" id="filetoolbar">
     @*<a class="layui-btn layui-btn layui-btn-xs" lay-event="download">下载</a>*@
-    <a class="layui-btn layui-btn layui-btn-xs" lay-event="delete">删除</a>
+    <a class="layui-btn layui-btn layui-btn-xs" lay-event="delete">Delete</a>
 </script>
 
 

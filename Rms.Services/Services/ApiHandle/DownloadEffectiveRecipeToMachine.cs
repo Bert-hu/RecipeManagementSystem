@@ -15,58 +15,53 @@ namespace Rms.Services.Services.ApiHandle
 {
     public partial class ApiMessageHandler
     {
-        public ResponseMessage DownloadEffectiveRecipeToMachine(string jsoncontent)
+        public ResponseMessage DownloadEffectiveRecipeToMachine(string jsonContent)
         {
             var db = DbFactory.GetSqlSugarClient();
             var res = new DownloadEffectiveRecipeToMachineResponse();
-            var req = JsonConvert.DeserializeObject<DownloadEffectiveRecipeToMachineRequest>(jsoncontent);
+            var req = JsonConvert.DeserializeObject<DownloadEffectiveRecipeToMachineRequest>(jsonContent);
             var eqp = db.Queryable<RMS_EQUIPMENT>().In(req.EquipmentId).First();
-            var eqtpye = db.Queryable<RMS_EQUIPMENT_TYPE>().In(eqp.TYPE).First();
+            var eqType = db.Queryable<RMS_EQUIPMENT_TYPE>().In(eqp.TYPE).First();
             if (eqp == null)
             {
                 res.Result = false;
                 res.Message = "Equipment does not exist in RMS";
                 return res;
             }
-            var recipe = db.Queryable<RMS_RECIPE>().Where(it =>it.EQUIPMENT_ID ==req.EquipmentId && it.NAME ==req.RecipeName).First();
+            var recipe = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == req.EquipmentId && it.NAME == req.RecipeName).First();
             if (recipe == null)
             {
                 res.Result = false;
                 res.Message = "Recipe does not exist in RMS";
                 return res;
             }
-            var recipe_version = db.Queryable<RMS_RECIPE_VERSION>().In(recipe.VERSION_EFFECTIVE_ID).First();
-
-            if (recipe_version.RECIPE_DATA_ID == null)
+            var recipeVersion = db.Queryable<RMS_RECIPE_VERSION>().In(recipe.VERSION_EFFECTIVE_ID).First();
+            if (recipeVersion.RECIPE_DATA_ID == null)
             {
                 res.Result = false;
-                res.Message = "RMS ERROR! Effective version do not have recipe content!";
+                res.Message = "RMS ERROR! Effective version does not have recipe content!";
                 return res;
             }
-            if (eqtpye.DELETEBEFOREDOWNLOAD)
+            if (eqType.DELETEBEFOREDOWNLOAD)
             {
-                var delteres = DeleteAllRecipes(eqp.RECIPE_TYPE, eqp.ID);//暂时不处理删除的答复
+                var deleteRes = DeleteAllRecipes(eqp.RECIPE_TYPE, eqp.ID);
+                // 暂时不处理删除的答复
             }
-            var serverdata = db.Queryable<RMS_RECIPE_DATA>().In(recipe_version.RECIPE_DATA_ID)?.First()?.CONTENT;
-
-            var rabbitRes = SetUnfomattedRecipe(eqp.RECIPE_TYPE, eqp.ID, recipe.NAME, serverdata);
-
-
-            #region 返回是否是离线
+            var serverData = db.Queryable<RMS_RECIPE_DATA>().In(recipeVersion.RECIPE_DATA_ID)?.First()?.CONTENT;
+            var rabbitRes = SetSecsRecipe(eqp.RECIPE_TYPE, eqp.ID, recipe.NAME, serverData);
             bool isOffline = false;
-            if (rabbitRes.Parameters.TryGetValue("Status", out object status))
-            {
-                isOffline = status.ToString().ToUpper() == "OFFLINE";
-            }
-            if (isOffline)
-            {
-                res.Result = false;
-                res.Message = "Equipment offline!";
-                return res;
-            }
-            #endregion
             if (rabbitRes != null)
             {
+                if (rabbitRes.Parameters.TryGetValue("Status", out object status))
+                {
+                    isOffline = status.ToString().ToUpper() == "OFFLINE";
+                }
+                if (isOffline)
+                {
+                    res.Result = false;
+                    res.Message = "Equipment offline!";
+                    return res;
+                }
                 if (rabbitRes.Parameters["Result"].ToString().ToUpper() != "TRUE")
                 {
                     res.Message = rabbitRes.Parameters["Message"].ToString();
@@ -75,58 +70,62 @@ namespace Rms.Services.Services.ApiHandle
                 {
                     res.Result = true;
                     res.RecipeName = recipe.NAME;
-                    db.Insertable<RMS_CHANGE_RECORD>(new RMS_CHANGE_RECORD 
+                    db.Insertable<RMS_CHANGE_RECORD>(new RMS_CHANGE_RECORD
                     {
                         EQID = req.EquipmentId,
                         TO_RECIPE_NAME = req.RecipeName,
-                        TO_RECIPE_VERSION = recipe_version.VERSION?.ToString(),
+                        TO_RECIPE_VERSION = recipeVersion.VERSION?.ToString(),
                         CREATOR = req.TrueName,
                         CREATETIME = DateTime.Now
                     }).ExecuteCommand();
-
-                    //PPSelect(eqp.ID, recipe.NAME);//不管回复了
+                    //PPSelect(eqp.ID, recipe.NAME); // 不管回复了
                 }
-
-
             }
-            else//Rabbit Mq失败
+            else
             {
                 res.Message = "Equipment offline or EAP client error!";
             }
-
-
             return res;
         }
 
-
-        public RabbitMqTransaction SetUnfomattedRecipe(string RecipeType, string EquipmentID, string RecipeName, byte[] serverdata)
+        public RabbitMqTransaction SetSecsRecipe(string recipeType, string equipmentID, string recipeName, byte[] serverData)
         {
-            string rabbitmqroute = string.Empty;
-            //识别设备类型和恢复queue
-            string body = string.Empty;
-            switch (RecipeType)
+            string rabbitMqRoute;
+            string transName;
+            string body;
+
+            switch (recipeType)
             {
-               case "secsByte":
-                    body = Convert.ToBase64String(serverdata);
-                    rabbitmqroute = $"EAP.SecsClient.{EquipmentID}";
+                case "secsByte":
+                    rabbitMqRoute = $"EAP.SecsClient.{equipmentID}";
+                    transName = "SetUnfomattedRecipe";
+                    body = Convert.ToBase64String(serverData);
+                    break;
+                case "secsSml":
+                    rabbitMqRoute = $"EAP.SecsClient.{equipmentID}";
+                    transName = "SetFormattedRecipe";
+                    body = System.Text.Encoding.Unicode.GetString(serverData);
                     break;
                 default:
-                    body = Convert.ToBase64String(serverdata);
-                    rabbitmqroute = $"EAP.SecsClient.{EquipmentID}";
+                    rabbitMqRoute = $"EAP.SecsClient.{equipmentID}";
+                    transName = "SetUnfomattedRecipe";
+                    body = Convert.ToBase64String(serverData);
                     break;
             }
-            var ListenChannel = ConfigurationManager.AppSettings["ListenChannel"];
+
+            var listenChannel = ConfigurationManager.AppSettings["ListenChannel"];
             var trans = new RabbitMqTransaction
             {
-                TransactionName = "SetUnfomattedRecipe",
-                EquipmentID = EquipmentID,
+                TransactionName = transName,
+                EquipmentID = equipmentID,
                 NeedReply = true,
-                ReplyChannel = ListenChannel,
-                Parameters = new Dictionary<string, object>() { { "RecipeName", RecipeName }, { "RecipeBody", body } }
+                ReplyChannel = listenChannel,
+                Parameters = new Dictionary<string, object>() { { "RecipeName", recipeName }, { "RecipeBody", body } }
             };
-            var rabbitres = RabbitMqService.ProduceWaitReply(rabbitmqroute, trans, 120);
 
-            return rabbitres;
+            var rabbitRes = RabbitMqService.ProduceWaitReply(rabbitMqRoute, trans, 120);
+
+            return rabbitRes;
         }
 
         public RabbitMqTransaction PPSelect(string EquipmentID, string RecipeName)

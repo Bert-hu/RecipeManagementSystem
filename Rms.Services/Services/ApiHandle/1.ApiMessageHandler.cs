@@ -19,7 +19,7 @@ namespace Rms.Services.Services.ApiHandle
         public ApiMessageHandler() { }
 
         private static log4net.ILog Log = log4net.LogManager.GetLogger("Logger");
-        bool isdebugmode = ConfigurationManager.AppSettings["IsDebugMode"].ToUpper() == "TRUE";
+        bool IsDebugMode = ConfigurationManager.AppSettings["IsDebugMode"].ToUpper() == "TRUE";
 
 
         public ResponseMessage HandleMessage(string route, string jsoncontent)
@@ -61,6 +61,9 @@ namespace Rms.Services.Services.ApiHandle
                         break;
                     case "/api/deleteallrecipes":
                         res = DeleteAllRecipes(jsoncontent);
+                        break;
+                    case "/api/editrecipebody":
+                        res = EditRecipeBody(jsoncontent);
                         break;
                     default:
                         res.Result = false;

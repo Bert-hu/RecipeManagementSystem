@@ -25,6 +25,12 @@ namespace Rms.Web.Controllers.Ems
             return View();
         }
 
+        public ActionResult AuditProcessPage(string TYPEID)
+        {
+            ViewBag.TYPEID = TYPEID;
+            return View();
+        }
+
         public JsonResult GetProcesses()
         {
             var eqptypes = db.Queryable<RMS_EQUIPMENT_TYPE>().ToList();
@@ -70,6 +76,10 @@ namespace Rms.Web.Controllers.Ems
                             message = "Invalid value for int field";
                         }
                     }
+                    else if (property.PropertyType == typeof(bool))
+                    {
+                        property.SetValue(item, value.ToLower() == "true");
+                    }
                     else
                     {
                         message = "Unsupported field type";
@@ -107,14 +117,31 @@ namespace Rms.Web.Controllers.Ems
             return Json(new { data = data, code = 0, count = totalnum }, JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult SetTypeRoles(string TypeId, string[] RoleIds)
+        public JsonResult SetTypeRoles(string TypeId, string[] RoleIds = default)
         {
             var db = DbFactory.GetSqlSugarClient();
             var item = db.Queryable<RMS_EQUIPMENT_TYPE>().In(TypeId).First();
-            item.ROLEIDS = RoleIds.ToList();
+            item.ROLEIDS = RoleIds?.ToList() ?? new List<string>();
             db.Updateable<RMS_EQUIPMENT_TYPE>(item).ExecuteCommand();
             return Json(new { result = true, message = "更新成功" });
 
+        }
+
+        public JsonResult GetFlowRoles(string TypeId)
+        {
+            int totalnum = 0;
+            var selectroles = db.Queryable<RMS_EQUIPMENT_TYPE>().In(TypeId).First().FLOWROLEIDS;
+            var roles = db.Queryable<PMS_ROLE>().ToList();
+            return Json(new { data = roles, seldata = selectroles, code = 0, count = totalnum }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult SetFlowRoles(string TypeId, string[] RoleIds = default)
+        {
+            var db = DbFactory.GetSqlSugarClient();
+            var item = db.Queryable<RMS_EQUIPMENT_TYPE>().In(TypeId).First();
+            item.FLOWROLEIDS = RoleIds?.ToList()?? new List<string>();
+            db.Updateable<RMS_EQUIPMENT_TYPE>(item).ExecuteCommand();
+            return Json(new { result = true, message = "更新成功" });
         }
     }
 }

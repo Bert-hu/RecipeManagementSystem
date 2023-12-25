@@ -40,160 +40,167 @@ namespace Rms.Services.Services.ApiHandle
                 return res;
             }
 
-            //TODO Unfomatted/Fomatted/onlyName
             switch (eqp.RECIPE_TYPE)
             {
                 case "secsByte":
-                    return AddUnfomattedRecipeTransaction(eqp, req);
+                case "secsSml":
+                    return AddSecsRecipeTransaction(eqp, req);                
                 case "onlyName":
                     return AddOnlyNameRecipeTransaction(eqp, req);
                 default:
-                    return AddUnfomattedRecipeTransaction(eqp, req);
+                    return AddSecsRecipeTransaction(eqp, req);
             }
 
         }
 
-        private AddNewRecipeResponse AddUnfomattedRecipeTransaction(RMS_EQUIPMENT eqp, AddNewRecipeRequest req)
+        private AddNewRecipeResponse AddSecsRecipeTransaction(RMS_EQUIPMENT eqp, AddNewRecipeRequest req)
         {
-            AddNewRecipeResponse res = new AddNewRecipeResponse();
-            var rabbitRes = GetUnfomattedRecipe(eqp.RECIPE_TYPE, req.EquipmentId, req.RecipeName);
-            #region 返回是否是离线
+            var res = new AddNewRecipeResponse();
+
+            var rabbitRes = GetSecsRecipe(eqp.RECIPE_TYPE, req.EquipmentId, req.RecipeName);
+
+            if (rabbitRes == null)
+            {
+                res.Message = "Equipment offline or EAP client error!";
+                return res;
+            }
+
+            if (rabbitRes.Parameters["Result"] is string result && result.ToUpper() != "TRUE")
+            {
+                res.Result = false;
+                res.Message = rabbitRes.Parameters["Message"].ToString();
+                return res;
+            }
+
             bool isOffline = false;
             if (rabbitRes.Parameters.TryGetValue("Status", out object status))
             {
                 isOffline = status.ToString().ToUpper() == "OFFLINE";
             }
+
             if (isOffline)
             {
                 res.Result = false;
                 res.Message = "Equipment offline!";
                 return res;
             }
-            #endregion
 
-            if (rabbitRes != null)
+            if (!IsDebugMode && rabbitRes.Parameters["RecipeName"].ToString() != req.RecipeName)
             {
+                res.Message = $"The RecipeName of the response({rabbitRes.Parameters["RecipeName"].ToString()}) is inconsistent with the request({req.RecipeName})";
+                return res;
+            }
 
-                if (rabbitRes.Parameters["Result"].ToString().ToUpper() == "TRUE")
+            byte[] body;
+            switch (eqp.RECIPE_TYPE)
+            {
+                case "secsByte":
+                    body = Convert.FromBase64String(rabbitRes.Parameters["RecipeBody"].ToString());
+                    break;
+                case "secsSml":
+                    body = System.Text.Encoding.Unicode.GetBytes(rabbitRes.Parameters["RecipeBody"].ToString());
+                    break;
+                default:
+                    body = Convert.FromBase64String(rabbitRes.Parameters["RecipeBody"].ToString());
+                    break;
+            }
+
+            using (var db = DbFactory.GetSqlSugarClient())
+            {
+                db.BeginTran();
+
+                try
                 {
-                    if (!isdebugmode)//生产环境才检查 设备回复的RecipeName和请求中的RecipeName是否一致
+                    var recipe = new RMS_RECIPE
                     {
-                        if (rabbitRes.Parameters["RecipeName"].ToString() != req.RecipeName)
-                        {
-                            res.Message = $"The RecipeName of the response({rabbitRes.Parameters["RecipeName"].ToString()}) is inconsistent with the request({req.RecipeName})";
-                            return res;
-                        }
-                    }
+                        EQUIPMENT_ID = req.EquipmentId,
+                        NAME = req.RecipeName
+                    };
+                    db.Insertable<RMS_RECIPE>(recipe).ExecuteCommand();
 
-                    byte[] body;
-                    //根据Recipe Type获取 ByteArray类型的Body
-                    switch (eqp.RECIPE_TYPE)
+                    var eqtype = db.Queryable<RMS_EQUIPMENT_TYPE>().In(eqp.TYPE).First();
+
+                    var version = new RMS_RECIPE_VERSION
                     {
-                        default:
-                            body = Convert.FromBase64String(rabbitRes.Parameters["RecipeBody"].ToString());
-                            break;
-                    }
-                    //开启事务，执行新建Recipe的任务
-                    var db = DbFactory.GetSqlSugarClient();
-                    db.BeginTran();
-                    try
+                        RECIPE_ID = recipe.ID,
+                        _FLOW_ROLES = eqtype.FLOWROLEIDS,
+                        CURRENT_FLOW_INDEX = 100,
+                        REMARK = "First Version",
+                        CREATOR = req.TrueName
+                    };
+                    db.Insertable<RMS_RECIPE_VERSION>(version).ExecuteCommand();
+
+                    var data = new RMS_RECIPE_DATA
                     {
-                        //添加Recipe
-                        var recipe = new RMS_RECIPE
-                        {
-                            EQUIPMENT_ID = req.EquipmentId,
-                            NAME = req.RecipeName,
-                            //  CREATOR = req.TrueName,
-                            //  LASTEDITOR = req.TrueName
-                        };
-                        db.Insertable<RMS_RECIPE>(recipe).ExecuteCommand();
-                        var eqtype = db.Queryable<RMS_EQUIPMENT_TYPE>().In(eqp.TYPE).First();
-                        //添加Version
-                        //var flow = db.Queryable<RMS_FLOW>().In(eqp.FLOW_ID).First();
-                        var version = new RMS_RECIPE_VERSION
-                        {
-                            RECIPE_ID = recipe.ID,
-                            //FLOW_ID = recipe.FLOW_ID,
-                            _FLOW_ROLES = eqtype.FLOWROLEIDS,
-                            CURRENT_FLOW_INDEX = 100,
-                            REMARK = "First Version",
-                            CREATOR = req.TrueName
-                        };
-                        db.Insertable<RMS_RECIPE_VERSION>(version).ExecuteCommand();
-                        //添加Data
-                        var data = new RMS_RECIPE_DATA
-                        {
-                            NAME = req.RecipeName,
-                            CONTENT = body,
-                            CREATOR = req.TrueName,
-                        };
-                        db.Insertable<RMS_RECIPE_DATA>(data).ExecuteCommand();
-                        //更新外键
-                        version.RECIPE_DATA_ID = data.ID;
-                        db.Updateable<RMS_RECIPE_VERSION>(version).UpdateColumns(it => new { it.RECIPE_DATA_ID }).ExecuteCommand();
-                        //更新生效版和最新版
-                        recipe.VERSION_LATEST_ID = version.ID;
-                        recipe.VERSION_EFFECTIVE_ID = version.ID;
-                        db.Updateable<RMS_RECIPE>(recipe).UpdateColumns(it => new { it.VERSION_LATEST_ID, it.VERSION_EFFECTIVE_ID }).ExecuteCommand();
-                        res.RECIPE_ID = recipe.ID;
-                        res.VERSION_LATEST_ID = recipe.VERSION_LATEST_ID;
-                    }
-                    catch
-                    {
-                        db.RollbackTran();
-                        throw;
-                    }
-                    db.CommitTran();//提交事务
+                        NAME = req.RecipeName,
+                        CONTENT = body,
+                        CREATOR = req.TrueName,
+                    };
+                    db.Insertable<RMS_RECIPE_DATA>(data).ExecuteCommand();
+
+                    version.RECIPE_DATA_ID = data.ID;
+                    db.Updateable<RMS_RECIPE_VERSION>(version).UpdateColumns(it => new { it.RECIPE_DATA_ID }).ExecuteCommand();
+
+                    recipe.VERSION_LATEST_ID = version.ID;
+                    recipe.VERSION_EFFECTIVE_ID = version.ID;
+                    db.Updateable<RMS_RECIPE>(recipe).UpdateColumns(it => new { it.VERSION_LATEST_ID, it.VERSION_EFFECTIVE_ID }).ExecuteCommand();
+
+                    res.RECIPE_ID = recipe.ID;
+                    res.VERSION_LATEST_ID = recipe.VERSION_LATEST_ID;
+
+                    db.CommitTran();
                     res.Result = true;
                 }
-                else
+                catch
                 {
-                    res.Result = false;
-                    res.Message = rabbitRes.Parameters["Message"].ToString();
+                    db.RollbackTran();
+                    throw;
                 }
-
-
             }
-            else//Rabbit Mq失败
-            {
-                res.Message = "Equipment offline or EAP client error!";
-            }
-
 
             return res;
         }
 
-        public RabbitMqTransaction GetUnfomattedRecipe(string RecipeType, string EquipmentID, string RecipeName)
+        public RabbitMqTransaction GetSecsRecipe(string recipeType, string equipmentID, string recipeName)
         {
-            string rabbitmqroute = string.Empty;
-            //识别设备类型和回复queue
-            switch (RecipeType)
+            string rabbitmqRoute;
+            string transName;
+            switch (recipeType)
             {
+                case "secsByte":
+                    rabbitmqRoute = $"EAP.SecsClient.{equipmentID}";
+                    transName = "GetUnfomattedRecipe";
+                    break;
+                case "secsSml":
+                    rabbitmqRoute = $"EAP.SecsClient.{equipmentID}";
+                    transName = "GetFormattedRecipe";
+                    break;
                 default:
-                    rabbitmqroute = $"EAP.SecsClient.{EquipmentID}";
+                    rabbitmqRoute = $"EAP.SecsClient.{equipmentID}";
+                    transName = "GetUnfomattedRecipe";
                     break;
             }
-            var ListenChannel = ConfigurationManager.AppSettings["ListenChannel"];
+
+            var listenChannel = ConfigurationManager.AppSettings["ListenChannel"];
             var trans = new RabbitMqTransaction
             {
-                TransactionName = "GetUnfomattedRecipe",
-                EquipmentID = EquipmentID,
+                TransactionName = transName,
+                EquipmentID = equipmentID,
                 NeedReply = true,
-                ReplyChannel = ListenChannel,
-                Parameters = new Dictionary<string, object>() { { "RecipeName", RecipeName } }
+                ReplyChannel = listenChannel,
+                Parameters = new Dictionary<string, object>() { { "RecipeName", recipeName } }
             };
-            var rabbitres = RabbitMqService.ProduceWaitReply(rabbitmqroute, trans, 120);
 
+            var rabbitRes = RabbitMqService.ProduceWaitReply(rabbitmqRoute, trans, 120);
 
-            if (rabbitres == null)//Rabbit Mq失败
+            if (rabbitRes == null)
             {
                 Log.Debug($"Rabbit Mq send content:\n{JsonConvert.SerializeObject(trans, Formatting.Indented)}");
-                Log.Error($"GetNewRecipeVersion Time out!");
+                Log.Error("GetNewRecipeVersion Time out!");
             }
-            return rabbitres;
+
+            return rabbitRes;
         }
-
-
 
         private AddNewRecipeResponse AddOnlyNameRecipeTransaction(RMS_EQUIPMENT eqp, AddNewRecipeRequest req)
         {

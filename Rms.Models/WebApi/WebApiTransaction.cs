@@ -146,4 +146,15 @@ namespace Rms.Models.WebApi
     {
     }
 
+
+    public class AddNewRecipeVersionWithBodyRequest
+    {
+        public string TrueName { get; set; } = "Default";
+        public string RecipeVersionId { get; set; }
+        public string RecipeBody { get; set; }
+    }
+
+    public class AddNewRecipeVersionWithBodyResponse : ResponseMessage
+    {
+    }
 }

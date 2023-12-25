@@ -573,6 +573,8 @@
     <Content Include="Views\Equipment\Index.cshtml" />
     <Content Include="Views\EquipmentType\Index.cshtml" />
     <Content Include="Views\EquipmentType\TypeRole.cshtml" />
+    <Content Include="Views\EquipmentType\AuditProcessPage.cshtml" />
+    <Content Include="Views\Recipe\EditVersion.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -603,6 +605,9 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

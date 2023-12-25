@@ -74,8 +74,9 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                 , { field: 'PROCESS', title: 'PROCESS', edit: true }
                 , { field: 'VENDOR', title: '供应商', edit: true }
                 , { field: 'TYPE', title: '型号', edit: true }
+                , { field: 'DELETEBEFOREDOWNLOAD', title: '下载前清空设备', edit: true }
                 , { field: 'ORDERSORT', title: '排序', edit: true }
-                , { fixed: 'right', width: 120, align: 'center', toolbar: '#toolbar' }
+                , { fixed: 'right', width: 220, align: 'center', toolbar: '#toolbar' }
             ]]
             , where: {
                 processfilter: processfilter
@@ -134,7 +135,6 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                 , area: ['40%', '85%']
                 , success: function (layero, index) {
 
-
                 }
                 , yes: function (index) {
                     var res = window["layui-layer-iframe" + index].callback();
@@ -155,6 +155,48 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                         success: function (data) {
                             layer.open({ content: data.message });
 
+                        },
+                        error: function (message) {
+                            alert('error!');
+                        }
+                    });
+                    layer.close(index);
+
+
+                }, btn2: function (index, layero) {
+                    layer.msg('取消操作');
+                }
+
+            });
+        }
+        else if (event === 'auditprocess') {
+            layer.open({
+                title: '更改签核流程'
+                , type: 2
+                , btn: ['确定', '取消']
+                , content: 'AuditProcessPage?TYPEID=' + selectdata.ID
+                , area: ['90%', '85%']
+                , success: function (layero, index) {
+
+                }
+                , yes: function (index) {
+                    var res = window["layui-layer-iframe" + index].callback();
+                    console.log(res);
+                    var jdata = JSON.parse(res);
+                    console.log(jdata);
+                    var roleids = jdata.roles.map(obj => obj.value);
+                    console.log(roleids);
+                    $.ajax({
+                        url: '/EquipmentType/SetFlowRoles',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                        data: {
+                            TypeId: selectdata.ID,
+                            RoleIds: roleids
+                        },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
+                        type: 'POST',
+                        contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
+                        async: false,
+                        success: function (data) {
+                            layer.open({ content: data.message });
                         },
                         error: function (message) {
                             alert('error!');

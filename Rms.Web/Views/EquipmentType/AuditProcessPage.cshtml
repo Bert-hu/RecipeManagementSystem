@@ -1,0 +1,137 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="~/Scripts/layui/css/layui.css" rel="stylesheet" />
+    <script src="~/Scripts/layui/layui.js"></script>
+    <style>
+        .centered {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, 0);
+        }
+    </style>
+</head>
+<body>
+    <input id="selectedID" class="layui-input" lay-filter="selectedID" disabled="disabled" style="display:none;">
+    <div class="layui-container">
+        <div id="rolestransfer" class="centered"></div>
+    </div>
+    <script>
+
+            layui.use(['layer', 'jquery', 'transfer'], function () {
+                var $ = layui.jquery;
+                var transfer = layui.transfer;
+
+                $.ajax({
+                    url: '/EquipmentType/GetFlowRoles',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                    data: {
+                        TypeId:  '@ViewBag.TYPEID'
+                    },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
+                    async: false,
+                    success: function (data) {
+                        console.log(data);
+                        transfer.render({
+                            elem: '#rolestransfer'
+                            , title: ['角色', '签核角色']
+                            , parseData: function (res) {
+                                return {
+                                    "value": res.ID //数据值
+                                    , "title": res.NAME //数据标题
+                                }
+                            }
+                            , data: data.data
+                            , value:data.seldata
+                            , id: 'rolestransfer' //定义唯一索引
+                            , onchange: function (data, index) {
+                                //if (index === 0) {
+                                //    // 加入
+                                //    selectedTransfers.push(data);
+                                //    console.log(selectedTransfers);
+                                //} else {
+                                //    // 移除
+                                //    selectedTransfers.splice(data);
+                                //    console.log(selectedTransfers);
+                                //}
+                                $("#rolestransfer div[data-index='1'] ul li").attr("draggable", "true");
+             
+                            }
+
+                        });
+                        $("#rolestransfer div[data-index='1'] ul li").attr("draggable", "true");
+                        loadDrag();
+                    },
+                    error: function (message) {
+                        alert('error!');
+                    }
+                });
+
+
+
+
+
+                function loadDrag() {
+                    let list = document.querySelector("#rolestransfer div[data-index='1'] ul")
+                    let currentLi
+                    list.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.effectAllowed = 'move'
+                        currentLi = e.target
+                        setTimeout(() => {
+                            currentLi.classList.add('moving')
+                        })
+                    })
+
+                    list.addEventListener('dragenter', (e) => {
+                        e.preventDefault()
+                        if (e.target === currentLi || e.target === list) {
+                            return
+                        }
+                        let liArray = Array.from(list.childNodes)
+                        let currentIndex = liArray.indexOf(currentLi)
+                        let targetIndex = liArray.indexOf(e.target)
+                        if (currentIndex < targetIndex) {
+                            if (e.target.nextElementSibling != null) {
+                                if (e.target.nextElementSibling.nodeName === 'LI') {
+                                    list.insertBefore(currentLi, e.target.nextElementSibling)
+                                }
+                            }
+
+                        } else {
+                            if (e.target.nodeName === 'LI') {
+                                list.insertBefore(currentLi, e.target)
+                            }
+                        }
+                    })
+                    list.addEventListener('dragover', (e) => {
+                        e.preventDefault()
+                    })
+                    list.addEventListener('dragend', (e) => {
+                        currentLi.classList.remove('moving')
+                    })
+                }
+
+
+                var retdata = {};
+
+                window.callback = function () {
+                    var selectData = transfer.getData('rolestransfer');
+                    retdata.roles = selectData;
+                    return JSON.stringify(retdata);
+                };
+
+            })
+    </script>
+
+</body>
+</html>
+
+
+
+

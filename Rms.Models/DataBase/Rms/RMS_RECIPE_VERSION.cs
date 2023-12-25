@@ -43,11 +43,11 @@ namespace RMS.Domain.Rms
         public string RECIPE_ID { get; set; }
 
         public string RECIPE_NAME { get; set; }
-        public string RECIPE_GROUP_NAME { get; set; }
 
         public decimal RECIPE_LATEST_VERSION { get; set; }
 
         public decimal RECIPE_EFFECTIVE_VERSION { get; set; }
-
+        public string RECIPE_LATEST_VERSION_ID { get; set; }
+        public string RECIPE_EFFECTIVE_VERSION_ID { get; set; }
     }
 }

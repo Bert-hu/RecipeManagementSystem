@@ -37,7 +37,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             window.currenteqid = change[0].value;
             document.getElementById("info").innerHTML = eqpid;
             ShowRCPTable(eqpid);
-            
+
         },
 
     })
@@ -51,15 +51,15 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             , url: '/Recipe/GetVersions'
             , toolbar: '#addnewversion'
             , id: "versiontable"
-            
+
             , limit: 1000
             , limits: [1000]
             , height: 'full-235'
             , cols: [[
-                { field: 'VERSION', title: '版本号', width: '10%' , sort: true }
+                { field: 'VERSION', title: '版本号', width: '10%', sort: true }
                 //, { field: 'NAME', title: '版本', width: 200 }
                 , {
-                    field: 'CURRENT_FLOW_INDEX', title: '签核状态',  width: '45%',
+                    field: 'CURRENT_FLOW_INDEX', title: '签核状态', width: '45%',
                     templet: function (d, s) {
                         var strstate;
                         if (d.CURRENT_FLOW_INDEX == 100) {
@@ -104,7 +104,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                 });
             }
         });
-        
+
     }
 
     function ShowRCPTable(id) {
@@ -117,13 +117,10 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             , limits: [1000]
             , height: 'full-235'
             , cols: [[
-                { field: 'RECIPE_NAME', title: 'Recipe名', width: '55%' }
-                //, { field: 'RECIPE_GROUP_NAME', title: 'ModelName', width: '20%' }
+                { field: 'RECIPE_NAME', title: 'Recipe名', width: '45%' }
                 , { field: 'RECIPE_LATEST_VERSION', title: '最新版本', width: '15%' }
                 , { field: 'RECIPE_EFFECTIVE_VERSION', title: '生效版本', width: '15%' }
-                //, { field: 'CREATE_TIME', title: '创建时间', templet: '<div>{{ FormDate(d.CREATE_TIME, "yyyy-MM-dd HH:mm:ss") }}</div>', width: 180 }
-                //, { fixed: 'right', title: '操作', width: '20%', align: 'center', toolbar: '#rcptoolbar' }
-                , { fixed: 'right', width: '15%', align: 'center', toolbar: '#recipetoolbar' }
+                , { fixed: 'right', width: '25%', align: 'center', toolbar: '#recipetoolbar' }
             ]]
             , where: {
                 EQID: id
@@ -136,13 +133,15 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                 data.data.forEach(function (item, index) {
                     var tr = that.find(".layui-table-box tbody tr[data-index='" + index + "']");
 
-                   
-                    console.log(item.RECIPE_LATEST_VERSION)
+
                     if (item.RECIPE_LATEST_VERSION > item.RECIPE_EFFECTIVE_VERSION) {//黄色
                         console.log('here')
                         tr.css("background-color", "#fdfd96");
                     }
-                   
+                    console.log(data.canEdit);
+                    if (!data.canEdit) {
+                        tr.find('a[lay-event="editbody"]').hide();
+                    }
                 });
                 //ShowVersionTable(data.data[0].RECIPE_ID)
             }
@@ -205,26 +204,27 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                     limit: 9999,
                     processfilter: process
                 },
-                success: function (data) {       var seldata = data.data.map(it => {
+                success: function (data) {
+                    var seldata = data.data.map(it => {
                         //console.log(it.NAME)
                         return {
                             name: it.TYPEPROCESS + "--" + it.TYPENAME + "--" + it.ID,
                             value: it.ID
                         };
                     });
-                    
+
                     var eqpid = data.data[0].ID;
                     document.getElementById("info").innerHTML = eqpid;
                     ShowRCPTable(eqpid);
 
                     EQPsel.update({
                         data: seldata,
-                        
+
                     });
                     EQPsel.setValue([
                         seldata[0]
                     ])
-                    
+
                     console.log(EQPsel)
 
                 },
@@ -269,11 +269,11 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                                 } else {
                                     layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + response.message + '</em>', { icon: response.result ? 1 : 4 });
                                 }
-                                
+
                                 result = response.result;
                                 //rcptable.reload();
                                 //window.versiontable.reload();
-                                
+
                             },
                             error: function () {
                                 layer.msg('提交失败', { icon: 4 });
@@ -321,7 +321,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             layer.prompt({
                 formType: 2,
 
-                title: '请确认下载"' + obj.data.RECIPE_NAME +'"到设备吗？请输入Y确认',
+                title: '请确认下载"' + obj.data.RECIPE_NAME + '"到设备吗？请输入Y确认',
                 area: ['80px', '35px'] //自定义文本域宽高
             }, function (value, index, elem) {
                 if (value.toUpperCase() === 'Y') {
@@ -355,6 +355,10 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                 }
             });
         }
+        else if (layEvent === 'editbody'){
+
+            ShowBodyEditPage(selectdata.RECIPE_LATEST_VERSION_ID);
+        }
 
     });
 
@@ -375,8 +379,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                 , success: function (layero, index) {
                     //向layer页面传值，传值主要代码
                     var body = layer.getChildFrame('body', index);
-                    //将弹窗页面中属性名id="xxxx"的标签赋值
-                    //body.find("[id='rcpversionID']").val(versionid);
+
                 }
                 , yes: function (index) {
                     var res = window["layui-layer-iframe" + index].callback();
@@ -413,9 +416,6 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                             console.log(err)
                         }
                     });
-
-
-
                 }, btn2: function (index, layero) {
 
                     layer.close(index);
@@ -430,51 +430,51 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                 title: '请扫入Lot ID',
                 area: ['300px', '35px'] //自定义文本域宽高
             }, function (value, index, elem) {
-                
-                    
-                    $.ajax({
-                        type: 'post',
-                        dataType: 'json',
-                        url: '/Recipe/DownloadRecipeByLot',
-                        data: {
-                            eqid: obj.config.currenteqpid,
-                            lotid: value
 
-                        },
-                        success: function (data) {
-                         
 
-                            if (data.Result) {
-                                layer.close(index)
-                                window.rcptable.reload();
-                                //layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + 'Recipe download succeed.' + '</em>');
-                                layer.open({
-                                    title: '下载成功'
-                                    , content: "Group:'" + data.RecipeGroupName +"',\r\nRecipe:'" + data.RecipeName+"'"
-                                });
+                $.ajax({
+                    type: 'post',
+                    dataType: 'json',
+                    url: '/Recipe/DownloadRecipeByLot',
+                    data: {
+                        eqid: obj.config.currenteqpid,
+                        lotid: value
 
-                                //return false;
-                            } else {
-                                layer.open({
-                                    title: '下载失败'
-                                    , content: data.Message
-                                });
-                            }
+                    },
+                    success: function (data) {
 
-                        },
-                        error: function (err) {
-                            console.log(err)
+
+                        if (data.Result) {
+                            layer.close(index)
+                            window.rcptable.reload();
+                            //layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + 'Recipe download succeed.' + '</em>');
+                            layer.open({
+                                title: '下载成功'
+                                , content: "Group:'" + data.RecipeGroupName + "',\r\nRecipe:'" + data.RecipeName + "'"
+                            });
+
+                            //return false;
+                        } else {
+                            layer.open({
+                                title: '下载失败'
+                                , content: data.Message
+                            });
                         }
-                    });
-              
+
+                    },
+                    error: function (err) {
+                        console.log(err)
+                    }
+                });
+
             });
         }
-       
+
 
     })
 
     //表单提交
-   
+
 
     var currentversionid;
     window.data;
@@ -523,30 +523,59 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
 
     }
 
+    function ShowBodyEditPage(recipeVersionId) {
+        layer.open({
+            title: 'Edit Recipe Body'
+            , type: 2
+            , btn: ['提交','取消']
+            , content: 'EditVersion?RecipeVersionId=' + recipeVersionId
+            , area: ['90%', '90%']
 
-    function uploadRcp(EQID, rcpname) {
-        $.ajax({
-            type: 'post',
-            dataType: 'json',
-            url: '/Recipe/AddNewRecipeToApi',
-            data: {
-                EQID: EQID,
-                rcpname: rcpname
-            },
-            success: function (data) {
-                console.log(data)
-                return data;
-                if (data.Result) {
-                    
-                    //return false;
-                } else {
-                    //return true;
-                }
-                
-            },
-            error: function (err) {
-                console.log(err)
+            , success: function (layero, index) {
+
             }
+            , yes: function (index) {
+                var res = window["layui-layer-iframe" + index].callback();
+
+                var loadingIndex = layer.load();
+                $.ajax({
+                    type: 'post',
+                    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                    url: '/Recipe/EditRecipeBody',
+                    data: {
+                        RecipeVersionId: recipeVersionId,
+                        RecipeBody: res.editedBody
+                    },
+                    success: function (data) {
+                        setTimeout(function () {
+                            layer.close(loadingIndex);
+                        }, 10);
+                        var resultData = data
+
+                        if (resultData.Result) {
+                            layer.close(index)
+                            window.rcptable.reload();
+                            layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + 'Content modified and saved successfully.' + '</em>');
+                            //return false;
+                        } else {
+                            layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + 'Error:' + resultData.Message + '</em>');
+                            //return true;
+                        }
+
+                    },
+                    error: function (err) {
+                        console.log(err)
+                    }
+                });
+
+
+            }, btn2: function (index, layero) {
+
+                layer.close(index);
+            }
+
         });
+
     }
+
 });

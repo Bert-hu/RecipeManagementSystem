@@ -2,9 +2,9 @@ layui.use(['jquery','layer', 'table', 'form', 'upload', 'element'], function () 
     var $ = layui.jquery
         , layer = layui.layer
         , table = layui.table
-        , form = layui.form
-        , upload = layui.upload
-        , element = layui.element;
+        , form = layui.form;
+        //, upload = layui.upload
+        //, element = layui.element;
 
     var vid = window.parent.data.id;
     var rcpname;
@@ -21,7 +21,7 @@ layui.use(['jquery','layer', 'table', 'form', 'upload', 'element'], function () 
             type: 'GET',
             contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
             success: function (data) {
-                console.log(data);
+                //console.log(data);
                 rcpname = data.projectinfo.NAME;
                 var status = GetVersionStatus(data.versioninfo._FLOW_ROLES, data.versioninfo.CURRENT_FLOW_INDEX);
                 document.getElementById("info").innerHTML = 'Recipe: ' + data.projectinfo.NAME + " " + data.versioninfo.VERSION + ' ' + status;
@@ -52,45 +52,45 @@ layui.use(['jquery','layer', 'table', 'form', 'upload', 'element'], function () 
                 // 重新渲染 layui 表单
                 layui.form.render();
 
-                var uploadInst = upload.render({
-                    elem: '#test1'
-                    , accept: 'file'
-                    , url: 'UploadRcpFromEQP' //此处用的是第三方的 http 请求演示，实际使用时改成您自己的上传接口即可。
-                    , data: {
-                        versionid: vid
-                        //rcpname: data.projectinfo.NAME
-                    }
-                    , before: function (obj) {
-                        //预读本地文件示例，不支持ie8
-                        //obj.preview(function (index, file, result) {
-                        //    $('#demo1').attr('src', result); //图片链接（base64）
-                        //});
+                //var uploadInst = upload.render({
+                //    elem: '#test1'
+                //    , accept: 'file'
+                //    , url: 'UploadRcpFromEQP' //此处用的是第三方的 http 请求演示，实际使用时改成您自己的上传接口即可。
+                //    , data: {
+                //        versionid: vid
+                //        //rcpname: data.projectinfo.NAME
+                //    }
+                //    , before: function (obj) {
+                //        //预读本地文件示例，不支持ie8
+                //        //obj.preview(function (index, file, result) {
+                //        //    $('#demo1').attr('src', result); //图片链接（base64）
+                //        //});
 
-                        element.progress('demo', '0%'); //进度条复位
-                        window.parent.layer.msg('上传中', { icon: 16, time: 0 });
-                    }
-                    , done: function (res) {
-                        window.parent.layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + res.message + '</em>', { icon: res.result ? 1 : 4 });
+                //        element.progress('demo', '0%'); //进度条复位
+                //        window.parent.layer.msg('上传中', { icon: 16, time: 0 });
+                //    }
+                //    , done: function (res) {
+                //        window.parent.layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + res.message + '</em>', { icon: res.result ? 1 : 4 });
 
-                        $('#demoText').html(''); //置空上传失败的状态
-                    }
-                    , error: function () {
-                        //演示失败状态，并实现重传
-                        var demoText = $('#demoText');
-                        demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
-                        demoText.find('.demo-reload').on('click', function () {
-                            uploadInst.upload();
-                        });
-                    }
-                    //进度条
-                    , progress: function (n, elem, e) {
-                        element.progress('demo', n + '%'); //可配合 layui 进度条元素使用
-                        if (n == 100) {
-                            //layer.msg('上传完毕', { icon: 1 });
-                            filetable.reload();
-                        }
-                    }
-                });
+                //        $('#demoText').html(''); //置空上传失败的状态
+                //    }
+                //    , error: function () {
+                //        //演示失败状态，并实现重传
+                //        var demoText = $('#demoText');
+                //        demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+                //        demoText.find('.demo-reload').on('click', function () {
+                //            uploadInst.upload();
+                //        });
+                //    }
+                //    //进度条
+                //    , progress: function (n, elem, e) {
+                //        element.progress('demo', n + '%'); //可配合 layui 进度条元素使用
+                //        if (n == 100) {
+                //            //layer.msg('上传完毕', { icon: 1 });
+                //            filetable.reload();
+                //        }
+                //    }
+                //});
 
                 filetable = table.render({
                     elem: '#filetable'
@@ -221,6 +221,34 @@ layui.use(['jquery','layer', 'table', 'form', 'upload', 'element'], function () 
                 type: 'post',
                 dataType: 'json',
                 url: '/Recipe/UploadRcpFromEQP',
+                data: {
+                    versionid: vid,
+                    rcpname: rcpname
+                },
+                success: function (data) {
+                    console.log(data)
+                    //console.log('testest')
+                    //layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: data.result ? 1 : 4 });
+                    if (data.res.Result) {
+                        layer.msg('Uploaded Successfully!')
+                        filetable.reload();
+                    } else {
+                        filetable.reload();
+                        layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + 'Error:' + data.res.Message + '</em>');
+                    }
+                },
+                error: function (err) {
+                    console.log(err)
+                }
+            });
+        });
+
+        layui.$('#loadbodyfromeffectiveversion').on('click', function () {
+
+            $.ajax({
+                type: 'post',
+                dataType: 'json',
+                url: '/Recipe/UploadRcpFromEffectiveVersion',
                 data: {
                     versionid: vid,
                     rcpname: rcpname

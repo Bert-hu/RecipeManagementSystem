@@ -13,6 +13,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Web.Http;
 using System.Web.Mvc;
 
 namespace Rms.Web.Controllers.Rms
@@ -27,37 +28,39 @@ namespace Rms.Web.Controllers.Rms
         {
             return View();
         }
+        public ActionResult EditVersion(string RecipeVersionId)
+        {
+            ViewBag.RecipeVersionId = RecipeVersionId;
+            return View();
+        }
         public ActionResult GetRecipe(int page, int limit, string EQID)
         {
-            var db = DbFactory.GetSqlSugarClient();
+            var eqp = db.Queryable<RMS_EQUIPMENT>().In(EQID).First();
             var totalnum = 0;
             List<RecipeVersion> RecipeVersionList = db.Queryable<RMS_RECIPE>()
                 .Where(it => it.EQUIPMENT_ID == EQID)
                 .LeftJoin<RMS_RECIPE_VERSION>((r, rv) => r.VERSION_LATEST_ID == rv.ID)
                 .LeftJoin<RMS_RECIPE_VERSION>((r, rv, rv2) => r.VERSION_EFFECTIVE_ID == rv2.ID)
-                //.LeftJoin<RMS_RECIPE_GROUP>((r, rv, rv2, rrg) => r.RECIPE_GROUP_ID == rrg.ID)
                 .Select((r, rv, rv2) => new RecipeVersion
                 {
                     RECIPE_ID = r.ID,
                     RECIPE_NAME = r.NAME,
-                    //RECIPE_GROUP_NAME = rrg.NAME,
                     RECIPE_LATEST_VERSION = (decimal)rv.VERSION,
-                    RECIPE_EFFECTIVE_VERSION = (decimal)rv2.VERSION
+                    RECIPE_EFFECTIVE_VERSION = (decimal)rv2.VERSION,
+                    RECIPE_LATEST_VERSION_ID = rv.ID,
+                    RECIPE_EFFECTIVE_VERSION_ID = rv2.ID
                 })
                 .ToPageList(page, limit, ref totalnum);
-            //var data = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == EQID);//.ToPageList(page, limit, ref totalnum);
-            //var rcpList = db.Queryable<RMS_RECIPE_VERSION>().LeftJoin<RMS_RECIPE>(data,(v,r) => r.VERSION_LATEST_ID == v.ID).Select(v => v).ToList();
-            //var project = db.Queryable<VMS_PROJECT>().In(projectid).First();
+
             return Json(new
             {
                 data = RecipeVersionList,
                 code = 0,
                 count = totalnum,
-                //newversionlock = project.VERSION_LATEST_ID != project.VERSION_EFFECTIVE_ID,
-                //effective_version_id = project.VERSION_EFFECTIVE_ID
+                canEdit = eqp.RECIPE_TYPE == "secsSml"
+
             }, JsonRequestBehavior.AllowGet);
 
-            //return Json(new {RecipeId = 0});
         }
 
         public ActionResult GetRecipeFromEQP(string EQID)
@@ -128,52 +131,13 @@ namespace Rms.Web.Controllers.Rms
         }
 
 
-        //[LogAttribute]
-        //public JsonResult AddNewVersion(string projectid)
-        //{
-        //    var db = DbFactory.GetSqlSugarClient();
-        //    db.BeginTran();
-        //    try
-        //    {
-        //        var rcp = db.Queryable<RMS_RECIPE>().In(projectid).First();
-        //        if (rcp.VERSION_LATEST_ID != rcp.VERSION_EFFECTIVE_ID) return Json(new ResponseResult { result = false, message = "有未完成的签核版本，禁止新增！" });
-        //        var eqp = db.Queryable<RMS_EQUIPMENT>().In(rcp.EQUIPMENT_ID).First();
-        //        if (eqp.RECIPE_TYPE == "onlyName") { return Json( new ResponseResult { result = false, message = "Recipe Type 'onlyName' can not add new version!" }); }
-        //        var eqtype = db.Queryable<RMS_EQUIPMENT_TYPE>().In(eqp.TYPE).First();
-        //        var lastversion = rcp.VERSION_LATEST_ID == null ? null : db.Queryable<RMS_RECIPE_VERSION>().In(rcp.VERSION_LATEST_ID).First();
-        //        var flow = db.Queryable<RMS_FLOW>().In(rcp.FLOW_ID).First();
-        //        //插入新版本
-        //        var version = new RMS_RECIPE_VERSION
-        //        {
-        //            RECIPE_ID = projectid,
-        //            FLOW_ID = rcp.FLOW_ID,
-        //            VERSION = (lastversion?.VERSION + 1) ?? 1,
-        //            FLOW_ROLES = flow.FLOW_ROLES,
-        //            CURRENT_FLOW_INDEX = -1,
-        //            CREATOR = User.TRUENAME,
-        //            //BASE_VERSION = lastversion?.VERSION,
-        //        };
-        //        db.Insertable<RMS_RECIPE_VERSION>(version).ExecuteCommand();
 
-        //        db.CommitTran();
-        //        //更新PROJECT表中记录的最新版ID
-        //        rcp.VERSION_LATEST_ID = version.ID;
-        //        db.Updateable<RMS_RECIPE>(rcp).UpdateColumns(it => new { it.VERSION_LATEST_ID }).ExecuteCommand();
-
-        //        return Json(new ResponseResult { result = true, message = "添加成功", data = new { versionid = version.ID } });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        db.RollbackTran();
-        //        return Json(new ResponseResult { result = false, message = ex.Message });
-        //    }
-        //}
         [LogAttribute]
         public JsonResult AddNewVersion(string recipeid)
         {
             var recipe = db.Queryable<RMS_RECIPE>().In(recipeid).First();
             string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/addnewrecipeversion";
-            var body = JsonConvert.SerializeObject(new AddNewRecipeVersionRequest { TrueName = User.TRUENAME, EquipmentId = recipe.EQUIPMENT_ID, RecipeName = recipe.NAME,RecipeId=recipeid });
+            var body = JsonConvert.SerializeObject(new AddNewRecipeVersionRequest { TrueName = User.TRUENAME, EquipmentId = recipe.EQUIPMENT_ID, RecipeName = recipe.NAME, RecipeId = recipeid });
             var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(apiURL, body);
             var replyItem = JsonConvert.DeserializeObject<AddNewRecipeVersionResponse>(apiresult);
             return Json(new ResponseResult { result = replyItem.Result, message = replyItem.Message, data = new { versionid = replyItem.VERSION_LATEST_ID } });
@@ -306,6 +270,47 @@ namespace Rms.Web.Controllers.Rms
             var res = JsonConvert.DeserializeObject<ReloadRecipeBodyResponse>(apiresult);
             //GetFileTable(1, 1, versionid);
             return Json(new { res });
+        }
+
+        public JsonResult UploadRcpFromEffectiveVersion(string versionid, string rcpname)
+        {
+            db.BeginTran();
+            try
+            {
+                var version = db.Queryable<RMS_RECIPE_VERSION>().In(versionid).First();
+                var recipe = db.Queryable<RMS_RECIPE>().In(version.RECIPE_ID).First();
+                if (recipe.VERSION_EFFECTIVE_ID != null)
+                {
+                    if (!string.IsNullOrEmpty(version.RECIPE_DATA_ID))
+                    {
+                        db.Deleteable<RMS_RECIPE_DATA>().In(version.RECIPE_DATA_ID).ExecuteCommand();
+                    }
+                    var effeciveversion = db.Queryable<RMS_RECIPE_VERSION>().In(recipe.VERSION_EFFECTIVE_ID).First();
+                    var effeciveversiondata = db.Queryable<RMS_RECIPE_DATA>().In(effeciveversion.RECIPE_DATA_ID).First();
+                    var data = new RMS_RECIPE_DATA
+                    {
+                        NAME = rcpname,
+                        CONTENT = effeciveversiondata.CONTENT,
+                        CREATOR = User.USERNAME,
+                    };
+                    db.Insertable<RMS_RECIPE_DATA>(data).ExecuteCommand();
+                    version.RECIPE_DATA_ID = data.ID;
+                    db.Updateable<RMS_RECIPE_VERSION>(version).UpdateColumns(it => new { it.RECIPE_DATA_ID }).ExecuteCommand();
+                    db.CommitTran();
+                    return Json(new { res = new { Result = true } });
+                }
+                else
+                {
+                    return Json(new { res = new { Result = false, Message = "No effective version" } });
+                }
+               
+            }
+            catch (Exception ex)
+            {
+                db.RollbackTran();
+                return Json(new { res = new { Result = false, Message = ex.Message } });
+            }
+            
         }
 
         [LogAttribute]
@@ -455,6 +460,39 @@ namespace Rms.Web.Controllers.Rms
             }
         }
 
+        public JsonResult GetVersionSml(string RecipeVersionId)
+        {
+            try
+            {
+                var version = db.Queryable<RMS_RECIPE_VERSION>().In(RecipeVersionId).First();
+                if(version.RECIPE_DATA_ID==null) return Json(new { Result = false, Message = "No recipe body, please load body before edit!" }, JsonRequestBehavior.AllowGet);
+                var data = db.Queryable<RMS_RECIPE_DATA>().In(version.RECIPE_DATA_ID).First();
+                var bodySml = Encoding.Unicode.GetString(data.CONTENT);
 
+                return Json(new { Result = true, BodySml = bodySml });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { Result = true, Message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [ValidateInput(false)]//SML 字符串会被当做html，跳过验证
+        public JsonResult EditRecipeBody(string RecipeVersionId,string RecipeBody)
+        {
+            try
+            {
+                string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/editrecipebody";
+                var body = JsonConvert.SerializeObject(new AddNewRecipeVersionWithBodyRequest { TrueName = User.TRUENAME, RecipeVersionId = RecipeVersionId, RecipeBody = RecipeBody });
+
+                var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(apiURL, body);
+                var rep = JsonConvert.DeserializeObject<AddNewRecipeVersionWithBodyResponse>(apiresult);
+                return Json(new { Result = rep.Result, Message = rep.Message }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { Result = false, Message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
     }
 }

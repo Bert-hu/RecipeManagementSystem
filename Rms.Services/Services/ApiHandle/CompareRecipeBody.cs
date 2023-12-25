@@ -18,8 +18,8 @@ namespace Rms.Services.Services.ApiHandle
             var db = DbFactory.GetSqlSugarClient();
             var res = new CompareRecipeBodyResponse();
             var req = JsonConvert.DeserializeObject<CompareRecipeBodyRequest>(jsoncontent);
-      
-            var recipe = db.Queryable<RMS_RECIPE>().Where(it =>it.EQUIPMENT_ID ==req.EquipmentId && it.NAME ==req.RecipeName).First();
+
+            var recipe = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == req.EquipmentId && it.NAME == req.RecipeName).First();
             if (recipe == null)
             {
                 res.Result = false;
@@ -29,7 +29,7 @@ namespace Rms.Services.Services.ApiHandle
             var recipe_version = db.Queryable<RMS_RECIPE_VERSION>().In(recipe.VERSION_EFFECTIVE_ID).First();
             var eqp = db.Queryable<RMS_EQUIPMENT>().In(recipe.EQUIPMENT_ID).First();
 
-            var rabbitRes = GetUnfomattedRecipe(eqp.RECIPE_TYPE, eqp.ID, recipe.NAME);
+            var rabbitRes = GetSecsRecipe(eqp.RECIPE_TYPE, eqp.ID, recipe.NAME);
             #region 返回是否是离线
             bool isOffline = false;
             if (rabbitRes.Parameters.TryGetValue("Status", out object status))
@@ -45,7 +45,7 @@ namespace Rms.Services.Services.ApiHandle
             #endregion
             if (rabbitRes != null)
             {
-                if (!isdebugmode)//生产环境才检查 设备回复的RecipeName和请求中的RecipeName是否一致
+                if (!IsDebugMode)//生产环境才检查 设备回复的RecipeName和请求中的RecipeName是否一致
                 {
                     if (rabbitRes.Parameters["RecipeName"].ToString() != req.RecipeName)
                     {

@@ -42,10 +42,7 @@ namespace Rms.Services
             catch (Exception ex)
             {
                 //TODO : 生产环境初始化失败！！！  报警逻辑
-                while (true)
-                {
-                    Thread.Sleep(60000);
-                }
+
             }
         }
 
@@ -69,7 +66,7 @@ namespace Rms.Services
                 }
                 else
                 {
-                    QuartzUtil.AddJob<RegularDayJob>("RegularDayJob", $"0 0 0 * * ?");
+                    _ = QuartzUtil.AddJob<RegularDayJob>("RegularDayJob", $"0 0 0 * * ?");
                 }
             }
             catch (Exception ex)
