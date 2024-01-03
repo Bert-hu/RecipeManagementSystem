@@ -9,9 +9,11 @@ using RMS.Domain.Rms;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Web.Http;
 using System.Web.Mvc;
@@ -219,14 +221,14 @@ namespace Rms.Web.Controllers.Rms
                 if (type.FLOWROLEIDS.Count == 0)
                 {
                     version.CURRENT_FLOW_INDEX = 100;
-                    db.Updateable<RMS_RECIPE_VERSION>(version).UpdateColumns(it => it.CURRENT_FLOW_INDEX).ExecuteCommand();
+                    db.Updateable<RMS_RECIPE_VERSION>(version).UpdateColumns(it => new { it.CURRENT_FLOW_INDEX ,it.REMARK}).ExecuteCommand();
                     recipe.VERSION_EFFECTIVE_ID = version.ID;
                     db.Updateable<RMS_RECIPE>(recipe).UpdateColumns(it => it.VERSION_EFFECTIVE_ID).ExecuteCommand();
                 }
                 else
                 {
                     version.CURRENT_FLOW_INDEX = 0;
-                    db.Updateable<RMS_RECIPE_VERSION>(version).UpdateColumns(it => it.CURRENT_FLOW_INDEX).ExecuteCommand();
+                    db.Updateable<RMS_RECIPE_VERSION>(version).UpdateColumns(it => new { it.CURRENT_FLOW_INDEX, it.REMARK }).ExecuteCommand();
                 }
 
                 db.CommitTran();
@@ -460,14 +462,31 @@ namespace Rms.Web.Controllers.Rms
             }
         }
 
+        private object ByteArrayToObject(byte[] data)
+        {
+            if (data == null)
+                return null;
+
+            BinaryFormatter formatter = new BinaryFormatter();
+            using (MemoryStream stream = new MemoryStream(data))
+            {
+                return formatter.Deserialize(stream);
+            }
+        }
+
         public JsonResult GetVersionSml(string RecipeVersionId)
         {
             try
             {
                 var version = db.Queryable<RMS_RECIPE_VERSION>().In(RecipeVersionId).First();
                 if(version.RECIPE_DATA_ID==null) return Json(new { Result = false, Message = "No recipe body, please load body before edit!" }, JsonRequestBehavior.AllowGet);
-                var data = db.Queryable<RMS_RECIPE_DATA>().In(version.RECIPE_DATA_ID).First();
-                var bodySml = Encoding.Unicode.GetString(data.CONTENT);
+                var recipe = db.Queryable<RMS_RECIPE>().In(version.RECIPE_ID).First();
+                var eqp = db.Queryable<RMS_EQUIPMENT>().In(recipe.EQUIPMENT_ID).First();
+              
+                if (eqp.RECIPE_TYPE != "secsSml") return Json(new { Result = false, Message = "This machine do not support displaying content!" }, JsonRequestBehavior.AllowGet);
+                var serverdata = db.Queryable<RMS_RECIPE_DATA>().In(version.RECIPE_DATA_ID).First();
+                var dataobj = ByteArrayToObject(serverdata.CONTENT);
+                var bodySml = Encoding.Unicode.GetString((dataobj as RecipeBody).FormattedBody);
 
                 return Json(new { Result = true, BodySml = bodySml });
             }

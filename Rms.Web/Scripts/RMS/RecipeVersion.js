@@ -139,8 +139,10 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                         tr.css("background-color", "#fdfd96");
                     }
                     console.log(data.canEdit);
-                    if (!data.canEdit) {
-                        tr.find('a[lay-event="editbody"]').hide();
+                    if (data.canEdit) {
+                        //20231225暂时不开放修改功能
+                        //tr.find('a[lay-event="editbody"]').show();
+                        
                     }
                 });
                 //ShowVersionTable(data.data[0].RECIPE_ID)
@@ -208,7 +210,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                     var seldata = data.data.map(it => {
                         //console.log(it.NAME)
                         return {
-                            name: it.TYPEPROCESS + "--" + it.TYPENAME + "--" + it.ID,
+                            name: it.TYPEPROCESS + "--" + it.TYPENAME + "--" + it.ID + "--" + it.NAME,
                             value: it.ID
                         };
                     });
@@ -225,7 +227,6 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                         seldata[0]
                     ])
 
-                    console.log(EQPsel)
 
                 },
                 error: function () {

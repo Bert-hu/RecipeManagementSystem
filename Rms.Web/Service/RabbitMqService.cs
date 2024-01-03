@@ -113,7 +113,7 @@ namespace Rms.Web
                 }
                 else
                 {
-                    //TODO handle primary in trans
+                    // handle primary in trans
                     switch (trans.TransactionName)
                     {
 

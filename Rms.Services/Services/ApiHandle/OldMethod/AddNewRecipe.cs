@@ -169,7 +169,7 @@ namespace Rms.Services.Services.ApiHandle
             {
                 case "secsByte":
                     rabbitmqRoute = $"EAP.SecsClient.{equipmentID}";
-                    transName = "GetUnfomattedRecipe";
+                    transName = "GetUnformattedRecipe";
                     break;
                 case "secsSml":
                     rabbitmqRoute = $"EAP.SecsClient.{equipmentID}";
@@ -177,7 +177,7 @@ namespace Rms.Services.Services.ApiHandle
                     break;
                 default:
                     rabbitmqRoute = $"EAP.SecsClient.{equipmentID}";
-                    transName = "GetUnfomattedRecipe";
+                    transName = "GetUnformattedRecipe";
                     break;
             }
 

@@ -58,11 +58,8 @@ namespace Rms.Services.Services.ApiHandle
 
             if (rabbitres != null)
             {
-
-                    res.EPPD = JsonConvert.DeserializeObject<List<string>>(rabbitres.Parameters["EPPD"].ToString());
-                    res.Result = true;
-
-
+                res.EPPD = JsonConvert.DeserializeObject<List<string>>(rabbitres.Parameters["EPPD"].ToString());
+                res.Result = true;
             }
             else//Rabbit Mq失败
             {

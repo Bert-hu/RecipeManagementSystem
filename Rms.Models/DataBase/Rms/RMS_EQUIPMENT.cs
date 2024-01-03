@@ -27,5 +27,8 @@ namespace Rms.Models.DataBase.Rms
         public string LINE { get; set; }
         public string LASTRUN_RECIPE_ID { get; set; }
         public DateTime LASTRUN_RECIPE_TIME { get; set; }
+        public string RECIPE_PATH { get; set; }
+        public string USERNAME { get; set; }
+        public string PASSWORD { get; set; }
     }
 }

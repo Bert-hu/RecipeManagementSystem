@@ -75,7 +75,7 @@ namespace Rms.Web.Controllers.Rms
         [LogAttribute]
         public JsonResult ApproveVersion(string versionid, string remark)
         {
-            //TODO 同意
+            // 同意
             var db = DbFactory.GetSqlSugarClient();
             db.BeginTran();//开启事务
             try

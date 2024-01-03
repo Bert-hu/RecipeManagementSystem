@@ -92,7 +92,7 @@ namespace Rms.Web.Controllers
                 if (user == null)
                 {
                     var roleid = ssouser.department;
-                    //TODO: 自动判断创建角色
+                    // 自动判断创建角色
                     var role = db.Queryable<PMS_ROLE>().First(it => it.ID == roleid);
                     if (role == null)
                     {
@@ -105,7 +105,7 @@ namespace Rms.Web.Controllers
                         };
                         db.Insertable<PMS_ROLE>(role).ExecuteCommand();
                     }
-                    //TODO: 自动注册
+                    // 自动注册
                     user = new PMS_USER()
                     {
                         ID = ssouser.userId,

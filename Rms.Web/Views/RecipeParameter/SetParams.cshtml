@@ -1,0 +1,201 @@
+﻿
+@{
+    Layout = null;
+    ViewBag.Title = "setparams";
+}
+
+<link href="~/Scripts/layui/css/layui.css" rel="stylesheet" />
+<script src="~/Scripts/layui/layui.js"></script>
+
+<form class="layui-form layui-form-pane" action="" style="width: 60%;margin: 0 auto;margin-top: 20px">
+    <div class="layui-form-item" hidden>
+        <label class="layui-form-label">EQID</label>
+        <div class="layui-input-block">
+            <input id="eqp" class="layui-input" lay-filter="eqp" disabled>
+        </div>
+    </div>
+
+    <div class="layui-form-item" hidden>
+        <label class="layui-form-label">Recipe ID</label>
+        <div class="layui-input-block">
+            <input id="rcpid" class="layui-input" lay-filter="rcpid" disabled>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">参数名</label>
+        <div class="layui-input-block">
+            @*<input id="paramname" class="layui-input" lay-filter="paramname">*@
+            <select lay-verify="required" lay-search="" id="paramname" lay-filter="paramname">
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">类型</label>
+        <div class="layui-input-block">
+            <select id="type" class="layui-select" lay-filter="type">
+                <option value="floatvalue">±</option>
+                <option value="percent">百分比</option>
+                <option value="enum">枚举值</option>
+                <option value="value">固定阈值</option>
+            </select>
+            @*<input type="checkbox" id="type" class="layui-form-checkbox" lay-filter="type" value="true">*@
+        </div>
+    </div>
+
+    <div id="floatvalue" hidden>
+        <div class="layui-form-item">
+            <label class="layui-form-label">+</label>
+            <div class="layui-input-block">
+                <input type="number" id="uplimit" class="layui-input" lay-filter="uplimit">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">-</label>
+            <div class="layui-input-block">
+                <input type="number" id="lowlimit" class="layui-input" lay-filter="lowlimit">
+            </div>
+        </div>
+    </div>
+    <div id="percent" hidden>
+        <div class="layui-form-item">
+            <label class="layui-form-label">增幅</label>
+            <div class="layui-input-block">
+                <input type="number" id="uplimit2" class="layui-input" lay-filter="uplimit" placeholder="%">
+
+            </div>
+
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">减幅</label>
+            <div class="layui-input-block">
+                <input type="number" id="lowlimit2" class="layui-input" lay-filter="lowlimit" placeholder="%">
+            </div>
+        </div>
+    </div>
+    <div id="enum" hidden>
+        <div class="layui-form-item">
+            <label class="layui-form-label">枚举值</label>
+            <div class="layui-input-block">
+                <input type="text" id="enumvalue" class="layui-input" lay-filter="enumvalue" placeholder="请以/隔开，如：90/100/110">
+            </div>
+
+        </div>
+
+    </div>
+    <div id="value" hidden>
+        <div class="layui-inline">
+            <label class="layui-form-label">范围</label>
+            <div class="layui-input-inline" style="width: 25%;">
+                <input type="number" id="lowlimit3" name="lowlimit" placeholder="下限" autocomplete="off" class="layui-input" lay-filter="lowlimit">
+            </div>
+            <div class="layui-input-inline" style="width: 15%; text-align:center">
+                ~
+            </div>
+            <div class="layui-input-inline" style="width: 25%;">
+                <input type="number" id="uplimit3" name="uplimit" placeholder="上限" autocomplete="off" class="layui-input" lay-filter="uplimit">
+            </div>
+        </div>
+    </div>
+
+</form>
+<script>
+
+    layui.use(['jquery', 'form'], function () {
+        var $ = layui.jquery;
+        const form = layui.form;
+        form.render();
+        //回传给母页面的数据
+        var retdata = {};
+        var urlParams = new URLSearchParams(window.location.search);
+        var RecipeID = urlParams.get("RecipeID");
+        GetParams();
+
+        function GetParams() {
+            //执行重载
+            $.ajax({
+                url: '/RecipeParameter/GetParamsList',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                data: {
+                    "paramFilter": RecipeID
+                    //"recipeTypeFilter": $("#recipeTypeFilter").val(),
+
+                },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
+                async: false,
+                success: function (data) {
+                    //layer.open({ content: data.message });
+                    console.log(data)
+                    $("#paramname").html(data);
+                    form.render();
+
+                },
+                error: function (message) {
+                    alert('error!');
+                }
+            });
+        }
+        form.on('select(type)', function (data) {
+            //console.log(data.value);
+            if (data.value == 'floatvalue') {
+                $('#floatvalue').show();
+                $('#percent').hide();
+                $('#enum').hide();
+                $('#value').hide();
+
+                form.render('select');
+            }
+            else if (data.value == 'percent') {
+                $('#percent').show();
+                $('#floatvalue').hide();
+                $('#enum').hide();
+                $('#value').hide();
+                retdata.uplimit = $("#uplimit2").val();
+                retdata.lowlimit = $("#lowlimit2").val();
+                form.render('select');
+            }
+            else if (data.value == 'enum') {
+                $('#enum').show();
+                $('#floatvalue').hide();
+                $('#percent').hide();
+                $('#value').hide();
+                form.render('select');
+            }
+            else if (data.value == 'value') {
+                $('#value').show();
+                $('#floatvalue').hide();
+                $('#percent').hide();
+                $('#enum').hide();
+                form.render('select');
+            }
+        });
+
+        window.callback = function () {
+            retdata.eqpid = $("#eqp").val()
+            retdata.rcpid = $("#rcpid").val();
+            retdata.paramname = $("#paramname").val();
+            retdata.type = $("#type").val();
+            retdata.enum = $("#enumvalue").val();
+            if (retdata.type == 'percent') {
+                retdata.uplimit = $("#uplimit2").val();
+                retdata.lowlimit = $("#lowlimit2").val();
+            }
+            else if (retdata.type == 'value') {
+                retdata.uplimit = $("#uplimit3").val();
+                retdata.lowlimit = $("#lowlimit3").val();
+            }
+            else {
+                retdata.uplimit = $("#uplimit").val();
+                retdata.lowlimit = $("#lowlimit").val();
+            }
+
+            return JSON.stringify(retdata);
+        };
+
+
+
+
+
+    });
+
+</script>
+

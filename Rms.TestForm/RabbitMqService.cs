@@ -128,7 +128,6 @@ namespace Rms.TestForm
                 }
                 else
                 {
-                    //TODO handle primary in trans
                     var rep = new RabbitMqTransaction()
                     {
                         TransactionID = trans.TransactionID,

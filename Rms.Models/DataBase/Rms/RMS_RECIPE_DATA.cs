@@ -16,4 +16,12 @@ namespace Rms.Models.DataBase.Rms
         public string CREATOR { get; set; } = "Default";
         public DateTime CREATE_TIME { get; set; } = DateTime.Now;
     }
+
+
+    [Serializable]
+    public class RecipeBody
+    {
+        public byte[] UnformattedBody { get; set; }
+        public byte[] FormattedBody { get; set; }
+    }
 }

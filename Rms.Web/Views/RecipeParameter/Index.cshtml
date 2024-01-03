@@ -1,0 +1,677 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+
+
+
+
+<form class="layui-form layui-form-pane" action="">
+    <div class="layui-form-item layui-row">
+        <div class="layui-row">
+            <div class="layui-input-inline" style="width:15%">
+                <select name="process" id="process" lay-filter="process" lay-verify="required">
+                    <option value="">请选择Process</option>
+                    <option value="DPS">DPS</option>
+                </select>
+            </div>
+            <div class="layui-input-inline" style="width: 80% ;margin-left: 1%">
+                <div id="eqps" lay-filter="index" class="xm-select-demo"></div>
+            </div>
+        </div>
+    </div>
+</form>
+<fieldset class="layui-elem-field layui-field-title">
+    <legend id="info">EQP:</legend>
+</fieldset>
+
+<div class="layui-row layui-col-space10" style=" margin-bottom: 50px">
+    <div class="layui-row layui-col-space10" style=" margin-bottom: 50px">
+        <div class="layui-col-md4">
+            <div class="grid-demo grid-demo-bg1">
+                <table class="layui-hide" id="rcptable" lay-filter="rcptable"></table>
+
+            </div>
+        </div>
+        <div class="layui-col-md8">
+            <div class="grid-demo">
+                <table class="layui-hide" id="recipeparams" lay-filter="recipeparams"></table>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<script type="text/html" id="newspec">
+    <div>
+        <div class="layui-btn-container" style="float:left;display:inline">
+            <button class="layui-btn layui-btn-sm" lay-event="newspec">添加默认SPEC</button>
+        </div>
+
+    </div>
+</script>
+
+<script type="text/html" id="toolbar1">
+    <a class="layui-btn layui-btn-success layui-btn-xs" lay-event="setParams">新增参数管控</a>
+
+
+</script>
+<script type="text/html" id="toolbar2">
+
+    <a class="layui-btn layui-btn layui-btn-xs" lay-event="delete">删除</a>
+
+</script>
+
+<script type="text/html" id="toolbar3">
+
+    <a class="layui-btn layui-btn layui-btn-xs" lay-event="dictionary">参数字典</a>
+
+</script>
+<script src="~/Scripts/layui/xm-select.js"></script>
+<script>
+
+
+    layui.use(['table', 'jquery'], function () {
+        var table = layui.table
+            , form = layui.form
+            , $ = layui.jquery;
+        form.render();
+        var paramtable;
+        getProcess();
+        var processselect = document.getElementById("process");
+        var EQPsel = xmSelect.render({
+            el: '#eqps',
+            initValue: [0],
+            filterable: true,
+            radio: true,
+            tips: '请选择设备',
+            clickClose: true,
+            block: {
+                //最大显示数量, 0:不限制
+                showCount: 0,
+                //是否显示删除图标
+                showIcon: false,
+            },
+            on: function (data) {
+                //arr:  当前多选已选中的数据
+                var arr = data.arr;
+                //change, 此次选择变化的数据,数组
+                var change = data.change;
+                //isAdd, 此次操作是新增还是删除
+                var isAdd = data.isAdd;
+
+
+                //var projectid = change[0].value;
+
+                var eqpid = change[0].value;
+                window.currenteqid = change[0].value;
+                document.getElementById("info").innerHTML = eqpid;
+                ShowRCPTable(eqpid);
+
+            },
+
+        })
+        async function getProcess() {
+            try {
+                let result1 = await $.ajax({
+                    type: 'post',
+                    dataType: 'json',
+                    url: '/Equipment/GetProcesses',
+                    data: {
+                    },
+                    success: function (data) {
+
+                        processselect.innerHTML = "";
+                        // 添加默认选项
+                        //var defaultOption = document.createElement("option");
+                        //defaultOption.value = "";
+                        //defaultOption.text = "请选择Process";
+                        //processselect.add(defaultOption);
+                        // 自动生成其他选项
+                        for (var i = 0; i < data.length; i++) {
+                            var option = document.createElement("option");
+                            option.text = data[i];
+                            processselect.add(option);
+                        }
+                        form.render('select');
+                        getEQP(data[0]);
+                    },
+                    error: function () {
+                    }
+                });
+
+
+            } catch (error) {
+                //处理错误
+            }
+        }
+
+        async function getEQP(process) {
+            try {
+                let result1 = await $.ajax({
+                    type: 'post',
+                    dataType: 'json',
+                    url: '/Equipment/GetEQPs',
+                    data: {
+                        page: 1,
+                        limit: 9999,
+                        processfilter: process
+                    },
+                    success: function (data) {
+                        var seldata = data.data.map(it => {
+                            return {
+                                name: it.TYPEPROCESS + "--" + it.TYPENAME + "--" + it.ID,
+                                value: it.ID
+                            };
+                        });
+
+                        var eqpid = data.data[0].ID;
+                        document.getElementById("info").innerHTML = eqpid;
+                        ShowRCPTable(eqpid);
+
+                        EQPsel.update({
+                            data: seldata,
+
+                        });
+                        EQPsel.setValue([
+                            seldata[0]
+                        ])
+
+                    },
+                    error: function () {
+                    }
+                });
+
+
+            } catch (error) {
+                //处理错误
+            }
+        }
+
+        function ShowRCPTable(id) {
+            window.rcptable = table.render({
+                elem: '#rcptable'
+                , url: '/Recipe/GetRecipe'
+                , toolbar: '#addnewrcp'
+                , id: "rcptable"
+                , limit: 1000
+                , limits: [1000]
+                , height: 'full-235'
+                , cols: [[
+                    { field: 'RECIPE_NAME', title: 'RecipeName', width: '60%' }
+                    , { field: 'RECIPE_EFFECTIVE_VERSION', align: 'center', title: 'EffectiveVer.', width: '20%' }
+                    , { fixed: 'right', width: '20%', align: 'center', toolbar: '#recipetoolbar' }
+                ]]
+                , where: {
+                    EQID: id
+                }
+                , currenteqpid: id
+                , done: function (data) {
+
+                }
+            });
+
+        }
+
+
+        //这是单击触发事件（默认），如果需要双击触发事件，则table.on('rowDouble(test)', function(obj) {}）
+        table.on('rowDouble(rcptable)', function (obj) {
+            console.log(obj);
+            var data = obj.data;//data为当前点击行的数据
+            selid = data.RECIPE_ID;
+            SelectParamsScope(selid);//级联，调用右表数据加载函数
+
+            //标注选中样式
+            obj.tr.addClass('layui-table-click').siblings().removeClass('layui-table-click');
+        });
+
+
+
+
+
+        //这是单击触发事件（默认），如果需要双击触发事件，则table.on('rowDouble(test)', function(obj) {}）
+        table.on('rowDouble(recipeversion)', function (obj) {
+
+            var data = obj.data;//data为当前点击行的数据
+            selid = data.ID;
+            LoadRecipeParams(selid)
+            LoadRecipeParamsTable(selid)
+            //LoadRecipeVersion(selid);//级联，调用右表数据加载函数
+
+            //标注选中样式
+            obj.tr.addClass('layui-table-click').siblings().removeClass('layui-table-click');
+        });
+
+        function LoadRecipeParams(selid) {
+            layer.open({
+                title: 'Recipe Parameters'
+                , type: 2
+                , btn: ['确定', '取消']
+                , content: 'recipeParams'
+                , area: ['60%', '90%']
+                , success: function (layero, index) {
+                    //向layer页面传值，传值主要代码
+                    layer.msg(selid);
+                    var body = layer.getChildFrame('body', index);
+
+                    ////将弹窗页面中属性名id="xxxx"的标签赋值
+                    //var select = document.getElementById("rcpversionID");
+                    //var options = select.options;
+                    //var index = select.selectedIndex;
+                    body.find("[id='rcpversionID']").val(selid);
+                    //body.find("[id='rcpversionID']").val(options[index].value);
+                }
+                , yes: function (index) {
+                    var res = window["layui-layer-iframe" + index].callback();
+                    var data = JSON.parse(res);
+
+                    if (data.Name == null) {
+                        layer.msg('请选择一个Recipe');
+                    } else {
+                        //AddNewRecipe(data);
+                        //ReloadRecipeTable();
+                        // layer.msg(res);
+
+                        layer.close(index);
+                    }
+
+                }, btn2: function (index, layero) {
+                    layer.msg('取消操作');
+                }
+
+            });
+        }
+
+        form.render("select");
+        ReloadRecipeTable();
+        //ReloadEqpSPECTable();
+        //ReloadRecipeParamsTable();
+
+        function LoadRecipeParamsTable(selid) {
+            //执行重载
+            table.render({
+                elem: '#recipeversion'
+                , height: 'full-250'
+                , url: '/RecipeVersion/GetRcpParams/' //数据接口
+                , title: 'Recipe Version Table'
+                , id: "recipeversion"
+                , cols: [[ //表头
+                    { field: 'ALIAS', title: '名称' }
+                    , { field: 'VERSION', title: '版本' }
+                    , { field: 'REMARK', title: '备注' }
+                    , { field: 'CREATOR', title: '创建者' }
+                    , { field: 'CREATETIME', title: '创建时间', templet: '<div>{{ FormDate(d.CREATETIME, "yyyy-MM-dd HH:mm:ss") }}</div>' }
+
+                ]]
+                , where: {//这里传参 向后台
+                    "rcpversionID": selid
+                    // "siteFilter": $("#siteFilter").val(),
+                }
+            });
+        }
+
+
+
+
+
+
+
+
+
+
+        //监听行工具事件
+        table.on('toolbar(recipeparams)', function (obj) { //注：tool 是工具条事件名，recipe 是 table 原始容器的属性 lay-filter="对应的值"
+            var selectdata = obj.config.where.rcpFilter //获得当前行数据
+               , layEvent = obj.event; //获得 lay-event 对应的值
+
+            //console.log(obj)
+            SetParamsScope(selectdata);
+
+        });
+
+        table.on('toolbar(recipe)', function (obj) { //注：tool 是工具条事件名，recipe 是 table 原始容器的属性 lay-filter="对应的值"
+            var selectdata = obj.config.where.eqpid //获得当前行数据
+                , layEvent = obj.event; //获得 lay-event 对应的值
+
+            console.log(selectdata)
+            ParamsDictionary(selectdata)
+            //SetParamsScope(selectdata);
+
+        });
+
+        function ParamsDictionary(data) {
+            layer.open({
+                title: '参数字典'
+                , type: 2
+                , btn:[]
+                , content: 'ParamsDictionary?EQID=' + data
+                , area: ['50%', '60%']
+                , success: function (layero, index) {
+                    //向layer页面传值，传值主要代码
+                    var body = layer.getChildFrame('body', index);
+
+                    ////将弹窗页面中属性名id="xxxx"的标签赋值
+                    //var select = document.getElementById("rcpid");
+
+                    //var index = select.selectedIndex;
+                   // body.find("[id='rcpid']").val(data);
+                    //body.find("[id='rcpid']").val(options[index].value);
+                }
+
+
+            });
+        }
+
+        function SelectParamsScope(data) {
+            paramtable = table.render({
+                elem: '#recipeparams'
+                , height: 'full-250'
+                , url: '/RecipeParameter/GetRcpParams/' //数据接口
+                , title: '参数配置表'
+                , page: true //开启分页
+                // , toolbar: 'default' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
+                // , totalRow: true //开启合计行
+                , id: "recipeparams"
+                , limits: [9999]
+                , toolbar:"#toolbar1"
+                , limit: 9999
+                , defaultToolbar: ['filter']
+                , cols: [[ //表头
+                    { field: 'SOURCE', title: 'Source', edit: true, align: 'center' }
+                    , { field: 'ParamKey', title: 'Key', align: 'center' }
+                    , { field: 'Name', title: 'Name', align: 'center' }
+                    , { field: 'Type', title: 'Type', align: 'center' }
+                    , { field: 'LCL', title: 'LCL', edit: true, align: 'center' }
+                    , { field: 'UCL', title: 'UCL', edit: true, align: 'center' }                   
+                    , { field: 'EnumValue', title: 'EnumValue', edit: true, align: 'center' }
+                    , { field: 'LastEditor', title: 'LastEditor', align: 'center' }
+                    , { field: 'LastEditTime', title: 'LastEditTime', templet: '<div>{{ FormDate(d.LastEditTime, "yyyy-MM-dd HH:mm:ss") }}</div>', align: 'center' }
+                    , { fixed: 'right', width: 100, align: 'center', toolbar: '#toolbar2' }
+
+                ]]
+                , where: {//这里传参 向后台
+                    "rcpFilter": data
+
+                }
+            });
+            var cols = paramtable.config.cols;
+
+            table.on('tool(recipeparams)', function (obj) {
+                var event = obj.event, //当前单元格事件属性值
+
+                    selectdata = obj.data;
+
+                if (event === 'delete') {
+                    $.ajax({
+                        url: '/RecipeParameter/DeleteScope',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                        data: {
+                            "data": selectdata,
+                        },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
+                        type: 'POST',
+                        contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
+                        async: false,
+                        success: function (data) {
+                            layer.open({ content: data.message });
+                            paramtable.reload();
+                        },
+                        error: function (message) {
+                            alert('测试失败，请联系管理员!');
+                        }
+                    });
+                    //console.log('123');
+                }
+                else {
+
+                    var field = obj.field; //单元格字段
+                    var value = obj.value; //修改后的值
+                    var data = obj.data; //当前行旧数据
+                    var update = {};
+                    update[field] = value;
+                    //把value更新到行中
+                    obj.update(update);
+                    //layer.msg(value);
+                    /**
+                     *说白了，此obj与table.on('tool(tableEvent)',function (obj) {})
+                     *中的obj对象是同一个，所以可以如此操作。
+                     *
+                     * */
+                }
+
+
+            });
+            table.on('edit(recipeparams)', function (obj) { //注：edit是固定事件名，tableEvent是table原始容器的属性 lay-filter="对应的值"
+                console.log(obj);
+                layer.confirm('is not?', { icon: 3, title: '修改确认', content: obj.value }, function (index) {
+                    //do something
+                    $.ajax({
+                        url: '/RecipeParameter/EditScope',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                        data: {
+                            "ID": obj.data.ID,
+                            "value": obj.value,
+                            "field": obj.field
+                        },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
+                        type: 'POST',
+                        contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
+                        async: false,
+                        success: function (data) {
+                            layer.msg(data.message);
+                            paramtable.reload();
+
+                        },
+                        error: function (message) {
+                            alert('error!');
+                        }
+                    });
+                    layer.close(index);
+                },
+                    function (index) {
+                        layer.msg('取消修改');
+                        paramtable.reload();
+                    }
+
+                );
+
+                //layer.msg(obj.value);
+                //  layer.msg(obj.field);
+                // layer.msg(obj.data.ID);
+            });
+            //layer.open({
+            //    title: 'Recipe Parameters'
+            //    , type: 2
+            //    , content: 'SelectParams'
+            //    , area: ['90%', '90%']
+            //    , success: function (layero, index) {
+            //        //向layer页面传值，传值主要代码
+            //        var body = layer.getChildFrame('body', index);
+
+            //        ////将弹窗页面中属性名id="xxxx"的标签赋值
+            //        //var select = document.getElementById("rcpid");
+
+            //        //var index = select.selectedIndex;
+            //        body.find("[id='rcpid']").val(data.ID);
+            //        //body.find("[id='rcpid']").val(options[index].value);
+            //    }
+            //    , yes: function (index) {
+            //    }
+
+            //});
+        }
+
+        //by recipe set param scope
+        function SetParamsScope(data) {
+            layer.open({
+                title: 'Set Recipe Parameters'
+                , type: 2
+                , btn: ['确定', '取消']
+                , content: '/RecipeParameter/SetParams?RecipeID=' + data
+                , area: ['40%', '50%']
+                , success: function (layero, index) {
+                    //向layer页面传值，传值主要代码
+                    var body = layer.getChildFrame('body', index);
+
+                    ////将弹窗页面中属性名id="xxxx"的标签赋值
+                    //var select = document.getElementById("rcpid");
+
+                    //var index = select.selectedIndex;
+                    body.find("[id='rcpid']").val(data);
+                    //body.find("[id='rcpid']").val(options[index].value);
+                }
+                , yes: function (index) {
+                    var res = window["layui-layer-iframe" + index].callback();
+                    var data = JSON.parse(res);
+                    console.log(data);
+                    if (data.paramname == "") {
+                        layer.msg('请填写完整');
+                    } else {
+                    AddNewScope(data);
+                    //ReloadRecipeTable();
+                    //layer.msg(res);
+
+                    layer.close(index);
+                    }
+
+                }, btn2: function (index, layero) {
+                    layer.msg('取消操作');
+                }
+
+            });
+        }
+        function AddNewScope(data) {
+            console.log(data);
+            $.ajax({
+                url: '/RecipeParameter/AddNewScope',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                data: {
+                    data
+                },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
+                async: false,
+                success: function (data) {
+                    layer.open({ content: data.message });
+                    paramtable.reload();
+                },
+                error: function (message) {
+                    alert('error!');
+                }
+            });
+        }
+
+        table.on('toolbar(eqpspec)', function (obj) {
+            layer.open({
+                title: '新增参数SPEC'
+                , type: 2
+                , btn: ['确定', '取消']
+                , content: 'setparams'
+                , area: ['40%', '50%']
+                , success: function (layero, index) {
+                    //向layer页面传值，传值主要代码
+                    //   var body = layer.getChildFrame('body', index);
+                    var body = layer.getChildFrame('body', index);
+                    var select = document.getElementById("eqp");
+                    var options = select.options;
+                    var index = select.selectedIndex;
+                    body.find("[id='eqp']").val(options[index].value);
+                }
+                , yes: function (index) {
+                    var res = window["layui-layer-iframe" + index].callback();
+                    var data = JSON.parse(res);
+                    console.log(data);
+                    if (data.eqpid == "") {
+                        layer.msg('请输入信息');
+                    } else {
+                        //console.log(data);
+                        // layer.msg(res);
+                        //layer.msg('新增设备功能未开放');
+                        AddNewSPECByEQP(data);
+                        layer.close(index);
+                    }
+
+                }, btn2: function (index, layero) {
+                    layer.msg('取消操作');
+                }
+
+            });
+        });
+        function ReloadRecipeTable() {
+            //执行重载
+            table.reload('recipe', {
+                where: {//这里传参 向后台
+                    "eqpid": $("#eqp").val(),
+                }
+                //, url: '/RecipeVersion/GetSpecialRcpList/' //数据接口
+                , url: '/RecipeVersion/GetRecipeList/' //数据接口
+                , method: 'post'
+            });
+        }
+        function ReloadEqpSPECTable() {
+            table.reload('eqpspec', {
+                where: {//这里传参 向后台
+                    "eqpid": $("#eqp").val(),
+                }
+                , url: '/RecipeParameter/GetSpecList/' //数据接口
+                , method: 'post'
+            });
+        }
+        $(document).on('click', '#newspec', function () {
+            layer.open({
+                title: '新增参数SPEC'
+                , type: 2
+                , btn: ['确定', '取消']
+                , content: 'setparams'
+                , area: ['40%', '50%']
+                , success: function (layero, index) {
+                    //向layer页面传值，传值主要代码
+                    //   var body = layer.getChildFrame('body', index);
+                    var body = layer.getChildFrame('body', index);
+                    var select = document.getElementById("eqp");
+                    var options = select.options;
+                    var index = select.selectedIndex;
+                    body.find("[id='eqp']").val(options[index].text);
+                }
+                , yes: function (index) {
+                    var res = window["layui-layer-iframe" + index].callback();
+                    var data = JSON.parse(res);
+                    console.log(data);
+                    if (data.eqpid == "") {
+                        layer.msg('请输入信息');
+                    } else {
+                        //console.log(data);
+                        // layer.msg(res);
+                        //layer.msg('新增设备功能未开放');
+                        AddNewSPECByEQP(data);
+                        layer.close(index);
+                    }
+
+                }, btn2: function (index, layero) {
+                    layer.msg('取消操作');
+                }
+
+            });
+        });
+        function AddNewSPECByEQP(data) {
+            $.ajax({
+                url: '/RecipeParameter/AddNewSPECByEQP',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                data: {
+                    data
+                },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
+                async: false,
+                success: function (resdata) {
+                    layer.open({ content: resdata.message });
+                    //ReloadEqpSPECTable();
+                },
+                error: function (message) {
+                    alert('error!');
+                }
+            });
+        }
+
+
+
+
+    });
+</script>

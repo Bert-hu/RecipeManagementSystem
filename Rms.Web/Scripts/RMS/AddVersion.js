@@ -1,10 +1,15 @@
-layui.use(['jquery','layer', 'table', 'form', 'upload', 'element'], function () {
+layui.use(['jquery', 'layer', 'table', 'form', 'upload', 'element', 'code'], function () {
     var $ = layui.jquery
         , layer = layui.layer
         , table = layui.table
-        , form = layui.form;
-        //, upload = layui.upload
-        //, element = layui.element;
+        , form = layui.form
+        ;
+    //, upload = layui.upload
+    //, element = layui.element;
+
+    layui.code({
+        encode: true //是否转义html标签。默认不开启
+    });
 
     var vid = window.parent.data.id;
     var rcpname;
@@ -155,6 +160,34 @@ layui.use(['jquery','layer', 'table', 'form', 'upload', 'element'], function () 
 
         });
 
+        $.ajax({
+            url: '/Recipe/GetVersionSml',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+            data: {
+                RecipeVersionId: vid
+            },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
+            type: 'POST',
+            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
+            async: false,
+            success: function (data) {
+                if (data.Result) {
+                    var convertedText = data.BodySml.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+                    document.getElementById("textarea_recipebody").innerHTML = convertedText;
+                    layui.code({
+                        //encode: true //是否转义html标签。默认不开启
+                    });
+
+                } else {
+                    document.getElementById("textarea_recipebody").innerHTML = data.Message;
+                }
+
+
+            },
+            error: function (message) {
+                alert('error!');
+            }
+        });
+
         table.render({
             elem: '#processrecordtable'
             , url: '/Recipe/GetProcessRecord'
@@ -206,7 +239,7 @@ layui.use(['jquery','layer', 'table', 'form', 'upload', 'element'], function () 
                     var index = window.parent.layer.getFrameIndex(window.name)
                     window.parent.layer.close(index);
                     window.parent.versiontable.reload();
-                    
+
                 },
                 error: function () {
                 }
@@ -216,7 +249,7 @@ layui.use(['jquery','layer', 'table', 'form', 'upload', 'element'], function () 
 
         //load recipe body
         layui.$('#loadbody').on('click', function () {
-            
+
             $.ajax({
                 type: 'post',
                 dataType: 'json',
@@ -295,9 +328,9 @@ layui.use(['jquery','layer', 'table', 'form', 'upload', 'element'], function () 
                         } else {
                             window.parent.layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: data.result ? 1 : 4 });
                         }
-                        
+
                         //close iframe
-                        
+
                     },
                     error: function () {
                     }
@@ -306,7 +339,7 @@ layui.use(['jquery','layer', 'table', 'form', 'upload', 'element'], function () 
             return false;
         });
     }
-    
+
 
     function GetVersionStatus(flows, index) {
         var status = '';

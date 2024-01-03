@@ -55,6 +55,8 @@
     <Compile Include="DataBase\Pms\PMS_ROLE.cs" />
     <Compile Include="DataBase\Pms\PMS_USER.cs" />
     <Compile Include="DataBase\Rms\RMS_EQUIPMENT_TYPE.cs" />
+    <Compile Include="DataBase\Rms\RMS_PARAMETER_SCOPE.cs" />
+    <Compile Include="DataBase\Rms\RMS_PARAMETER_DIC.cs" />
     <Compile Include="DataBase\Rms\RMS_PRODUCTIONLOG.cs" />
     <Compile Include="DataBase\Rms\RMS_FLOW.cs" />
     <Compile Include="DataBase\Rms\RMS_FLOW_HITS.cs" />

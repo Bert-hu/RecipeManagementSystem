@@ -83,8 +83,9 @@ namespace Rms.Services.Services
                     return null;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
+                Log.Warn($"Tansaction {trans.TransactionName} timeout, {timeoutInSeconds} s");
                 return null;
             }
         }
@@ -123,7 +124,6 @@ namespace Rms.Services.Services
                 }
                 else
                 {
-                    //TODO handle primary in trans
                     switch (trans.TransactionName)
                     {
 

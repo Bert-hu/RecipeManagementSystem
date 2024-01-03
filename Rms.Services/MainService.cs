@@ -11,7 +11,10 @@ using System.ComponentModel;
 using System.Configuration;
 using System.Data;
 using System.Diagnostics;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Net;
 using System.ServiceProcess;
 using System.Text;
 using System.Threading;
@@ -41,6 +44,7 @@ namespace Rms.Services
             }
             catch (Exception ex)
             {
+                Log.Error(ex.Message,ex);
                 //TODO : 生产环境初始化失败！！！  报警逻辑
 
             }
@@ -48,6 +52,30 @@ namespace Rms.Services
 
         public void OnStart()
         {
+
+
+            //NetworkCredential networkCredential = new NetworkCredential("admin", "usi");
+            //var recipepath = @"\\172.19.11.116\eap\test\rcp1";
+            //DirectoryInfo directoryInfo = new DirectoryInfo(recipepath);
+            //if (directoryInfo.Exists)
+            //{
+            //    var body = CompressDirectory(recipepath);
+
+            //    DecompressDirectory(body, recipepath + "1");
+            //}
+            //else
+            //{
+            //    using (new NetworkConnection(recipepath, networkCredential))
+            //    {
+            //        var body = CompressDirectory(recipepath);
+
+            //        DecompressDirectory(body, recipepath + "1");
+            //    }
+            //}
+
+
+
+
             StartQuartzJob();
             StartRabbitMqService();
             StartWebApiListener();
