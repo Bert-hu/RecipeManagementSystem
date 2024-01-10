@@ -78,6 +78,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Class1.cs" />
+    <Compile Include="CommonConfiguration.cs" />
     <Compile Include="DbFactory.cs" />
     <Compile Include="EncrypHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -87,6 +88,12 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Rms.Models\Rms.Models.csproj">
+      <Project>{3a2c676d-23e1-4cc0-b232-6720afb43503}</Project>
+      <Name>Rms.Models</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

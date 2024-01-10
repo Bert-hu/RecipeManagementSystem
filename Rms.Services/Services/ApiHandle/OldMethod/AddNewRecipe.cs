@@ -181,13 +181,11 @@ namespace Rms.Services.Services.ApiHandle
                     break;
             }
 
-            var listenChannel = ConfigurationManager.AppSettings["ListenChannel"];
             var trans = new RabbitMqTransaction
             {
                 TransactionName = transName,
                 EquipmentID = equipmentID,
                 NeedReply = true,
-                ReplyChannel = listenChannel,
                 Parameters = new Dictionary<string, object>() { { "RecipeName", recipeName } }
             };
 

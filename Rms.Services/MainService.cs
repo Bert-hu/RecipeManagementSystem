@@ -44,7 +44,7 @@ namespace Rms.Services
             }
             catch (Exception ex)
             {
-                Log.Error(ex.Message,ex);
+                Log.Error(ex.Message, ex);
                 //TODO : 生产环境初始化失败！！！  报警逻辑
 
             }
@@ -52,30 +52,6 @@ namespace Rms.Services
 
         public void OnStart()
         {
-
-
-            //NetworkCredential networkCredential = new NetworkCredential("admin", "usi");
-            //var recipepath = @"\\172.19.11.116\eap\test\rcp1";
-            //DirectoryInfo directoryInfo = new DirectoryInfo(recipepath);
-            //if (directoryInfo.Exists)
-            //{
-            //    var body = CompressDirectory(recipepath);
-
-            //    DecompressDirectory(body, recipepath + "1");
-            //}
-            //else
-            //{
-            //    using (new NetworkConnection(recipepath, networkCredential))
-            //    {
-            //        var body = CompressDirectory(recipepath);
-
-            //        DecompressDirectory(body, recipepath + "1");
-            //    }
-            //}
-
-
-
-
             StartQuartzJob();
             StartRabbitMqService();
             StartWebApiListener();
@@ -84,6 +60,9 @@ namespace Rms.Services
         protected override void OnStop()
         {
         }
+
+
+
         private void StartQuartzJob()
         {
             try
@@ -109,12 +88,11 @@ namespace Rms.Services
         {
             try
             {
-                var RabbitMqHost = ConfigurationManager.AppSettings["RabbitMqHost"];
-                var RabbitMqPort = int.Parse(ConfigurationManager.AppSettings["RabbitMqPort"]);
-                var RabbitMqUser = ConfigurationManager.AppSettings["RabbitMqUser"];
-                var RabbitMqPassword = ConfigurationManager.AppSettings["RabbitMqPassword"];
+                var RabbitMqHost = CommonConfiguration.Configs["RabbitMqHost"];
+                var RabbitMqPort = int.Parse(CommonConfiguration.Configs["RabbitMqPort"]);
+                var RabbitMqUser = CommonConfiguration.Configs["RabbitMqUser"];
+                var RabbitMqPassword = CommonConfiguration.Configs["RabbitMqPassword"];
                 var ListenChannel = ConfigurationManager.AppSettings["ListenChannel"];
-                var ListenReplyChannel = ConfigurationManager.AppSettings["ListenReplyChannel"];
                 var isdebugmode = ConfigurationManager.AppSettings["IsDebugMode"].ToUpper() == "TRUE";
                 if (isdebugmode) //测试模式
                 {
@@ -126,7 +104,6 @@ namespace Rms.Services
                     Log.Debug($"{RabbitMqHost}, {RabbitMqUser}, {RabbitMqPassword}, {RabbitMqPort}");
                     RabbitMqService.Initiate(RabbitMqHost, RabbitMqUser, RabbitMqPassword, RabbitMqPort);
                     RabbitMqService.BeginConsume(ListenChannel);
-                    RabbitMqService.BeginConsume(ListenReplyChannel);
                 }
 
             }
@@ -141,7 +118,7 @@ namespace Rms.Services
         {
             try
             {
-                var ApiPort = ConfigurationManager.AppSettings["ApiPort"];
+                var ApiPort = CommonConfiguration.Configs["ApiPort"];
                 var isdebugmode = ConfigurationManager.AppSettings["IsDebugMode"].ToUpper() == "TRUE";
                 if (isdebugmode) //测试模式
                 {

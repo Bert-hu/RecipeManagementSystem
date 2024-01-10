@@ -157,4 +157,15 @@ namespace Rms.Models.WebApi
     public class AddNewRecipeVersionWithBodyResponse : ResponseMessage
     {
     }
+
+    public class DownloadMapByLotRequest
+    {
+        public string EquipmentId { get; set; }
+        public string LottId { get; set; }
+    }
+
+    public class DownloadMapByLotResponse : ResponseMessage
+    {
+      
+    }
 }

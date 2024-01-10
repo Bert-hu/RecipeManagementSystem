@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataBase\COMMON_CONFIG.cs" />
     <Compile Include="DataBase\Pms\PMS_MODULE.cs" />
     <Compile Include="DataBase\Pms\PMS_MODULEROLE.cs" />
     <Compile Include="DataBase\Pms\PMS_OPERATIONLOG.cs" />

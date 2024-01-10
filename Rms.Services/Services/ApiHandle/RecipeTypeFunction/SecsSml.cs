@@ -42,14 +42,12 @@ namespace Rms.Services.Services.ApiHandle.RecipeTypeFunction
                 var dataobj = ByteArrayToObject(serverdata);
 
                 string rabbitMqRoute = $"EAP.SecsClient.{EquipmentId}";
-                var listenChannel = ConfigurationManager.AppSettings["ListenChannel"];
                 var body = Convert.ToBase64String((dataobj as RecipeBody).UnformattedBody);
                 var trans = new RabbitMqTransaction
                 {
                     TransactionName = "SetUnformattedRecipe",
                     EquipmentID = EquipmentId,
                     NeedReply = true,
-                    ReplyChannel = listenChannel,
                     Parameters = new Dictionary<string, object>() { { "RecipeName", recipe.NAME }, { "RecipeBody", body } }
                 };
                 var rabbitRes = RabbitMqService.ProduceWaitReply(rabbitMqRoute, trans, 60);

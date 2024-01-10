@@ -23,13 +23,11 @@ namespace Rms.Services.Services.ApiHandle.RecipeTypeFunction
             {
                 string rabbitmqroute = $"EAP.SecsClient.{EquipmentId}";
 
-                var ListenChannel = ConfigurationManager.AppSettings["ListenChannel"];
                 var trans = new RabbitMqTransaction
                 {
                     TransactionName = "DeleteAllRecipes",
                     EquipmentID = EquipmentId,
                     NeedReply = true,
-                    ReplyChannel = ListenChannel,
                 };
                 var rabbitres = RabbitMqService.ProduceWaitReply(rabbitmqroute, trans, 30);
                 if (rabbitres != null)
@@ -69,14 +67,12 @@ namespace Rms.Services.Services.ApiHandle.RecipeTypeFunction
                 var recipe = db.Queryable<RMS_RECIPE>().InSingle(recipe_version.RECIPE_ID);
                 var data = db.Queryable<RMS_RECIPE_DATA>().InSingle(recipe_version.RECIPE_DATA_ID)?.CONTENT;
                 string rabbitMqRoute = $"EAP.SecsClient.{EquipmentId}";
-                var listenChannel = ConfigurationManager.AppSettings["ListenChannel"];
                 var body = Convert.ToBase64String(data);
                 var trans = new RabbitMqTransaction
                 {
                     TransactionName = "SetUnformattedRecipe",
                     EquipmentID = EquipmentId,
                     NeedReply = true,
-                    ReplyChannel = listenChannel,
                     Parameters = new Dictionary<string, object>() { { "RecipeName", recipe.NAME }, { "RecipeBody", body } }
                 };
                 var rabbitRes = RabbitMqService.ProduceWaitReply(rabbitMqRoute, trans, 60);
@@ -104,13 +100,11 @@ namespace Rms.Services.Services.ApiHandle.RecipeTypeFunction
             try
             {
                 var rabbitmqroute = $"EAP.SecsClient.{EquipmentId}";
-                var ListenChannel = ConfigurationManager.AppSettings["ListenChannel"];
                 var trans = new RabbitMqTransaction
                 {
                     TransactionName = "GetEPPD",
                     EquipmentID = EquipmentId,
                     NeedReply = true,
-                    ReplyChannel = ListenChannel,
                 };
                 var rabbitres = RabbitMqService.ProduceWaitReply(rabbitmqroute, trans, 5);
                 if (rabbitres != null)

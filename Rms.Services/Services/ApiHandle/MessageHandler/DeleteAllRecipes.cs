@@ -46,13 +46,11 @@ namespace Rms.Services.Services.ApiHandle.MessageHandler
             string rabbitmqroute = string.Empty;
             rabbitmqroute = $"EAP.SecsClient.{EquipmentID}";
 
-            var ListenChannel = ConfigurationManager.AppSettings["ListenChannel"];
             var trans = new RabbitMqTransaction
             {
                 TransactionName = "DeleteAllRecipes",
                 EquipmentID = EquipmentID,
                 NeedReply = true,
-                ReplyChannel = ListenChannel,
             };
             var rabbitres = RabbitMqService.ProduceWaitReply(rabbitmqroute, trans, 30);
             if (rabbitres != null)

@@ -27,13 +27,11 @@ namespace Rms.Services.Services.ApiHandle
             var res = new GetEquipmentStatusResponse();
             var req = JsonConvert.DeserializeObject<GetEquipmentStatusRequest>(jsoncontent);
 
-            var ListenChannel = ConfigurationManager.AppSettings["ListenChannel"];
             var trans = new RabbitMqTransaction
             {
                 TransactionName = "GetEquipmentStatus",
                 EquipmentID = req.EquipmentId,
                 NeedReply = true,
-                ReplyChannel = ListenChannel,
             };
 
             var rabbitmqroute = $"EAP.SecsClient.{req.EquipmentId}";

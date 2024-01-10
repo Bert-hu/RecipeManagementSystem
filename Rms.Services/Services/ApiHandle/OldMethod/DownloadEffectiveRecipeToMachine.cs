@@ -113,13 +113,11 @@ namespace Rms.Services.Services.ApiHandle
                     break;
             }
 
-            var listenChannel = ConfigurationManager.AppSettings["ListenChannel"];
             var trans = new RabbitMqTransaction
             {
                 TransactionName = transName,
                 EquipmentID = equipmentID,
                 NeedReply = true,
-                ReplyChannel = listenChannel,
                 Parameters = new Dictionary<string, object>() { { "RecipeName", recipeName }, { "RecipeBody", body } }
             };
 
@@ -134,13 +132,11 @@ namespace Rms.Services.Services.ApiHandle
             //识别设备类型和恢复queue
             string body = string.Empty;
 
-            var ListenChannel = ConfigurationManager.AppSettings["ListenChannel"];
             var trans = new RabbitMqTransaction
             {
                 TransactionName = "PpSelect",
                 EquipmentID = EquipmentID,
                 NeedReply = true,
-                ReplyChannel = ListenChannel,
                 Parameters = new Dictionary<string, object>() { { "RecipeName", RecipeName } }
             };
             var rabbitres = RabbitMqService.ProduceWaitReply(rabbitmqroute, trans, 1);
@@ -158,13 +154,11 @@ namespace Rms.Services.Services.ApiHandle
                     rabbitmqroute = $"EAP.SecsClient.{EquipmentID}";
                     break;
             }
-            var ListenChannel = ConfigurationManager.AppSettings["ListenChannel"];
             var trans = new RabbitMqTransaction
             {
                 TransactionName = "DeleteAllRecipes",
                 EquipmentID = EquipmentID,
                 NeedReply = true,
-                ReplyChannel = ListenChannel,
             };
             var rabbitres = RabbitMqService.ProduceWaitReply(rabbitmqroute, trans, 30);
             return rabbitres;

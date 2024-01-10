@@ -33,13 +33,11 @@ namespace Rms.Services.Services.ApiHandle
                     rabbitmqroute = $"EAP.SecsClient.{req.EquipmentId}";
                     break;
             }
-            var ListenChannel = ConfigurationManager.AppSettings["ListenChannel"];
             var trans = new RabbitMqTransaction
             {
                 TransactionName = "GetEPPD",
                 EquipmentID = req.EquipmentId,
                 NeedReply = true,
-                ReplyChannel = ListenChannel,
             };
             var rabbitres = RabbitMqService.ProduceWaitReply(rabbitmqroute, trans, 5);
             #region 返回是否是离线

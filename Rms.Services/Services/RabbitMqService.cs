@@ -24,6 +24,7 @@ namespace Rms.Services.Services
         private static log4net.ILog Log = log4net.LogManager.GetLogger("Logger");
 
         static RabbitMqHelper rabbitMq;
+        static string ListenReplyChannel;        
 
         static RabbitMqService()
         {
@@ -38,15 +39,16 @@ namespace Rms.Services.Services
         public static void BeginConsume(string routingKey)
         {
             rabbitMq?.BeginConsume(routingKey, RabbitMqReceive);
+            ListenReplyChannel = routingKey + "." + Guid.NewGuid().ToString("N");
+            rabbitMq?.BeginConsume(ListenReplyChannel, RabbitMqReceive);
         }
 
         public static void Produce(string routingKey, RabbitMqTransaction trans)
         {
             try
             {
-                var ListenChannel = ConfigurationManager.AppSettings["ListenChannel"];
 
-                if (trans.NeedReply == true && string.IsNullOrEmpty(trans.ReplyChannel)) trans.ReplyChannel = ListenChannel;
+                if (trans.NeedReply == true && string.IsNullOrEmpty(trans.ReplyChannel)) trans.ReplyChannel = ListenReplyChannel;
                 var message = JsonConvert.SerializeObject(trans);
 
                 rabbitMq?.Produce(routingKey, message, trans.ExpireSecond);
@@ -64,7 +66,6 @@ namespace Rms.Services.Services
         {
             try
             {
-                var ListenReplyChannel = ConfigurationManager.AppSettings["ListenReplyChannel"];
                 trans.ReplyChannel = ListenReplyChannel;
                 var tcs = new TaskCompletionSource<RabbitMqTransaction>();
                 var message = JsonConvert.SerializeObject(trans);

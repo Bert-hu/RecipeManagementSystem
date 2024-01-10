@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Rms.Utils;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
@@ -19,9 +20,10 @@ namespace Rms.Services
             var isdebugmode = ConfigurationManager.AppSettings["IsDebugMode"].ToUpper() == "TRUE";
             if (isdebugmode)
             {
+                CommonConfiguration.UpdateConfig(isdebugmode);
                 MainService service = new MainService();
                 service.OnStart();
-                while (true) { Thread.Sleep(10000); } ;
+                while (true) { Thread.Sleep(10000); } 
             }
 
             ServiceBase[] ServicesToRun;

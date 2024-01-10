@@ -257,9 +257,10 @@
     <Compile Include="Controllers\Pms\RoleController.cs" />
     <Compile Include="Controllers\Pms\UserController.cs" />
     <Compile Include="Controllers\Production\CommonProductionController.cs" />
+    <Compile Include="Controllers\Production\UvIrradiationController.cs" />
     <Compile Include="Controllers\Production\WaferToReelController.cs" />
     <Compile Include="Controllers\Production\FviController.cs" />
-    <Compile Include="Controllers\Production\WaferAOI.cs" />
+    <Compile Include="Controllers\Production\WaferAOIController.cs" />
     <Compile Include="Controllers\Production\WaferMarkingController.cs" />
     <Compile Include="Controllers\Production\WaferGrindingLaminationController.cs" />
     <Compile Include="Controllers\Production\DicingSawController.cs" />
@@ -503,6 +504,7 @@
     <Content Include="Scripts\Marking\markingfields.js" />
     <Content Include="Scripts\Marking\markingmanage.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
+    <Content Include="Scripts\Production\UvIrradiation\Index.js" />
     <Content Include="Scripts\Production\Fvi\Index.js" />
     <Content Include="Scripts\Production\WaferAOI\Index.js" />
     <Content Include="Scripts\Production\WaferToReel\Index.js" />
@@ -578,6 +580,7 @@
     <Content Include="Views\Recipe\EditVersion.cshtml" />
     <Content Include="Views\RecipeParameter\Index.cshtml" />
     <Content Include="Views\RecipeParameter\SetParams.cshtml" />
+    <Content Include="Views\UvIrradiation\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

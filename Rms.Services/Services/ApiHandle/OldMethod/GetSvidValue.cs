@@ -27,13 +27,11 @@ namespace Rms.Services.Services.ApiHandle
             var res = new GetSvidValueResponse();
             var req = JsonConvert.DeserializeObject<GetSvidValueRequest>(jsoncontent);
 
-            var ListenChannel = ConfigurationManager.AppSettings["ListenChannel"];
             var trans = new RabbitMqTransaction
             {
                 TransactionName = "GetSvidValue",
                 EquipmentID = req.EquipmentId,
                 NeedReply = true,
-                ReplyChannel = ListenChannel,
                 Parameters = new Dictionary<string, object>() { { "VidList", req.VidList } }
             };
 

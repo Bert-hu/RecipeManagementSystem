@@ -30,13 +30,11 @@ namespace Rms.Services.Services.ApiHandle.RecipeTypeFunction
             try
             {
                 var rabbitmqroute = $"EAP.SecsClient.{EquipmentId}";
-                var ListenChannel = ConfigurationManager.AppSettings["ListenChannel"];
                 var trans = new RabbitMqTransaction
                 {
                     TransactionName = "GetEPPD",
                     EquipmentID = EquipmentId,
                     NeedReply = true,
-                    ReplyChannel = ListenChannel,
                 };
                 var rabbitres = RabbitMqService.ProduceWaitReply(rabbitmqroute, trans, 5);
                 if (rabbitres != null)
@@ -69,7 +67,7 @@ namespace Rms.Services.Services.ApiHandle.RecipeTypeFunction
 
         public (bool result, string message, byte[] body) UploadRecipeToServer(string EquipmentId, string RecipeName)
         {
-            throw new NotImplementedException();
+            return (true, string.Empty, null);
         }
     }
 }
