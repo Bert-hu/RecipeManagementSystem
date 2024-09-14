@@ -30,5 +30,9 @@ namespace Rms.Models.DataBase.Rms
         public string RECIPE_PATH { get; set; }
         public string USERNAME { get; set; }
         public string PASSWORD { get; set; }
+        public bool ISLOCKED { get; set; } = false;
+        public string LOCKED_MESSAGE { get; set; } = string.Empty;
+
+        public string FATHER_EQID { get; set; }//只适用于Golden Machine， Golden Recipe的RecipeTypeFunction
     }
 }

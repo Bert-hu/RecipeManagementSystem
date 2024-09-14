@@ -1,16 +1,7 @@
 ﻿using Newtonsoft.Json;
-using Rms.Models.DataBase.Rms;
 using Rms.Models.RabbitMq;
 using Rms.Models.WebApi;
 using Rms.Utils;
-using RMS.Domain.Rms;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Rms.Services.Services.ApiHandle
 {

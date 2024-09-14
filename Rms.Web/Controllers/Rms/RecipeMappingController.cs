@@ -96,6 +96,7 @@ ORDER BY equipment.ORDERSORT", line, recipegroup_id);
                  .GroupJoin(recipes, filtereqp => filtereqp.eqp.ID, rcp => rcp.EQUIPMENT_ID, (filtereqps, rcps) =>
                  new EqupmentTableData
                  {
+                     LINE = filtereqps.eqp.LINE,
                      EQUIPMENT_ID = filtereqps.eqp.ID,
                      EQUIPMENT_NAME = filtereqps.eqp.NAME,
                      EQUIPMENT_TYPE_NAME = filtereqps.eqptype.NAME,
@@ -154,6 +155,7 @@ ORDER BY equipment.ORDERSORT", line, recipegroup_id);
 
         public class EqupmentTableData
         {
+            public string LINE { get; set; }
             public string EQUIPMENT_ID { get; set; }
             public string EQUIPMENT_NAME { get; set; }
             public string EQUIPMENT_TYPE_NAME { get; set; }

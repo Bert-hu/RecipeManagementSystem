@@ -6,7 +6,7 @@ using System.Text;
 using Newtonsoft.Json;
 using SqlSugar;
 
-namespace RMS.Domain.Rms
+namespace Rms.Models.DataBase.Rms
 {
     ///<summary>
     ///

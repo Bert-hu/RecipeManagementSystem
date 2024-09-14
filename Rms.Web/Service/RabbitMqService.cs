@@ -43,7 +43,7 @@ namespace Rms.Web
                 rabbitMq?.Produce(routingKey, message, trans.ExpireSecond);
 
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 //Log.Error(ex);
             }
@@ -73,7 +73,7 @@ namespace Rms.Web
                     return null;
                 }
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return null;
             }
@@ -123,7 +123,7 @@ namespace Rms.Web
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 //Log.Error(ex.Message);
             }

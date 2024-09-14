@@ -56,16 +56,16 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             , limits: [1000]
             , height: 'full-235'
             , cols: [[
-                { field: 'VERSION', title: '版本号', width: '10%', sort: true }
+                { field: 'VERSION', title: 'Version No.', width: '15%', sort: true }
                 //, { field: 'NAME', title: '版本', width: 200 }
                 , {
-                    field: 'CURRENT_FLOW_INDEX', title: '签核状态', width: '45%',
+                    field: 'CURRENT_FLOW_INDEX', title: 'Status', width: '30%',
                     templet: function (d, s) {
                         var strstate;
                         if (d.CURRENT_FLOW_INDEX == 100) {
-                            strstate = '已完成'
+                            strstate = '已完成/Finished'
                         } else if (d.CURRENT_FLOW_INDEX == -1) {
-                            strstate = '未提交'
+                            strstate = '未提交/'
                         }
                         else {
                             strstate = d._FLOW_ROLES[d.CURRENT_FLOW_INDEX];
@@ -73,8 +73,8 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                         return strstate;
                     }
                 }
-                , { field: 'CREATOR', title: '创建者', width: '15%' }
-                , { field: 'CREATE_TIME', title: '创建时间', templet: '<div>{{ FormDate(d.CREATE_TIME, "yyyy-MM-dd HH:mm:ss") }}</div>', width: '20%' }
+                , { field: 'CREATOR', title: 'User', width: '15%' }
+                , { field: 'CREATE_TIME', title: 'Date Time', templet: '<div>{{ FormDate(d.CREATE_TIME, "yyyy-MM-dd HH:mm:ss") }}</div>', width: '30%' }
                 , { fixed: 'right', width: '10%', align: 'center', toolbar: '#versiontoolbar' }
 
             ]]
@@ -117,9 +117,9 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             , limits: [1000]
             , height: 'full-235'
             , cols: [[
-                { field: 'RECIPE_NAME', title: 'Recipe名', width: '45%' }
-                , { field: 'RECIPE_LATEST_VERSION', title: '最新版本', width: '15%' }
-                , { field: 'RECIPE_EFFECTIVE_VERSION', title: '生效版本', width: '15%' }
+                { field: 'RECIPE_NAME', title: 'Recipe Name', width: '45%' }
+                , { field: 'RECIPE_LATEST_VERSION', title: 'Latest Version', width: '15%' }
+                , { field: 'RECIPE_EFFECTIVE_VERSION', title: 'Effective Version', width: '15%' }
                 , { fixed: 'right', width: '25%', align: 'center', toolbar: '#recipetoolbar' }
             ]]
             , where: {
@@ -135,7 +135,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
 
 
                     if (item.RECIPE_LATEST_VERSION > item.RECIPE_EFFECTIVE_VERSION) {//黄色
-                        console.log('here')
+                        //console.log('here')
                         tr.css("background-color", "#fdfd96");
                     }
                     console.log(data.canEdit);
@@ -210,13 +210,15 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                     var seldata = data.data.map(it => {
                         //console.log(it.NAME)
                         return {
-                            name: it.TYPEPROCESS + "--" + it.TYPENAME + "--" + it.ID + "--" + it.NAME,
+                            name: it.TYPEPROCESS + "--" + it.TYPENAME + "--" + it.LINE + "--" + it.ID + "--" + it.NAME,
                             value: it.ID
                         };
                     });
 
                     var eqpid = data.data[0].ID;
                     document.getElementById("info").innerHTML = eqpid;
+                    window.currenteqid = seldata[0].value;
+                    console.log(window.currenteqid);
                     ShowRCPTable(eqpid);
 
                     EQPsel.update({
@@ -226,8 +228,8 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                     EQPsel.setValue([
                         seldata[0]
                     ])
-
-
+                   
+                    
                 },
                 error: function () {
                 }
@@ -248,13 +250,13 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
         console.log(versiontable);
         if (newversionlock) {
             console.log(newversionlock)
-            layer.msg('<em style="color:white;font-style:normal;font-weight:normal">有未完成的签核版本，禁止新增！</em>', { icon: 5 });
+            layer.msg('<em style="color:white;font-style:normal;font-weight:normal">有未完成的签核版本，禁止新增！There is a unfinished version, no new additions allowed!</em>', { icon: 5 });
             versiontable.reload();
         }
         else {
             switch (obj.event) {
                 case 'add':
-                    if (confirm('确定新增版本？')) {
+                    if (confirm('确定新增版本？Are you sure to add a new version?')) {
                         $.ajax({
                             url: '/Recipe/AddNewVersion',
                             data: {
@@ -277,7 +279,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
 
                             },
                             error: function () {
-                                layer.msg('提交失败', { icon: 4 });
+                                layer.msg('提交失败.Submit fail', { icon: 4 });
                                 result = false;
                             }
                         });
@@ -322,7 +324,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             layer.prompt({
                 formType: 2,
 
-                title: '请确认下载"' + obj.data.RECIPE_NAME + '"到设备吗？请输入Y确认',
+                title: '请确认下载"' + obj.data.RECIPE_NAME + '"到设备吗？请输入Y确认.Enter "Y" to confirm download',
                 area: ['80px', '35px'] //自定义文本域宽高
             }, function (value, index, elem) {
                 if (value.toUpperCase() === 'Y') {
@@ -356,6 +358,44 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                 }
             });
         }
+        else if (layEvent === 'ppselect') {
+            layer.prompt({
+                formType: 2,
+
+                title: '请确认切换"' + obj.data.RECIPE_NAME + '"到设备吗？请输入Y确认.Enter "Y" to confirm ppselect',
+                area: ['80px', '35px'] //自定义文本域宽高
+            }, function (value, index, elem) {
+                if (value.toUpperCase() === 'Y') {
+                    console.log(selectdata.RECIPE_ID);
+                    $.ajax({
+                        type: 'post',
+                        dataType: 'json',
+                        url: '/Recipe/SwitchRecipe',
+                        data: {
+                            rcpID: selectdata.RECIPE_ID
+                        },
+                        success: function (data) {
+                            var resultData = data
+
+                            if (resultData.Result) {
+                                layer.close(index)
+                                window.rcptable.reload();
+                                layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + 'PP-SELECT succeed.' + '</em>');
+                                //return false;
+                            } else {
+
+                                layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + 'Error:' + resultData.Message + '</em>');
+                                //return true;
+                            }
+
+                        },
+                        error: function (err) {
+                            console.log(err)
+                        }
+                    });
+                }
+            });
+        }
         else if (layEvent === 'editbody'){
 
             ShowBodyEditPage(selectdata.RECIPE_LATEST_VERSION_ID);
@@ -372,7 +412,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             layer.open({
                 title: 'Add New Recipe'
                 , type: 2
-                , btn: ['确定', '取消']
+                , btn: ['确定Confirm', '取消Cancel']
                 , content: 'AddRecipe'
                 , area: ['60%', '90%']
                 //, params: { id: currentversionid }
@@ -450,14 +490,14 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                             window.rcptable.reload();
                             //layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + 'Recipe download succeed.' + '</em>');
                             layer.open({
-                                title: '下载成功'
+                                title: '下载成功Download success'
                                 , content: "Group:'" + data.RecipeGroupName + "',\r\nRecipe:'" + data.RecipeName + "'"
                             });
 
                             //return false;
                         } else {
                             layer.open({
-                                title: '下载失败'
+                                title: '下载失败Download fail'
                                 , content: data.Message
                             });
                         }
@@ -486,7 +526,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
         layer.open({
             title: 'Recipe Version Upgrade'
             , type: 2
-            , btn: ['取消']
+            , btn: ['取消Cancel']
             , content: 'AddVersion'
             , area: ['60%', '90%']
             //, params: { id: currentversionid }
@@ -496,9 +536,6 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                 var body = layer.getChildFrame('body', index);
                 //将弹窗页面中属性名id="xxxx"的标签赋值
                 body.find("[id='rcpversionID']").val(versionid);
-
-
-
             }
             , yes: function (index) {
                 layer.close(index);
@@ -528,7 +565,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
         layer.open({
             title: 'Edit Recipe Body'
             , type: 2
-            , btn: ['提交','取消']
+            , btn: ['提交Submit','取消Cancel']
             , content: 'EditVersion?RecipeVersionId=' + recipeVersionId
             , area: ['90%', '90%']
 

@@ -72,11 +72,11 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                 { field: 'ID', title: 'ID' }
                 , { field: 'NAME', title: 'NAME', edit: true }
                 , { field: 'PROCESS', title: 'PROCESS', edit: true }
-                , { field: 'VENDOR', title: '供应商', edit: true }
-                , { field: 'TYPE', title: '型号', edit: true }
-                , { field: 'DELETEBEFOREDOWNLOAD', title: '下载前清空设备', edit: true }
-                , { field: 'ORDERSORT', title: '排序', edit: true }
-                , { fixed: 'right', width: 220, align: 'center', toolbar: '#toolbar' }
+                , { field: 'VENDOR', title: 'Vendor', edit: true }
+                , { field: 'TYPE', title: 'Type', edit: true }
+                , { field: 'DELETEBEFOREDOWNLOAD', title: 'Delete all recipe befor download', edit: true }
+                , { field: 'ORDERSORT', title: 'Order Sort', edit: true }
+                , { fixed: 'right', width: 400, align: 'center', toolbar: '#toolbar' }
             ]]
             , where: {
                 processfilter: processfilter
@@ -91,7 +91,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
 
     table.on('edit(equipmenttypetable)', function (obj) {
 
-        layer.confirm('is not?', { icon: 3, title: '修改确认', content: obj.value }, function (index) {
+        layer.confirm('is not?', { icon: 3, title: '修改确认/Confirm to Edit', content: obj.value }, function (index) {
             console.log(obj);
             $.ajax({
                 url: '/EquipmentType/Edit',
@@ -114,7 +114,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             layer.close(index);
         },
             function (index) {
-                layer.msg('取消修改');
+                layer.msg('取消Cancel');
                 ectable.reload();
             }
 
@@ -128,9 +128,9 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             selectdata = obj.data;
         if (event === 'permission') {
             layer.open({
-                title: '更改权限'
+                title: '更改访问权限/Edit access permissions'
                 , type: 2
-                , btn: ['确定', '取消']
+                , btn: ['确定Confirm', '取消Cancel']
                 , content: 'TypeRole?TYPEID=' + selectdata.ID
                 , area: ['40%', '85%']
                 , success: function (layero, index) {
@@ -164,16 +164,16 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
 
 
                 }, btn2: function (index, layero) {
-                    layer.msg('取消操作');
+                    layer.msg('取消Cancel');
                 }
 
             });
         }
         else if (event === 'auditprocess') {
             layer.open({
-                title: '更改签核流程'
+                title: '更改签核流程/Edit flow of audit'
                 , type: 2
-                , btn: ['确定', '取消']
+                , btn: ['确定Confirm', '取消Cancel']
                 , content: 'AuditProcessPage?TYPEID=' + selectdata.ID
                 , area: ['90%', '85%']
                 , success: function (layero, index) {
@@ -206,7 +206,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
 
 
                 }, btn2: function (index, layero) {
-                    layer.msg('取消操作');
+                    layer.msg('取消Cancel');
                 }
 
             });

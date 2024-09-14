@@ -163,7 +163,7 @@ ORDER BY CREATE_TIME", string.IsNullOrEmpty(logid) ? "" : $"AND CREATE_TIME>(SEL
                     return false;
                 }
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 errMsg = "EAP send message to SFIS fail.";
                 return false;
@@ -213,7 +213,7 @@ ORDER BY CREATE_TIME", string.IsNullOrEmpty(logid) ? "" : $"AND CREATE_TIME>(SEL
         }
 
 
-        public JsonResult LotEnd(string equipmentid, string lotid)
+        public virtual JsonResult LotEnd(string equipmentid, string lotid)
         {
             string sfis_step2_req = $"{equipmentid},{lotid},2,M068397,JORDAN,,OK,";
             string sfis_step2_res = string.Empty;

@@ -2,14 +2,9 @@
 using Rms.Models.DataBase.Rms;
 using Rms.Utils;
 using Rms.Web.Extensions;
-using RMS.Domain.Rms;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
-using System.Web.UI;
-using System.Windows.Media.Media3D;
 
 namespace Rms.Web.Controllers.Rms
 {
@@ -29,7 +24,7 @@ namespace Rms.Web.Controllers.Rms
         {
             var db = DbFactory.GetSqlSugarClient();
             var totalnum = 0;
-            var sql = @"SELECT R.NAME RECIPE_NAME,RV.* FROM USI_DPSRMS.RMS_RECIPE_VERSION RV,USI_DPSRMS.RMS_RECIPE R
+            var sql = @"SELECT R.NAME RECIPE_NAME,RV.* FROM RMS_RECIPE_VERSION RV,RMS_RECIPE R
 where R.ID = RV.RECIPE_ID
 AND RV.CURRENT_FLOW_INDEX >=0
 AND RV.CURRENT_FLOW_INDEX <100

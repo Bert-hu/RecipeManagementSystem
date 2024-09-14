@@ -1,13 +1,8 @@
 ﻿using Newtonsoft.Json;
-using RMS.Domain.Rms;
 using Rms.Models.DataBase.Rms;
 using Rms.Models.WebApi;
 using Rms.Utils;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Rms.Services.Services.ApiHandle
 {

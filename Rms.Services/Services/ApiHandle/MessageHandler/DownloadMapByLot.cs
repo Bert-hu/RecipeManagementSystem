@@ -2,6 +2,7 @@
 using Renci.SshNet;
 using Rms.Models.DataBase.Rms;
 using Rms.Models.WebApi;
+using Rms.Services.Utils;
 using Rms.Utils;
 using System;
 using System.Collections.Generic;
@@ -22,12 +23,12 @@ namespace Rms.Services.Services.ApiHandle.MessageHandler
             {
                 var db = DbFactory.GetSqlSugarClient();
                 var request = JsonConvert.DeserializeObject<DownloadMapByLotRequest>(jsonContent);
-                
+
 
                 var equipment = db.Queryable<RMS_EQUIPMENT>().In(request.EquipmentId).First();
                 var equipmentType = db.Queryable<RMS_EQUIPMENT_TYPE>().In(equipment.TYPE).First();
 
-                string sfisStep7Request = $"{request.EquipmentId},{request.LottId},7,M068397,JORDAN,,OK,MODEL_NAME=???  WAFER_IDS=???";
+                string sfisStep7Request = $"{request.EquipmentId},{request.LotId},7,M068397,JORDAN,,OK,MODEL_NAME=???  WAFER_IDS=???";
                 string sfisStep7Response = string.Empty;
                 string errorMessage = string.Empty;
 
@@ -39,88 +40,153 @@ namespace Rms.Services.Services.ApiHandle.MessageHandler
                             .Where(keyValueArray => keyValueArray.Length == 2)
                             .ToDictionary(keyValueArray => keyValueArray[0], keyValueArray => keyValueArray[1]);
 
-                        string modelName = sfisParameters["MODEL_NAME"];
+                        //string modelName = sfisParameters["MODEL_NAME"];
                         string[] waferIds = sfisParameters["WAFER_IDS"].Split(';');
-
-                        string sftpIp = CommonConfiguration.Configs["SftpIp"];
-                        string sourceUsername = CommonConfiguration.Configs["SftpSourceUsername"];
-                        string sourcePassword = CommonConfiguration.Configs["SftpSourcePassword"];
                         string productionMapPath = CommonConfiguration.Configs["ProductionMapPath"];
                         string productionMapUsername = CommonConfiguration.Configs["ProductionMapUsername"];
                         string productionMapPassword = CommonConfiguration.Configs["ProductionMapPassword"];
-                        string targetPath = $"\\Production{equipmentType.NAME}";
-
                         var targetDirectory = $"{productionMapPath.TrimEnd('\\').TrimEnd('/')}";
+                        string targetPath = $"Production{equipmentType.NAME}";
+                        #region Old Method: Sftp
+                        //string sftpIp = CommonConfiguration.Configs["SftpIp"];
+                        //string sourceUsername = CommonConfiguration.Configs["SftpSourceUsername"];
+                        //string sourcePassword = CommonConfiguration.Configs["SftpSourcePassword"];
+                        //
+                        //
+                        //using (new NetworkConnection(targetDirectory, new NetworkCredential(productionMapUsername, productionMapPassword)))
+                        //{
+                        //    targetDirectory = Path.Combine(targetDirectory, targetPath.TrimEnd('/'), request.EquipmentId);
+                        //    if (!Directory.Exists(targetDirectory))
+                        //    {
+                        //        Directory.CreateDirectory(targetDirectory);
+                        //    }
 
+                        //    string[] files = Directory.GetFiles(targetDirectory);
+                        //    files.ToList().ForEach(file => System.IO.File.Delete(file));
+
+                        //    using (var sourceClient = new SftpClient(sftpIp, sourceUsername, sourcePassword))
+                        //    {
+                        //        sourceClient.Connect();
+                        //        foreach (var waferId in waferIds)
+                        //        {
+                        //            string sfisStep3Request = $"{request.EquipmentId},{waferId},3,M001603,JORDAN,,OK,";
+                        //            string sfisStep3Response = string.Empty;
+
+                        //            if (SendMessageToSfis(sfisStep3Request, ref sfisStep3Response, ref errorMessage))
+                        //            {
+                        //                if (sfisStep3Response.ToUpper().StartsWith("OK"))
+                        //                {
+                        //                    var sfisParameters1 = sfisStep3Response.Split(',')[1].Split(' ').Select(keyValueString => keyValueString.Split('='))
+                        //                        .Where(keyValueArray => keyValueArray.Length == 2)
+                        //                        .ToDictionary(keyValueArray => keyValueArray[0], keyValueArray => keyValueArray[1]);
+
+                        //                    var folderName = sfisParameters1["FOLDER_NAME"].TrimEnd('/') + "/";
+                        //                    var fileName = sfisParameters1["FILE_NAME"];
+                        //                    var sourceFilePath = Path.Combine(folderName, fileName);
+                        //                    //var targetFilePath = Path.Combine(targetDirectory, waferId.ToUpper() + ".SINF");
+                        //                    var targetFilePath = Path.Combine(targetDirectory, waferId.ToUpper());//20240117 改为不带.SINF后缀
+
+                        //                    using (var fileStream = System.IO.File.OpenWrite(targetFilePath))
+                        //                    {
+                        //                        sourceClient.DownloadFile(sourceFilePath, fileStream);
+                        //                    }
+                        //                }
+                        //                else
+                        //                {
+                        //                    response.Message = $"Lot:{request.LotId},Sfis FAIL:{sfisStep3Response}";
+                        //                    return response;
+                        //                }
+                        //            }
+                        //            else
+                        //            {
+                        //                response.Message = $"Lot:{request.LotId},Sfis error:{sfisStep7Response}";
+                        //                return response;
+                        //            }
+                        //        }
+
+                        //        sourceClient.Disconnect();
+                        //    }
+                        //}
+                        #endregion
+
+
+                        #region New Method: WaferMap Service
                         using (new NetworkConnection(targetDirectory, new NetworkCredential(productionMapUsername, productionMapPassword)))
                         {
                             targetDirectory = Path.Combine(targetDirectory, targetPath.TrimEnd('/'), request.EquipmentId);
-
                             if (!Directory.Exists(targetDirectory))
                             {
                                 Directory.CreateDirectory(targetDirectory);
                             }
-
-                            string[] files = Directory.GetFiles(targetDirectory);
-                            files.ToList().ForEach(file => System.IO.File.Delete(file));
-
-                            using (var sourceClient = new SftpClient(sftpIp, sourceUsername, sourcePassword))
+                            List<WaferMapVM> wafermaps = new List<WaferMapVM>();
+                            string waferMapUrl = CommonConfiguration.Configs["WaferMapUrl"];
+                            string downloadMapUrl = $"{waferMapUrl}/WaferMap/GetEffectiveWaferMap";
+                            foreach (var waferid in waferIds)
                             {
-                                sourceClient.Connect();
-
-                                foreach (var waferId in waferIds)
+                                string downloadMapBody = JsonConvert.SerializeObject(new { WaferID = waferid, Role = equipmentType.ID });
+                                //Http Post Request
+                                var downloadMapResult = HTTPClientHelper.HttpPostRequestAsync4Json(downloadMapUrl, downloadMapBody);
+                                if (downloadMapResult != null)
                                 {
-                                    string sfisStep3Request = $"{request.EquipmentId},{waferId},3,M001603,JORDAN,,OK,";
-                                    string sfisStep3Response = string.Empty;
-
-                                    if (SendMessageToSfis(sfisStep3Request, ref sfisStep3Response, ref errorMessage))
+                                    var downloadMapReply = JsonConvert.DeserializeObject<DownloadMapReply>(downloadMapResult);
+                                    if (downloadMapReply.Result)
                                     {
-                                        if (sfisStep3Response.ToUpper().StartsWith("OK"))
+                                        var waferMap = downloadMapReply.WaferMap;
+                                        if (waferMap != null)
                                         {
-                                            var sfisParameters1 = sfisStep3Response.Split(',')[1].Split(' ').Select(keyValueString => keyValueString.Split('='))
-                                                .Where(keyValueArray => keyValueArray.Length == 2)
-                                                .ToDictionary(keyValueArray => keyValueArray[0], keyValueArray => keyValueArray[1]);
+                                            wafermaps.Add(waferMap);
 
-                                            var folderName = sfisParameters1["FOLDER_NAME"].TrimEnd('/') + "/";
-                                            var fileName = sfisParameters1["FILE_NAME"];
-                                            var sourceFilePath = Path.Combine(folderName, fileName);
-                                            var targetFilePath = Path.Combine(targetDirectory, waferId.ToUpper() + ".SINF");
-
-                                            using (var fileStream = System.IO.File.OpenWrite(targetFilePath))
-                                            {
-                                                sourceClient.DownloadFile(sourceFilePath, fileStream);
-                                            }
+                                            //string mapContent = waferMap.Content;
+                                            //string mapFileName = waferMap.ID;
+                                            //string mapFilePath = Path.Combine(targetDirectory, mapFileName);
+                                            //File.WriteAllText(mapFilePath, mapContent);
                                         }
                                     }
                                     else
                                     {
-                                        response.Message = $"Lot:{request.LottId},Sfis error:{sfisStep7Response}";
+                                        response.Message = $"Lot:{request.LotId},WaferID:{waferid},download wafer map FAIL:{downloadMapReply.Message}";
                                         return response;
                                     }
                                 }
+                                else
+                                {
+                                    response.Message = $"Lot:{request.LotId},WaferID:{waferid},Call WaferMap Service Api FAIL";
+                                    return response;
+                                }
+                            }
 
-                                sourceClient.Disconnect();
+                            foreach (var waferMap in wafermaps)
+                            {
+                                string mapContent = waferMap.Content;
+                                string mapFileName = waferMap.WaferMapId;
+                                string mapFilePath = Path.Combine(targetDirectory, mapFileName);
+                                File.WriteAllText(mapFilePath, mapContent);
                             }
                         }
+                        #endregion
+
 
                         response.Result = true;
+                        response.Message = string.Join(",", waferIds);
                         return response;
                     }
                     else
                     {
-                        response.Message = $"Lot:{request.LottId},Sfis error:{sfisStep7Response}";
+                        response.Message = $"Lot:{request.LotId},Sfis error:{sfisStep7Response}";
                         return response;
                     }
                 }
                 else
                 {
-                    response.Message = $"Lot:{request.LottId},error:{errorMessage}";
+                    response.Message = $"Lot:{request.LotId},error:{errorMessage}";
                     return response;
                 }
             }
             catch (Exception ex)
             {
                 // 记录异常日志
+                Log.Error( ex.ToString());
+                Log.Error(ex.Message, ex);
                 response.Message = $"未处理的异常: {ex.Message}";
                 return response;
             }
@@ -227,6 +293,23 @@ namespace Rms.Services.Services.ApiHandle.MessageHandler
                 return false;
             }
 
+        }
+
+        private class WaferMapVM
+        {
+            //public string ID { get; set; }
+            public string WaferMapId { get; set; }
+            public string Content { get; set; }
+            public bool IsEffectiveVersion { get; set; }
+            public long VersionNumber { get; set; }
+            public string Source { get; set; }
+        }
+
+        private class DownloadMapReply
+        {
+            public bool Result { get; set; }
+            public string Message { get; set; }
+            public WaferMapVM WaferMap { get; set; }
         }
     }
 }

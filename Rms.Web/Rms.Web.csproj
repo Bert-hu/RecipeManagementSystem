@@ -247,6 +247,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\SwaggerConfig.cs" />
+    <Compile Include="Controllers\Ams\AlarmConfigController.cs" />
     <Compile Include="Controllers\Ems\EquipmentTypeController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\Pms\AccountController.cs" />
@@ -256,6 +257,7 @@
     <Compile Include="Controllers\Pms\ProcessController.cs" />
     <Compile Include="Controllers\Pms\RoleController.cs" />
     <Compile Include="Controllers\Pms\UserController.cs" />
+    <Compile Include="Controllers\Production\CommonController.cs" />
     <Compile Include="Controllers\Production\CommonProductionController.cs" />
     <Compile Include="Controllers\Production\UvIrradiationController.cs" />
     <Compile Include="Controllers\Production\WaferToReelController.cs" />
@@ -281,6 +283,7 @@
     <Compile Include="Service\RabbitMqService.cs" />
     <Compile Include="Utils\HttpClientHelper.cs" />
     <Compile Include="Utils\SsoHelper.cs" />
+    <Compile Include="ViewModels\AlarmConfigViewModel.cs" />
     <Compile Include="ViewModels\ChangePasswordViewModel.cs" />
     <Compile Include="ViewModels\EquipmentViewModel.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
@@ -331,6 +334,10 @@
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
+    <Content Include="Scripts\AlarmConfig\AddConfig.js" />
+    <Content Include="Scripts\AlarmConfig\AlarmHandle.js" />
+    <Content Include="Scripts\AlarmConfig\index.js" />
+    <Content Include="Scripts\AlarmConfig\AlarmRecords.js" />
     <Content Include="Scripts\Alarm\Alarm.js" />
     <Content Include="Scripts\Alarm\xlsx.core.min.js" />
     <Content Include="Scripts\bootstrap.js" />
@@ -351,13 +358,13 @@
     <Content Include="Content\icons\icomoon\fonts\icomoon.ttf" />
     <Content Include="Content\icons\icomoon\fonts\icomoon.woff" />
     <Content Include="Content\font\DS-DIGIT.TTF" />
+    <Content Include="Content\SOP\RMS SOP.pptx" />
     <None Include="Oracle.DataAccess.Common.Configuration.Section.xsd">
       <SubType>Designer</SubType>
     </None>
     <None Include="Oracle.ManagedDataAccess.Client.Configuration.Section.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Scripts\jquery-3.4.1.intellisense.js" />
     <Content Include="Scripts\BoxLayout.js" />
     <Content Include="Scripts\Box\Box.js" />
     <Content Include="Scripts\DPPM\Box.js" />
@@ -372,10 +379,13 @@
     <Content Include="Scripts\ECharts\theme-vintage.js" />
     <Content Include="Scripts\Ems\EquipmentType.js" />
     <Content Include="Scripts\Image\Image.js" />
-    <Content Include="Scripts\jquery-3.4.1.js" />
-    <Content Include="Scripts\jquery-3.4.1.min.js" />
-    <Content Include="Scripts\jquery-3.4.1.slim.js" />
-    <Content Include="Scripts\jquery-3.4.1.slim.min.js" />
+    <None Include="Scripts\jquery-3.7.1.intellisense.js" />
+    <Content Include="Scripts\jquery-3.7.1.js" />
+    <Content Include="Scripts\jquery-3.7.1.min.js" />
+    <Content Include="Scripts\jquery-3.7.1.slim.js" />
+    <Content Include="Scripts\jquery-3.7.1.slim.min.js" />
+    <Content Include="Scripts\jquery-3.7.1.slim.min.map" />
+    <Content Include="Scripts\jquery-3.7.1.min.map" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />
     <Content Include="Scripts\jquery.validate.js" />
     <Content Include="Scripts\jquery.validate.min.js" />
@@ -507,6 +517,7 @@
     <Content Include="Scripts\Production\UvIrradiation\Index.js" />
     <Content Include="Scripts\Production\Fvi\Index.js" />
     <Content Include="Scripts\Production\WaferAOI\Index.js" />
+    <Content Include="Scripts\Production\Common\Index.js" />
     <Content Include="Scripts\Production\WaferToReel\Index.js" />
     <Content Include="Scripts\Production\WaferMarking\Index.js" />
     <Content Include="Scripts\Production\WaferGrindingLamination\Index.js" />
@@ -532,7 +543,9 @@
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
-    <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Views\Shared\_Layout.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
@@ -581,6 +594,11 @@
     <Content Include="Views\RecipeParameter\Index.cshtml" />
     <Content Include="Views\RecipeParameter\SetParams.cshtml" />
     <Content Include="Views\UvIrradiation\Index.cshtml" />
+    <Content Include="Views\Common\Index.cshtml" />
+    <Content Include="Views\AlarmConfig\Index.cshtml" />
+    <Content Include="Views\AlarmConfig\AddConfig.cshtml" />
+    <Content Include="Views\AlarmConfig\AlarmRecords.cshtml" />
+    <Content Include="Views\AlarmConfig\AlarmHandle.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -596,8 +614,6 @@
     <Content Include="Content\bootstrap-theme.min.css.map" />
     <Content Include="Content\bootstrap-theme.css.map" />
     <None Include="packages.config" />
-    <Content Include="Scripts\jquery-3.4.1.slim.min.map" />
-    <Content Include="Scripts\jquery-3.4.1.min.map" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Rms.Models\Rms.Models.csproj">

@@ -43,7 +43,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
 
             //var line = change[0].value;
 
-            ShowEquipmentTable(currentRecipeGroup);
+            ShowEquipmentTable();
         },
 
     })
@@ -68,7 +68,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
         
     }
 
-    function ShowEquipmentTable(recipegroup_id) {
+    function ShowEquipmentTable() {
         //var selectedline = LineSel.getValue()[0].value;
         var selectedline = currentLine;
         console.log(selectedline);
@@ -81,7 +81,8 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             , limits: [1000]
             , height: 'full-235'
             , cols: [[
-                { field: 'EQUIPMENT_ID', title: 'EQID' }
+                { field: 'LINE', title: 'LINE' }
+                ,{ field: 'EQUIPMENT_ID', title: 'EQID' }
                 , { field: 'EQUIPMENT_TYPE_NAME', title: 'EQ Type' }
                 , { field: 'EQUIPMENT_NAME', title: 'Name' }
                 , { field: 'RECIPE_NAME', title: 'Recipe Name' }
@@ -90,7 +91,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                 , { fixed: 'right', width: '15%', align: 'center', toolbar: '#equipmenttoolbar' }
             ]]
             , where: {
-                recipegroup_id: recipegroup_id,
+                recipegroup_id: currentRecipeGroup,
                 line: selectedline,
                 processfilter: selectedline
             }
@@ -148,9 +149,9 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
         console.log(selectdata);
         if (event === 'modify') {
             layer.open({
-                title: '更改权限'
+                title: '更改Recipe绑定/Change recipe binding'
                 , type: 2
-                , btn: ['确定', '取消']
+                , btn: ['确定Confirm', '取消Cancel']
                 , content: 'BindingRecipePage?EQUIPMENT_ID=' + selectdata.EQUIPMENT_ID + '&RECIPE_GROUP_ID=' + selectdata.RECIPE_GROUP_ID
                 , area: ['40%', '85%']
                 , success: function (layero, index) {
@@ -176,7 +177,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                         async: false,
                         success: function (data) {
                             layer.open({ content: data.message });
-                            ShowEquipmentTable(selectdata.RECIPE_GROUP_ID);
+                            ShowEquipmentTable();
                         },
                         error: function (message) {
                             alert('error!');
@@ -186,7 +187,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
 
 
                 }, btn2: function (index, layero) {
-                    layer.msg('取消操作');
+                    layer.msg('取消操作.Cancel.');
                 }
 
             });
@@ -199,8 +200,8 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
         var data = obj.data;//data为当前点击行的数据
         //console.log(data)
         var selectGroup = data.ID;
-        //console.log(selectedRcp)
-        ShowEquipmentTable(selectGroup);
+        currentRecipeGroup = selectGroup;
+        ShowEquipmentTable();
         //selid = data.ID;
         //LoadRecipeVersion(selid);//级联，调用右表数据加载函数
 
@@ -219,7 +220,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             layer.prompt({
                 formType: 2,
 
-                title: '请输入Recipe Group Name',
+                title: 'Enter new Model Name',
                 area: ['300px', '35px'] //自定义文本域宽高
             }, function (value, index, elem) {
 
@@ -235,11 +236,11 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                         if (data.Result) {
                             layer.close(index)
                             window.recipegrouptable.reload();
-                            layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + '新增成功.' + '</em>');
+                            layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + '成功.Success.' + '</em>');
                             //return false;
                         } else {
                             layer.open({
-                                title: '新增失败'
+                                title: '失败.Fail.'
                                 , content: data.Message
                             });
                         }

@@ -84,8 +84,9 @@ namespace Rms.Services.Services
                     return null;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Log.Warn(ex);
                 Log.Warn($"Tansaction {trans.TransactionName} timeout, {timeoutInSeconds} s");
                 return null;
             }
@@ -127,8 +128,6 @@ namespace Rms.Services.Services
                 {
                     switch (trans.TransactionName)
                     {
-
-
                         default:
                             break;
                     }

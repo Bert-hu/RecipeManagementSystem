@@ -1,11 +1,9 @@
 ﻿using Newtonsoft.Json;
-using Renci.SshNet;
 using Rms.Models.DataBase.Rms;
 using Rms.Models.WebApi;
 using Rms.Utils;
 using Rms.Web.Extensions;
 using Rms.Web.Utils;
-using RMS.Domain.Rms;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -15,13 +13,13 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using System.Web.Http;
 using System.Web.Mvc;
 
 namespace Rms.Web.Controllers.Rms
 {
     public class RecipeController : BaseController
     {
+
         public ActionResult Index()
         {
             return View();
@@ -221,7 +219,7 @@ namespace Rms.Web.Controllers.Rms
                 if (type.FLOWROLEIDS.Count == 0)
                 {
                     version.CURRENT_FLOW_INDEX = 100;
-                    db.Updateable<RMS_RECIPE_VERSION>(version).UpdateColumns(it => new { it.CURRENT_FLOW_INDEX ,it.REMARK}).ExecuteCommand();
+                    db.Updateable<RMS_RECIPE_VERSION>(version).UpdateColumns(it => new { it.CURRENT_FLOW_INDEX, it.REMARK }).ExecuteCommand();
                     recipe.VERSION_EFFECTIVE_ID = version.ID;
                     db.Updateable<RMS_RECIPE>(recipe).UpdateColumns(it => it.VERSION_EFFECTIVE_ID).ExecuteCommand();
                 }
@@ -255,7 +253,7 @@ namespace Rms.Web.Controllers.Rms
             var db = DbFactory.GetSqlSugarClient();
 
             var version = db.Queryable<RMS_RECIPE_VERSION>().In(versionid).First();
-            var sql = $"SELECT ID,NAME,VERSION_ID,CREATOR,CREATE_TIME FROM USI_DPSRMS.RMS_RECIPE_DATA WHERE ID = '{version.RECIPE_DATA_ID}'";
+            var sql = $"SELECT ID,NAME,VERSION_ID,CREATOR,CREATE_TIME FROM RMS_RECIPE_DATA WHERE ID = '{version.RECIPE_DATA_ID}'";
             var data = version.RECIPE_DATA_ID == null ? null : db.SqlQueryable<RMS_RECIPE_DATA>(sql).ToList();
             return Json(new { data, code = 0, count = 1 }, JsonRequestBehavior.AllowGet);
 
@@ -305,14 +303,14 @@ namespace Rms.Web.Controllers.Rms
                 {
                     return Json(new { res = new { Result = false, Message = "No effective version" } });
                 }
-               
+
             }
             catch (Exception ex)
             {
                 db.RollbackTran();
                 return Json(new { res = new { Result = false, Message = ex.Message } });
             }
-            
+
         }
 
         [LogAttribute]
@@ -408,6 +406,22 @@ namespace Rms.Web.Controllers.Rms
         }
 
 
+        public JsonResult SwitchRecipe(string rcpID)
+        {
+            var db = DbFactory.GetSqlSugarClient();
+            var recipe = db.Queryable<RMS_RECIPE>().In(rcpID).First();
+
+            string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/PpSelect";
+            var body = JsonConvert.SerializeObject(new PpSelectRequest { TrueName = User?.TRUENAME ?? "NA", EquipmentId = recipe.EQUIPMENT_ID, RecipeName = recipe.NAME });
+            var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(apiURL, body);
+            var replyItem = JsonConvert.DeserializeObject<PpSelectResponse>(apiresult);
+
+            return Json(new { Result = replyItem.Result, Message = replyItem.Message, RecipeName = replyItem.RecipeName });
+
+        }
+
+
+
         private bool SendMessageToSfis(string message, ref string receiveMsg, ref string errMsg)
         {
             try
@@ -455,7 +469,7 @@ namespace Rms.Web.Controllers.Rms
                     return false;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 errMsg = "EAP send message to SFIS fail.";
                 return false;
@@ -476,14 +490,13 @@ namespace Rms.Web.Controllers.Rms
 
         public JsonResult GetVersionSml(string RecipeVersionId)
         {
+            var version = db.Queryable<RMS_RECIPE_VERSION>().In(RecipeVersionId).First();
+            if (version.RECIPE_DATA_ID == null) return Json(new { Result = false, Message = "No recipe body, please load body before edit!" }, JsonRequestBehavior.AllowGet);
+            var recipe = db.Queryable<RMS_RECIPE>().In(version.RECIPE_ID).First();
+            var eqp = db.Queryable<RMS_EQUIPMENT>().In(recipe.EQUIPMENT_ID).First();
             try
-            {
-                var version = db.Queryable<RMS_RECIPE_VERSION>().In(RecipeVersionId).First();
-                if(version.RECIPE_DATA_ID==null) return Json(new { Result = false, Message = "No recipe body, please load body before edit!" }, JsonRequestBehavior.AllowGet);
-                var recipe = db.Queryable<RMS_RECIPE>().In(version.RECIPE_ID).First();
-                var eqp = db.Queryable<RMS_EQUIPMENT>().In(recipe.EQUIPMENT_ID).First();
-              
-                if (eqp.RECIPE_TYPE != "secsSml") return Json(new { Result = false, Message = "This machine do not support displaying content!" }, JsonRequestBehavior.AllowGet);
+            {       
+               // if (eqp.RECIPE_TYPE != "secsSml" || eqp.) return Json(new { Result = false, Message = "This machine do not support displaying content!" }, JsonRequestBehavior.AllowGet);
                 var serverdata = db.Queryable<RMS_RECIPE_DATA>().In(version.RECIPE_DATA_ID).First();
                 var dataobj = ByteArrayToObject(serverdata.CONTENT);
                 var bodySml = Encoding.Unicode.GetString((dataobj as RecipeBody).FormattedBody);
@@ -492,12 +505,12 @@ namespace Rms.Web.Controllers.Rms
             }
             catch (Exception ex)
             {
-                return Json(new { Result = true, Message = ex.Message }, JsonRequestBehavior.AllowGet);
+                return Json(new { Result = false, Message = $"Recipe Type{eqp.RECIPE_TYPE} do not support." }, JsonRequestBehavior.AllowGet);
             }
         }
 
         [ValidateInput(false)]//SML 字符串会被当做html，跳过验证
-        public JsonResult EditRecipeBody(string RecipeVersionId,string RecipeBody)
+        public JsonResult EditRecipeBody(string RecipeVersionId, string RecipeBody)
         {
             try
             {

@@ -2,6 +2,7 @@
 @{
     var user = (Rms.Models.DataBase.Pms.PMS_USER)Session["user_account"];
     var modules = (List<Rms.Models.DataBase.Pms.PMS_MODULE>)Session["modules"];
+    var equipmenttypeids = (List<string>)Session["equipmenttypeids"];
     string name = "未登录";
     string role = "NA";
     if (user != null)
@@ -22,7 +23,7 @@
 
 <body class="layui-layout-body">
     <script src="~/Scripts/layui/layui.js?v=1.1"></script>
-    <script src="~/Scripts/jquery-3.4.1.min.js?v=1.1"></script>
+    <script src="~/Scripts/jquery-3.7.1.min.js?v=3.7.1"></script>
 
     <div class="layui-layout layui-layout-admin">
         <div class="layui-header">
@@ -59,15 +60,30 @@
                                 }
                                 else
                                 {
-                                    <li class="layui-nav-item">
-                                        <a class="" href="javascript:;">@cl</a>
-                                        <dl class="layui-nav-child">
-                                            @foreach (var module in modulesInClass)
-                                            {
-                                                <dd><a href="@module.LINKURL">@module.NAME</a></dd>
-                                            }
-                                        </dl>
-                                    </li>
+            <li class="layui-nav-item">
+                @if (cl == "报警管理")
+                {
+                    <a class="" href="javascript:;">@cl<span class="layui-badge" id="alarmActionNum1" hidden>0</span></a>
+                }
+                else
+                {
+                    <a class="" href="javascript:;">@cl</a>
+                }
+                <dl class="layui-nav-child">
+                    @foreach (var module in modulesInClass)
+                    {
+                        if (module.NAME == "报警处理")
+                        {
+                            <dd><a href="@module.LINKURL">@module.NAME<span class="layui-badge" id="alarmActionNum2" hidden>0</span></a></dd>
+                        }
+                        else
+                        {
+                            <dd><a href="@module.LINKURL">@module.NAME</a></dd>
+                        }
+
+                    }
+                </dl>
+            </li>
                                 }
                             }
                         }
@@ -128,7 +144,7 @@
 
                 },
                 error: function (message) {
-                    alert('error!');
+                    window.location.href = '/Account/Login';
                 }
             });
 
@@ -148,10 +164,32 @@
                     limit: 99999
                 },
                 success: function (data) {
-                    //console.log(data.data)
                     document.getElementById("auditnum").innerHTML = data.data.length;
                 },
                 error: function () {
+                }
+            });
+
+
+            $.ajax({
+                url: '/AlarmConfig/GetAlarmActions',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
+                async: false,
+                data: {
+                    page: 1,
+                    limit: 9999
+                },
+                success: function (data) {
+                 
+                    //console.log(data.data)
+                    document.getElementById("alarmActionNum1").innerHTML = data.notHandledNum;
+                    document.getElementById("alarmActionNum2").innerHTML = data.notHandledNum;
+                    //去掉hidden属性
+                    document.getElementById("alarmActionNum1").removeAttribute("hidden");
+                    document.getElementById("alarmActionNum2").removeAttribute("hidden");
+                },
+                error: function (message) {
                 }
             });
         });

@@ -12,5 +12,7 @@ namespace Rms.Services.Services.ApiHandle.RecipeTypeFunction
         (bool result, string message) DeleteAllMachineRecipes(string EquipmentId);
         (bool result, string message) DownloadRecipeToMachine(string EquipmentId, string RecipeVersionId);
         (bool result, string message, byte[] body) UploadRecipeToServer(string EquipmentId, string RecipeName);
+
+
     }
 }

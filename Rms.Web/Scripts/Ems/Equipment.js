@@ -94,12 +94,12 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             , height: 'full-235'
             , cols: [[
                 { field: 'TYPEPROCESS', title: 'Process' }
-                , { field: 'TYPENAME', title: '设备类型' }
-                , { field: 'TYPETYPE', title: '设备型号' }
-                , { field: 'TYPEVENDOR', title: '厂商' }
+                , { field: 'TYPENAME', title: 'Type' }
+                , { field: 'TYPETYPE', title: 'Model' }
+                , { field: 'TYPEVENDOR', title: 'Vendor' }
                 , { field: 'ID', title: 'EQID' }
-                , { field: 'NAME', title: '名称', edit: true }
-                , { field: 'RECIPE_TYPE', title: 'Recipe类型' }
+                , { field: 'NAME', title: 'Name', edit: true }
+                , { field: 'RECIPE_TYPE', title: 'Recipe Type' }
 
                 // , { fixed: 'right', width: '15%', align: 'center', toolbar: '#equipmenttoolbar' }
             ]]
@@ -116,7 +116,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
 
     table.on('edit(equipmenttable)', function (obj) { 
 
-        layer.confirm('is not?', { icon: 3, title: '修改确认', content: obj.value }, function (index) {
+        layer.confirm('is not?', { icon: 3, title: '修改确认/Confirm to Edit', content: obj.value }, function (index) {
             console.log(obj);
             $.ajax({
                 url: '/Equipment/Edit',
@@ -139,7 +139,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             layer.close(index);
         },
             function (index) {
-                layer.msg('取消修改');
+                layer.msg('取消Cancel');
                 ectable.reload();
             }
 

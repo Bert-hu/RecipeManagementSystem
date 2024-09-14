@@ -21,16 +21,24 @@ namespace Rms.Web.Controllers
     public class AccountController : Controller
     {
 
+        public static bool ssoEnable { get; set; } = (ConfigurationManager.AppSettings["SSO.Enable"] ?? "").ToString().ToUpper() != "FALSE";
+
         /// <summary>
         /// 登录页面
         /// </summary>
         /// <returns></returns>
         public ActionResult Login()
         {
-
-            var ipAddress = Request.UserHostAddress;
-            var ssouser = SsoHelper.GetUserWithIp(ipAddress);
-
+            SsoUser ssouser;
+            if (!ssoEnable)
+            {
+                ssouser = null;
+            }
+            else
+            {
+                var ipAddress = Request.UserHostAddress;
+                ssouser = SsoHelper.GetUserWithIp(ipAddress);
+            }
             if (ssouser != null)
             {
                 var db = DbFactory.GetSqlSugarClient();
@@ -60,6 +68,7 @@ namespace Rms.Web.Controllers
             return View();
         }
 
+
         /// <summary>
         /// 提交登录请求
         /// </summary>
@@ -71,11 +80,20 @@ namespace Rms.Web.Controllers
             var db = DbFactory.GetSqlSugarClient();
 
             model.UserName = model.UserName.ToLower();
-            Newtonsoft.Json.Linq.JObject jobj = null;
+            //Newtonsoft.Json.Linq.JObject jobj = null;
 
-            var ipAddress = Request.UserHostAddress;
+            SsoUser ssouser;
+            if (!ssoEnable)
+            {
+                ssouser = null;
+            }
+            else
+            {
+                var ipAddress = Request.UserHostAddress;              
+                ssouser = SsoHelper.GetUserWithUP(ipAddress, model.UserName, model.Password);
+            }
+
             var user = db.Queryable<PMS_USER>().First(it => it.USERNAME.ToLower() == model.UserName);
-            var ssouser = SsoHelper.GetUserWithUP(ipAddress, model.UserName, model.Password);
 
             if (ssouser == null && user != null && user.LOCALUSER == true && EncrypHelper.Encrypt32(model.Password) == user.PASSWORD)//SSO验证未通过的本地账户
             {
@@ -125,7 +143,7 @@ namespace Rms.Web.Controllers
                 }
 
                 LoginTransaction(user);
-                return RedirectToAction("index", "Home");
+                return RedirectToAction("Index", "Home");
             }
             else//SSO和本地验证均失败
             {
@@ -143,7 +161,7 @@ namespace Rms.Web.Controllers
             List<string> moduleids;
             List<string> equipmenttypeids;
             var aa = db.Queryable<RMS_EQUIPMENT_TYPE>().ToList();
-            
+
 
             if (user.ROLEID?.Equals("SuperAdmin") ?? false)//管理员默认拥有所有权限，不需要添加
             {

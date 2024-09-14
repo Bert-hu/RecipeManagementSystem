@@ -12,6 +12,8 @@ layui.use(['jquery','layer', 'table', 'form', 'upload', 'element'], function () 
     var retdata = {};
     console.log('eqid: '+ eqid)
     loadPage();
+
+
     function loadPage() {
         table.render({
             elem: '#eqprecipe'

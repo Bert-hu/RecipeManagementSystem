@@ -1,6 +1,6 @@
 ﻿using Rms.Models.DataBase.Rms;
 using Rms.Utils;
-using RMS.Domain.Rms;
+
 using SqlSugar;
 using System;
 using System.Collections.Generic;
@@ -36,6 +36,7 @@ namespace Rms.Services.Services.ApiHandle.RecipeTypeFunction
                 NetworkCredential networkCredential = new NetworkCredential(username, password);
                 DirectoryInfo directoryInfo = new DirectoryInfo(recipepath);
                 string recipeFullPath = Path.Combine(recipepath, recipe.NAME);
+
                 if (directoryInfo.Exists)
                 {
                     DecompressFile(data.CONTENT, recipeFullPath);
@@ -152,7 +153,7 @@ namespace Rms.Services.Services.ApiHandle.RecipeTypeFunction
                 {
                     // Handle error: The archive should contain exactly one entry for a single file
                     throw new InvalidOperationException("Invalid archive format for a single file decompression.");
-                }                
+                }
                 ZipArchiveEntry entry = archive.Entries[0];
                 using (Stream entryStream = entry.Open())
                 using (FileStream fileStream = File.Create(outputFilePath))
@@ -162,6 +163,7 @@ namespace Rms.Services.Services.ApiHandle.RecipeTypeFunction
                 File.SetLastWriteTime(outputFilePath, entry.LastWriteTime.DateTime);
             }
         }
+
 
 
     }

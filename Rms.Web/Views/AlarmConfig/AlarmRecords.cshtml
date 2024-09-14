@@ -1,0 +1,44 @@
+﻿
+@{
+
+}
+<style>
+    .scrollable-div {
+        max-height: 80vh;
+        overflow-y: auto; /* 或者使用 overflow-y: auto; */
+    }
+
+    .selected {
+        background-color: #89cff0 !important;
+    }
+</style>
+<script src="~/Scripts/layui/xm-select.js"></script>
+<script src="~/Scripts/layui/layui.table.formdate.js"></script>
+<script src="~/Scripts/AlarmConfig/AlarmRecords.js"></script>
+
+<form class="layui-form layui-form-pane" action="">
+    <div class="layui-form-item layui-row">
+        <div class="layui-input-inline">
+            <div id="processSelect" class="xm-select-demo"></div>
+        </div>
+
+        <div class="layui-input-inline">
+            <div id="equipmentTypeSelect" class="xm-select-demo"></div>
+        </div>
+
+        <div class="layui-input-inline">
+            <div id="equipmentSelect" class="xm-select-demo" style="width:200%"></div>
+        </div>
+    </div>
+</form>
+
+<div class="layui-row layui-col-space10" style=" margin-bottom: 50px">
+    <table class="layui-hide" id="ALarmRecordsTable" lay-filter="ALarmRecordsTable"></table>
+</div>
+
+
+
+
+
+
+

@@ -2,7 +2,6 @@
 using Rms.Models.DataBase.Rms;
 using Rms.Models.WebApi;
 using Rms.Utils;
-using RMS.Domain.Rms;
 using System;
 
 namespace Rms.Services.Services.ApiHandle.MessageHandler

@@ -1,24 +1,11 @@
 ﻿using EAP.Services.Utils;
-using Quartz;
-using Quartz.Impl;
 
 using Rms.Services.Jobs;
 using Rms.Services.Services;
 using Rms.Utils;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Configuration;
-using System.Data;
-using System.Diagnostics;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Net;
 using System.ServiceProcess;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Rms.Services
 {

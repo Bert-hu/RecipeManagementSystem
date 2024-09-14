@@ -2,14 +2,9 @@
 using Rms.Models.DataBase.Rms;
 using Rms.Models.RabbitMq;
 using Rms.Utils;
-using RMS.Domain.Rms;
 using SqlSugar;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Rms.Services.Services.ApiHandle.RecipeTypeFunction
 {

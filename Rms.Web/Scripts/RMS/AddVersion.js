@@ -126,7 +126,7 @@ layui.use(['jquery', 'layer', 'table', 'form', 'upload', 'element', 'code'], fun
                     if (layEvent === 'download') {
                         //DownladFile(selectdata.ID);
                     } else if (layEvent === 'delete') {
-                        if (confirm('确定删除？')) {
+                        if (confirm('确定删除？Confirm to delete')) {
                             //console.log(selectdata.ID)
                             DeleteFile(selectdata.ID);
                         }
@@ -197,25 +197,25 @@ layui.use(['jquery', 'layer', 'table', 'form', 'upload', 'element', 'code'], fun
             , limits: [1000]
             , height: '500'
             , cols: [[
-                { field: 'FLOW_INDEX', title: '流程序号' }
+                { field: 'FLOW_INDEX', title: '流程序号Flow No.' }
                 , {
                     field: 'ACTION', title: '结果',
                     templet: function (d, s) {
                         var strstate;
                         if (d.ACTION == 0) {
-                            strstate = '提交'
+                            strstate = '提交Submit'
                         } else if (d.ACTION == 1) {
-                            strstate = '同意'
+                            strstate = '同意Agree'
                         }
                         else {
-                            strstate = '否决'
+                            strstate = '否决Reject'
                         }
                         return strstate;
                     }
                 }
-                , { field: 'REMARK', title: '备注' }
-                , { field: 'CREATOR', title: '签核人员', width: 120 }
-                , { field: 'CREATE_TIME', title: '签核时间', templet: '<div>{{ FormDate(d.CREATE_TIME, "yyyy-MM-dd HH:mm:ss") }}</div>', width: 180 }
+                , { field: 'REMARK', title: 'Remark' }
+                , { field: 'CREATOR', title: 'User', width: 120 }
+                , { field: 'CREATE_TIME', title: 'Date Time', templet: '<div>{{ FormDate(d.CREATE_TIME, "yyyy-MM-dd HH:mm:ss") }}</div>', width: 180 }
 
 
             ]]
@@ -306,7 +306,7 @@ layui.use(['jquery', 'layer', 'table', 'form', 'upload', 'element', 'code'], fun
         //表单提交
         form.on('submit(versioninfo)', function (data) {
 
-            if (confirm('确定提交？')) {
+            if (confirm('确定提交？Confirm to submit?')) {
                 var formdata = form.val('versioninfo');
                 $.ajax({
                     type: 'post',
@@ -344,11 +344,11 @@ layui.use(['jquery', 'layer', 'table', 'form', 'upload', 'element', 'code'], fun
     function GetVersionStatus(flows, index) {
         var status = '';
         if (index == -1) {
-            status = '未提交';
+            status = 'Unsubmitted';
         } else if (index == 100) {
-            status = '已完成';
+            status = 'Completed';
         } else {
-            status = ' 待 ' + flows[index] + '签核';
+            status = 'Wait ' + flows[index] ;
         }
         return status;
     }

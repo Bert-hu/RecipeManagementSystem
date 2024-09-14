@@ -131,6 +131,7 @@ namespace Rms.Models.WebApi
     {
         public string EquipmentId { get; set; }
         public string RecipeGroupName { get; set; }
+        public bool CheckLastRecipe { get; set; } = true;
     }
 
     public class CheckRecipeGroupResponse : ResponseMessage
@@ -161,11 +162,71 @@ namespace Rms.Models.WebApi
     public class DownloadMapByLotRequest
     {
         public string EquipmentId { get; set; }
-        public string LottId { get; set; }
+        public string LotId { get; set; }
     }
 
     public class DownloadMapByLotResponse : ResponseMessage
     {
-      
+
     }
+
+    public class UploadMapByLotRequest
+    {
+        public string EquipmentId { get; set; }
+        public string LotId { get; set; }
+        //public string UploadPath { get; set; }
+    }
+
+    public class UploadMapByLotResponse : ResponseMessage
+    {
+
+    }
+    public class PpSelectRequest
+    {
+        public string TrueName { get; set; }
+        public string EquipmentId { get; set; }
+        public string RecipeName { get; set; }
+    }
+
+    public class PpSelectResponse : ResponseMessage
+    {
+        public string RecipeName { get; set; }
+    }
+
+    public class PpSelectByRecipeGroupRequest
+    {
+        public string TrueName { get; set; }
+        public string EquipmentId { get; set; }
+        public string RecipeGroupName { get; set; }
+    }
+
+    public class PpSelectByRecipeGroupResponse : ResponseMessage
+    {
+        public string RecipeName { get; set; }
+    }
+
+    public class GetRecipeNameAliasRequest
+    {
+        public string EquipmentTypeId { get; set; }
+        public string RecipeName { get; set; }
+    }
+
+    public class GetRecipeNameAliasResponse : ResponseMessage
+    {
+        public string Id { get; set; }
+        public string EquipmentTypeId { get; set; }
+        public string RecipeName { get; set; }
+        public List<string> RecipeAlias { get; set; }
+    }
+
+    public class SetRecipeNameAliasRequest
+    {
+        public string EquipmentTypeId { get; set; }
+        public string RecipeName { get; set; }
+        public List<string> RecipeAlias { get; set; }
+    }
+
+    public class SetRecipeNameAliasResponse : ResponseMessage
+    { }
+
 }

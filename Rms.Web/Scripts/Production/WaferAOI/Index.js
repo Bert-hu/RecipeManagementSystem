@@ -246,7 +246,52 @@
         });
     });
 
+    $("#uploadmapbylotbtn").click(function () {
+        layer.prompt({
+            formType: 2,
 
+            title: '请扫入Lot ID',
+            area: ['300px', '35px'] //自定义文本域宽高
+        }, function (value, index, elem) {
+            layer.close(index);
+            var loadingIndex = layer.load();
+            $.ajax({
+                type: 'post',
+                dataType: 'json',
+                url: './UploadMapByLot',
+                data: {
+                    eqid: equipmentSel.getValue()[0].value,
+                    lotid: value
+                },
+                success: function (data) {
+                    setTimeout(function () {
+                        loadLogs();
+                        LoadEquipmentInfo();
+                        layer.close(loadingIndex);
+                    }, 10);
+                    if (data.Result) {
+                        //layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + 'Recipe download succeed.' + '</em>');
+                        layer.open({
+                            title: '上传成功'
+                            , content: data.Message
+                        });
+                        WaitAndRefresh();
+                    } else {
+                        layer.close(loadingIndex);
+                        layer.open({
+                            title: '上传失败'
+                            , content: data.Message
+                        });
+                    }
+
+                },
+                error: function (err) {
+                    console.log(err)
+                }
+            });
+
+        });
+    });
 
     $("#downloadbylotbtn").click(function () {
         layer.prompt({

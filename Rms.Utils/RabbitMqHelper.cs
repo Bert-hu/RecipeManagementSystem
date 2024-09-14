@@ -35,10 +35,10 @@ namespace Rms.Utils
             channel = connection.CreateModel();
        }
 
+
         public void Produce(string routingKey,string message,int ExpireSecond = 60)
         {
             Dictionary<string,object> arguments = new Dictionary<string, object>() { { "x-message-ttl", 300000 } };
-            channel.QueueDeclareNoWait(routingKey, false, false, true, arguments);
             var properties = channel.CreateBasicProperties();
             properties.DeliveryMode = 2;
             properties.Expiration = (ExpireSecond* 1000).ToString();

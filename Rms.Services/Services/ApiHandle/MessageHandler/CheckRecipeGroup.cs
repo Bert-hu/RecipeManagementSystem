@@ -1,14 +1,9 @@
 ﻿using Newtonsoft.Json;
-using RMS.Domain.Rms;
 using Rms.Models.DataBase.Rms;
 using Rms.Models.WebApi;
 using Rms.Utils;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Rms.Services.Services.ApiHandle.MessageHandler;
 
 namespace Rms.Services.Services.ApiHandle.MessageHandler
 {
@@ -44,17 +39,27 @@ namespace Rms.Services.Services.ApiHandle.MessageHandler
                 return res;
             }
             var recipe = db.Queryable<RMS_RECIPE>().In(binding.RECIPE_ID).First();
-            if (recipe.ID != eqp.LASTRUN_RECIPE_ID)
+            if (req.CheckLastRecipe)
             {
-                res.RecipeName = recipe.NAME;
-                res.Message = $"The last run of the recipe is inconsistent, please download it again";
+                if (recipe.ID != eqp.LASTRUN_RECIPE_ID)
+                {
+                    res.RecipeName = recipe.NAME;
+                    res.Message = $"The last run of the recipe is inconsistent, please download it again";
+                }
+                else if (eqp.LASTRUN_RECIPE_TIME < DateTime.Now.AddHours(-2))
+                {
+                    res.RecipeName = recipe.NAME;
+                    res.Message = "The recipe did not run for 2 hours, please download it again";
+                }
+                else
+                {
+                    res.Result = true;
+                    res.RecipeName = recipe.NAME;
+                    eqp.LASTRUN_RECIPE_TIME = DateTime.Now;
+                    db.Updateable<RMS_EQUIPMENT>(eqp).ExecuteCommand();
+                }
             }
-            else if (eqp.LASTRUN_RECIPE_TIME < DateTime.Now.AddHours(-2))
-            {
-                res.RecipeName = recipe.NAME;
-                res.Message = "The recipe did not run for 2 hours, please download it again";
-            }
-            else
+            else//不检查，只记录
             {
                 res.Result = true;
                 res.RecipeName = recipe.NAME;

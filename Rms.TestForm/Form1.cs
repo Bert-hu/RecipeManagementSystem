@@ -3,22 +3,12 @@ using Rms.Models.DataBase.Rms;
 using Rms.Models.RabbitMq;
 using Rms.Models.WebApi;
 using Rms.Utils;
-using RMS.Domain.Rms;
 using SqlSugar;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Configuration;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Net.NetworkInformation;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web.UI.WebControls;
 using System.Windows.Forms;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Rms.TestForm
 {

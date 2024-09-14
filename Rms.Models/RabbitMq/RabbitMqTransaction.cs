@@ -17,7 +17,19 @@ namespace Rms.Models.RabbitMq
         // public string Body { get; set; } = string.Empty;
         public DateTime Timestamp { get; set; } = DateTime.Now;
         public int ExpireSecond { get; set; } = 120;
-        public Dictionary<string, object> Parameters { get; set; }
+        public Dictionary<string, object> Parameters { get; set; } = new Dictionary<string, object>();
+
+        public RabbitMqTransaction GetReplyTransaction()
+        {
+            return new RabbitMqTransaction
+            {
+                TransactionID = TransactionID,
+                TransactionName = TransactionName,
+                EquipmentID = EquipmentID,
+                IsReply = true,
+                NeedReply = false,
+            };
+        }
     }
 
     public class CacheRabbitMqTransaction : RabbitMqTransaction

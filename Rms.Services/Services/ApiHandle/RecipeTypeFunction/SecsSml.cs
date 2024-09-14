@@ -1,18 +1,11 @@
-﻿using Newtonsoft.Json;
-using Rms.Models.DataBase.Rms;
+﻿using Rms.Models.DataBase.Rms;
 using Rms.Models.RabbitMq;
-using Rms.Services.Services.ApiHandle.MessageHandler;
 using Rms.Utils;
-using RMS.Domain.Rms;
 using SqlSugar;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Rms.Services.Services.ApiHandle.RecipeTypeFunction
 {
@@ -59,7 +52,7 @@ namespace Rms.Services.Services.ApiHandle.RecipeTypeFunction
                 }
                 else//Rabbit Mq失败
                 {
-                    Log.Error($"Delete all recipe Time out!");
+                    Log.Error($"Time out!");
                     return (false, "Equipment offline or EAP client error!");
                 }
             }
@@ -102,6 +95,8 @@ namespace Rms.Services.Services.ApiHandle.RecipeTypeFunction
                 var unformattedBody = Convert.FromBase64String(rabbitRes1.Parameters["RecipeBody"].ToString());
                 var formattedBody = System.Text.Encoding.Unicode.GetBytes(rabbitRes2.Parameters["RecipeBody"].ToString());
                 var body = ObjectToByteArray(new RecipeBody { UnformattedBody = unformattedBody, FormattedBody = formattedBody });
+
+                var obj = (RecipeBody)ByteArrayToObject(body);
 
                 return (result, message?.ToString(), body);
             }

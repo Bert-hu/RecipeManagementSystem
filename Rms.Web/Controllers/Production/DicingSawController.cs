@@ -34,6 +34,13 @@ namespace Rms.Web.Controllers.Production
 
         public JsonResult LotStart(string equipmentid, string lotid, string port)
         {
+            var db = DbFactory.GetSqlSugarClient();
+            var eqp = db.Queryable<RMS_EQUIPMENT>().In(equipmentid).First();
+            if (eqp.ISLOCKED)
+            {
+                return Json(new { Result = false, Message = $"Machine was locked, {eqp.LOCKED_MESSAGE}" }, JsonRequestBehavior.AllowGet);
+            }
+
             string sfis_step1_req = $"{equipmentid},{lotid},1,M068397,JORDAN,,OK,";
             string sfis_step1_res = string.Empty;
             string errmsg = string.Empty;
@@ -67,8 +74,7 @@ namespace Rms.Web.Controllers.Production
                             repmsg += $",Recipe Name:{replyItem.RecipeName}";
 
 
-                            var db = DbFactory.GetSqlSugarClient();
-                            var eqp = db.Queryable<RMS_EQUIPMENT>().In(equipmentid).First();
+                         
                             if (true)
                             {
                                 var ListenChannel = ConfigurationManager.AppSettings["ListenChannel"];
