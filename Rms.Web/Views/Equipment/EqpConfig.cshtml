@@ -1,0 +1,256 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<link href="~/Scripts/layui_NEW/css/layui.css" rel="stylesheet" />
+<style>
+
+    .site-block {
+        padding: 25px;
+        border: 5px solid #eee;
+    }
+
+    .site-text {
+        position: relative;
+    }
+</style>
+<script src="~/Scripts/layui_NEW/layui.js"></script>
+
+<div id="equipmentTypeId"></div>
+
+<div class="site-text site-block">
+    <form class="layui-form" action="" lay-filter="configForm">
+        <div style="margin: 3vh auto 0;">
+            <div class="layui-form-item">
+                <div class="layui-col-md6">
+                    <label class="layui-form-label">EQID</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="ID" id="eqid" required lay-verify="required" placeholder="Please enter EQID" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-col-md6">
+                    <label class="layui-form-label">Name</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="NAME" required lay-verify="required" placeholder="Please enter device Name" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-col-md6">
+                    <label class="layui-form-label">Type</label>
+                    <div class="layui-input-block">
+                        <select name="TYPE" lay-verify="required" lay-filter="equipmentType" id="equipmentType" lay-search>
+                            <option value="">Select directly or search</option>
+                            <option value="111">111</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-col-md6">
+                    <label class="layui-form-label">Recipe Type</label>
+                    <div class="layui-input-block">
+                        <select name="RECIPE_TYPE" lay-verify="required" lay-filter="recipeType" lay-search>
+                            <option value="">Select directly or search</option>
+                            <option value="secsByte">secsByte</option>
+                            <option value="GeneralFile">GeneralFile</option>
+                            <option value="GeneralDirectory">GeneralDirectory</option>
+                            <option value="onlyName">onlyName</option>
+                            <option value="secsSml">secsSml</option>
+                            <option value="SecsByteWithPara">SecsByteWithPara</option>
+                            <option value="secsString">secsString</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-col-md6">
+                    <label class="layui-form-label">Line</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="LINE" placeholder="Please enter Line" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-col-md6">
+                    <label class="layui-form-label">Sort Order</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="ORDERSORT" lay-verify="number" placeholder="Display order" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div class="shared-folder-items" hidden>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">Shared Path</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="RECIPE_PATH" placeholder="Device Recipe shared path" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <div class="layui-col-md4">
+                        <label class="layui-form-label">Username</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="USERNAME" autocomplete="off" placeholder="Device computer username" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-col-md4">
+                        <label class="layui-form-label">Password</label>
+                        <div class="layui-input-block">
+                            <input type="password" name="PASSWORD" autocomplete="off" placeholder="Device computer password" class="layui-input" lay-affix="eye">
+                        </div>
+                    </div>
+                    <div class="layui-col-md1">
+
+                    </div>
+                    <div class="layui-col-md3" style="margin-left: 5vw">
+                        <button class="layui-btn layui-bg-purple" id="test-conn">Test Connection</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit lay-filter="configFormSubmit">Submit Now</button>
+                    @*<button type="reset" class="layui-btn layui-btn-primary">Reset</button>*@
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="site-text site-block">
+    <div class="layui-card">
+        <div class="layui-card-header">Device List of Same Type</div>
+        <div class="layui-card-body">
+            <table class="layui-hide" id="equipmenttable" lay-filter="equipmenttable"></table>
+        </div>
+    </div>
+</div>
+<script>
+        var equipmentId = '@ViewBag.EquipmentId';
+
+        layui.use(['jquery', 'layer', 'table', 'form', 'upload', 'element', 'code'], function () {
+            var $ = layui.jquery
+                , layer = layui.layer
+                , table = layui.table
+                , form = layui.form
+                ;
+
+            $.post('/Equipment/GetRoleEquipmentTypes', { }, function (res) {
+                // Handle response data
+                $('#equipmentType').html('');
+                $('#equipmentType').append(new Option('Select directly or search', ''));
+                res.forEach(function (value, index, array) {
+                    $('#equipmentType').append(new Option(value.NAME + '---' + value.ID + '---' + value.VENDOR + '---' + value.TYPE +'---'+value.PROCESS, value.ID));
+                });
+                form.render();
+            });
+
+            if (equipmentId != '') {
+                document.getElementById("eqid").disabled = true;
+                $.post('/Equipment/GetEquipmentConfig', { equipmentId: equipmentId }, function (res) {
+                    // Handle response data
+                    form.val('configForm', {
+                        "ID": res.ID,
+                        "NAME": res.NAME,
+                        "RECIPE_TYPE": res.RECIPE_TYPE,
+                        "TYPE": res.TYPE,
+                        "LINE": res.LINE,
+                        "ORDERSORT": res.ORDERSORT,
+                        "RECIPE_PATH": res.RECIPE_PATH,
+                        "USERNAME": res.USERNAME,
+                        "PASSWORD": res.PASSWORD
+                    });
+
+                    if (res.RECIPE_TYPE === 'GeneralFile' || res.RECIPE_TYPE === 'GeneralDirectory') {
+                        // Show class="shared-folder-items"
+                        $('.shared-folder-items').show();
+                    } else {
+                        // Hide class="shared-folder-items"
+                        $('.shared-folder-items').hide();
+                    }
+
+                    $.post('/Equipment/GetEquipmentConfigs', { equipmentTypeId: res.TYPE }, function (eqps) {
+                        // Handle response data
+                        table.reload('equipmenttable', { data: eqps });
+
+                    });
+                });
+                form.render();
+            }
+            window.eqptable = table.render({
+                elem: '#equipmenttable'
+                //, url: '/Equipment/GetEquipmentConfigs'
+                //, toolbar: '#eqpToolbar'
+                , id: "equipmenttable"
+                , data:[]
+                //, page: true
+                //, limit: 1000
+                //, limits: [1000]
+                , height: 'full-435'
+                , cols: [[
+                    { field: 'ID', title: 'ID' }
+                    , { field: 'NAME', title: 'Name' }
+                    , { field: 'RECIPE_TYPE', title: 'Recipe Type' }
+                    , { field: 'LINE', title: 'Line' }
+                    , { field: 'ORDERSORT', title: 'Sort Order' }
+                ]]
+                , done: function (data) {
+
+                }
+            });
+
+            form.on('submit(configFormSubmit)', function (data) {
+
+                $.post('/Equipment/AddOrUpdateEquipment', { config: data.field }, function (res) {
+                    // Handle response data
+                    console.log(res)
+                    if (res.result) {
+                        var index = window.parent.layer.getFrameIndex(window.name)
+                        window.parent.layer.close(index);
+                        window.parent.equipmenttable.reload();
+                        window.parent.layer.msg('OK');
+                    } else {
+                        layer.msg(res.message);
+                    }
+                });
+
+                return false;
+            });
+
+            form.on('select(equipmentType)', function (data) {
+                var elem = data.elem; // Get the original DOM object of select
+                var value = data.value; // Get the selected value
+                var othis = data.othis; // Get the jQuery object of the replaced select element
+
+                $.post('/Equipment/GetEquipmentConfigs', { equipmentTypeId: data.value }, function (res) {
+                    // Handle response data
+                    table.reload('equipmenttable', { data: res });
+                });
+
+            });
+
+
+            form.on('select(recipeType)', function (data) {
+                var elem = data.elem; // Get the original DOM object of select
+                var value = data.value; // Get the selected value
+                var othis = data.othis; // Get the jQuery object of the replaced select element
+
+                if (data.value === 'GeneralFile' || data.value === 'GeneralDirectory') {
+                    // Show class="shared-folder-items"
+                    $('.shared-folder-items').show();
+                } else {
+                    // Hide class="shared-folder-items"
+                    $('.shared-folder-items').hide();
+                }
+
+            });
+
+            layui.$('#test-conn').on('click', function () {
+                var data = form.val('configForm');
+                $.post('/Equipment/TestSharedFolder', { directoryPath: data.RECIPE_PATH, username: data.USERNAME, password:data.PASSWORD }, function (res) {
+                    // Handle response data
+                    var icon = res.result ? 1 : 2;
+                    layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + res.message + '</em>', { icon: icon });
+                });
+                return false;
+            });
+
+        });
+</script>

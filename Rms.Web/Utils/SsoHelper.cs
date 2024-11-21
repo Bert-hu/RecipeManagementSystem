@@ -78,7 +78,7 @@ public class SsoHelper
             });
             string retmsg = HttpPostRequestAsync4Json(ssourl, msg);
             var jobj = JsonConvert.DeserializeObject(retmsg) as Newtonsoft.Json.Linq.JObject;
-            if (jobj["code"].ToString().Equals("200"))
+            if (jobj != null && jobj["code"].ToString().Equals("200"))
             {
                 var user = JsonConvert.DeserializeObject<SsoUser>(jobj["data"].ToString());
                 return user;

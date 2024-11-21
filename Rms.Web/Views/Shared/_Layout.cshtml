@@ -18,7 +18,7 @@
     <meta charset="utf-8">
     <title>RMS</title>
     @*<link rel="stylesheet" href="../src/css/layui.css">*@
-    <link href="~/Scripts/layui/css/layui.css" rel="stylesheet" />
+    <link href="~/Scripts/layui_NEW/css/layui.css" rel="stylesheet" />
 </head>
 
 <body class="layui-layout-body">
@@ -115,7 +115,7 @@
 
 
         <!-- 内容主体区域 -->
-        <div style="padding: 15px; margin-top: 10px;"> @RenderBody()</div>
+        <div class="layui-bg-gray" style="padding: 25px; margin-top: 60px;"> @RenderBody()</div>
 
         <div class="layui-footer" style="left: 0; ">
             <!-- 底部固定区域 -->
@@ -170,28 +170,32 @@
                 }
             });
 
+            if (@(modules.Exists(it => it.LINKURL == "\\AlarmConfig\\AlarmHandle")?"true":"false"))
+            {
+                $.ajax({
+                    url: '/AlarmConfig/GetAlarmActions',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
+                    async: false,
+                    data: {
+                        page: 1,
+                        limit: 9999
+                    },
+                    success: function (data) {
 
-            $.ajax({
-                url: '/AlarmConfig/GetAlarmActions',
-                type: 'POST',
-                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
-                async: false,
-                data: {
-                    page: 1,
-                    limit: 9999
-                },
-                success: function (data) {
-                 
-                    //console.log(data.data)
-                    document.getElementById("alarmActionNum1").innerHTML = data.notHandledNum;
-                    document.getElementById("alarmActionNum2").innerHTML = data.notHandledNum;
-                    //去掉hidden属性
-                    document.getElementById("alarmActionNum1").removeAttribute("hidden");
-                    document.getElementById("alarmActionNum2").removeAttribute("hidden");
-                },
-                error: function (message) {
-                }
-            });
+                        //console.log(data.data)
+                        document.getElementById("alarmActionNum1").innerHTML = data.notHandledNum;
+                        document.getElementById("alarmActionNum2").innerHTML = data.notHandledNum;
+                        //去掉hidden属性
+                        document.getElementById("alarmActionNum1").removeAttribute("hidden");
+                        document.getElementById("alarmActionNum2").removeAttribute("hidden");
+                    },
+                    error: function (message) {
+                    }
+                });
+            }
+
+           
         });
     </script>
 </body>

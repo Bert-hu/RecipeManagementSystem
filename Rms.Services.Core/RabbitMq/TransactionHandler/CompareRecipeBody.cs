@@ -16,9 +16,9 @@ namespace Rms.Services.Core.RabbitMq.TransactionHandler
             var repTrans = trans.GetReplyTransaction();
             try
             {
-                var EquipmentId = string.Empty;
-                var RecipeName = string.Empty;         
-                if (trans.Parameters.TryGetValue("EquipmentId", out object _equipmentId)) EquipmentId = _equipmentId?.ToString();
+                var EquipmentId = trans.EquipmentID;
+                var RecipeName = string.Empty;
+                //if (trans.Parameters.TryGetValue("EquipmentId", out object _equipmentId)) EquipmentId = _equipmentId?.ToString();
                 if (trans.Parameters.TryGetValue("RecipeName", out object _recipeName)) RecipeName = _recipeName?.ToString();
 
                 var recipe = sqlSugarClient.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == EquipmentId && it.NAME == RecipeName).First();
@@ -35,7 +35,9 @@ namespace Rms.Services.Core.RabbitMq.TransactionHandler
                     (var result, var message) = service.CompareRecipe(eqp, recipe_version.ID);
                     repTrans.Parameters.Add("Result", result);
                     repTrans.Parameters.Add("Message", message);
-                }          
+                }
+
+
             }
             catch (Exception ex)
             {

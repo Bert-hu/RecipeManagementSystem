@@ -17,11 +17,13 @@ namespace Rms.Services.Core.Services
             //sqlSugarClient.DbFirst.IsCreateAttribute().StringNullable().CreateClassFile(@"..\WaferMapSystem.Models\DataBase\Wms");
             //throw new NotImplementedException();
 
-            //Assembly wrsmodels = Assembly.Load("ICOSEAP.Models");
-            //var typesInNamespace = wrsmodels.GetTypes()
-            //   .Where(t => t.Namespace != null && t.Namespace.StartsWith("ICOSEAP.Models.DataBase"))
-            //   .ToList();
 
+            //Code First 生成表
+            //Assembly wrsmodels = Assembly.Load("Rms.Models");
+            //var typesInNamespace = wrsmodels.GetTypes()
+            //   .Where(t => t.Namespace != null && t.Namespace.StartsWith("Rms.Models.DataBase.Mms"))
+            //   .ToList();
+            //
             //foreach (var type in typesInNamespace)
             //{
             //    sqlSugarClient.CodeFirst.InitTables(type);

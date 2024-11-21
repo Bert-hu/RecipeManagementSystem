@@ -1,0 +1,112 @@
+
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<link href="~/Scripts/layui/css/layui.css" rel="stylesheet" />
+<style>
+
+    .site-block {
+        padding: 20px;
+        border: 2px solid #eee;
+    }
+
+    .site-text {
+        position: relative;
+    }
+</style>
+<script src="~/Scripts/layui/layui.js"></script>
+<script src="~/Scripts/AlarmConfig/AddConfig.js?v=7"></script>
+
+<div id="equipmentTypeId"></div>
+
+<div class="site-text site-block">
+    <form class="layui-form" action="" lay-filter="configForm">
+        @*<input type="text" name="equipmentTypeId" id="equipmentTypeId" style="display:none">*@
+        <div class="layui-form-item">
+            <label class="layui-form-label">Name</label>
+            <div class="layui-input-block">
+                <input type="text" name="SHOWNAME" required placeholder="显示名称" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">序号</label>
+            <div class="layui-input-block">
+                <input type="text" name="ORDER_SORT" required lay-verify="number" placeholder="序号" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">类型</label>
+            <div class="layui-input-block">
+                <select name="TYPE">
+                    <option value="Material">Material</option>
+                    <option value="Tooling">Tooling</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">Type Code</label>
+            <div class="layui-input-block">
+                <input type="text" name="MATERIAL_TYPE" required lay-verify="required" placeholder="Type Code" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="configFormSubmit">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+    <script>
+        var equipmentTypeId = '@ViewBag.equipmentTypeId';
+        var configId = '@ViewBag.configId';
+
+
+
+        layui.use(['jquery', 'layer', 'table', 'form', 'upload', 'element', 'code'], function () {
+            var $ = layui.jquery
+                , layer = layui.layer
+                , table = layui.table
+                , form = layui.form
+                ;
+            console.log(configId);
+            if (configId != '') {
+                console.log(configId);
+                $.post('/Material/GetMaterialDicConfigId', { configId: configId }, function (res) {
+                    // 处理响应数据
+                    console.log(res);
+                    form.val('configForm', {
+                        "SHOWNAME": res.SHOWNAME,
+                        "MATERIAL_TYPE": res.MATERIAL_TYPE,
+                        "ORDER_SORT": res.ORDER_SORT,
+                        "TYPE":res.TYPE
+                    });
+                });
+            }
+
+            form.on('submit(configFormSubmit)', function (data) {
+
+                console.log(JSON.stringify(data.field));
+
+
+
+                $.post('/Material/AddOrUpdateConfig', { config: data.field, equipmentTypeId: equipmentTypeId, configId:configId }, function (res) {
+                    // 处理响应数据
+                    console.log(res)
+                    if (res.result) {
+                        var index = window.parent.layer.getFrameIndex(window.name)
+                        window.parent.layer.close(index);
+                        window.parent.configTable.reload();
+                    } else {
+                        layer.msg(res.message);
+                    }
+                });
+
+
+                return false;
+            });
+
+
+        });
+    </script>
+</div>

@@ -11,6 +11,7 @@
         el: '#equipments',
         //initValue: [0],
         radio: true,
+        repeat: true,
         clickClose: true,
         model: {
             icon: 'hidden',
@@ -35,9 +36,9 @@
 
             var loadingIndex = layer.load();
 
-            console.log(change);
-            console.log(arr);
-            console.log(equipmentSel.getValue()[0].value);
+            //console.log(change);
+            //console.log(arr);
+            //console.log(equipmentSel.getValue()[0].value);
             CleanLogField();
 
             setTimeout(function () {
@@ -89,13 +90,20 @@
                     equipmentSel.update({
                         data: seldata,
                     });
+
+                    loadMaterialToolingTable(seldata[0].value);
                     EquipmentTimer();
+                    //console.log(seldata[0].value);
                     // 初始加载日志
                     loadLogs();
+
+
                 },
                 error: function () {
                 }
             });
+
+
 
 
         } catch (error) {
@@ -131,10 +139,9 @@
 
     function LoadEquipmentInfo(eqid) {
 
-        console.log(eqid);
         if (eqid === undefined) {
             eqid = equipmentSel.getValue()[0].value;
-            console.log(eqid);
+            //console.log(eqid);
         }
         $.ajax({
             url: '/CommonProduction/GetEquipmentInfo',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
@@ -151,6 +158,88 @@
             }
         });
     }
+
+    window.materialToolingTable;
+    function loadMaterialToolingTable(eqid) {
+
+        window.materialToolingTable = table.render({
+            elem: '#materialToolingTable'
+            , url: '/CommonProduction/GetMaterialTooling'
+            , id: "materialToolingTable"
+            , page: false
+            , limit: 1000
+            , limits: [1000]
+            , height: 'full-450'
+            , toolbar: true
+            , defaultToolbar: [
+                'filter', // 列筛选
+                'exports'
+            ]
+            , cols: [[
+                { field: 'SHOWNAME', title: '名称', width: '150' },
+                { field: 'VALUE', title: '条码', width: '300', edit: true },
+                { field: 'LASTEDITOR', title: '修改者', width: '300', hide: true },
+                { field: 'LASTEDITTIME', title: '修改时间', templet: '<div>{{ FormDate(d.LASTEDITTIME, "yyyy-MM-dd HH:mm:ss") }}</div>', width: 180, hide: true }
+            ]]
+            , where: {
+                equipmentid: eqid
+            }
+            , done: function (data) {
+
+
+            }
+
+        });
+
+        table.on('edit(materialToolingTable)', function (obj) {
+
+            var field = obj.field; // 得到修改的字段
+            var value = obj.value // 得到修改后的值
+            var oldValue = obj.oldValue // 得到修改前的值 -- v2.8.0 新增
+            var data = obj.data // 得到所在行所有键值
+            var col = obj.getCol(); // 得到当前列的表头配置属性 -- v2.8.0 新增
+            console.log(obj); // 查看对象所有成员
+
+            // 值的校验
+            if (value.replace(/\s/g, '') === '') {
+                layer.tips('值不能为空', this, { tips: 1 });
+                return obj.reedit(); // 重新编辑 -- v2.8.0 新增
+            }
+            layer.confirm('Are you sure you want to modify?', { icon: 3, title: 'Modification Confirmation', content: obj.value }, function (index) {
+                $.ajax({
+                    url: '/CommonProduction/UpdateMaterialTooling',
+                    data: {
+                        "MMCID": obj.data.MMCID,
+                        "MID": obj.data.MID,
+                        "EQID": obj.data.EQID,
+                        "NewValue": value
+                    },
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                    async: false,
+                    success: function (data) {
+                        if (data.Result) {
+                            layer.msg(data.Message);
+                        } else {
+                            layer.msg(data.Message);
+                        }
+                        window.materialToolingTable.reload();
+                    },
+                    error: function (message) {
+                        alert('Error!');
+                    }
+                });
+                layer.close(index);
+            },
+                function (index) {
+                    layer.msg('Cancelled');
+                    ectable.reload();
+                });
+        });
+
+    }
+
+
 
 
     var logContainer = document.getElementById('logContainer');
@@ -349,4 +438,49 @@
         });
     });
 
+    $("#checkMandT").click(function () {
+
+        layer.prompt({
+            formType: 2,
+
+            title: 'Lot End:请扫入Lot ID',
+            area: ['300px', '35px'] //自定义文本域宽高
+        }, function (value, index, elem) {
+            layer.close(index);
+            var loadingIndex = layer.load();
+            $.ajax({
+                type: 'post',
+                dataType: 'json',
+                url: '/CommonProduction/CheckMaterialTooling',
+                data: {
+                    equipmentid: equipmentSel.getValue()[0].value,
+                    lotid: value,
+                },
+                success: function (data) {
+                    setTimeout(function () {
+                        loadLogs();
+                        LoadEquipmentInfo();
+                        layer.close(loadingIndex);
+                    }, 10);
+                    if (data.Result) {
+                        layer.open({
+                            title: 'OK'
+                            , content: data.Message
+                        });
+
+                    } else {
+                        layer.open({
+                            title: 'FAIL'
+                            , content: data.Message
+                        });
+                    }
+                },
+                error: function (err) {
+                    layer.close(loadingIndex);
+                    console.log(err)
+                }
+            });
+        });
+      
+    });
 });

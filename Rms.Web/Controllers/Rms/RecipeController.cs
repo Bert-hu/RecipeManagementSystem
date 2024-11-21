@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Web.Mvc;
@@ -476,16 +477,31 @@ namespace Rms.Web.Controllers.Rms
             }
         }
 
-        private object ByteArrayToObject(byte[] data)
+        //private object ByteArrayToObject(byte[] data)
+        //{
+        //    if (data == null)
+        //        return null;
+
+        //    BinaryFormatter formatter = new BinaryFormatter();
+        //    using (MemoryStream stream = new MemoryStream(data))
+        //    {
+        //        return formatter.Deserialize(stream);
+        //    }
+        //}
+
+        public object ByteArrayToObject(byte[] data)
         {
             if (data == null)
                 return null;
 
-            BinaryFormatter formatter = new BinaryFormatter();
+            IFormatter formatter = new BinaryFormatter();
+            formatter.Binder = new USerializationBinder();
             using (MemoryStream stream = new MemoryStream(data))
             {
                 return formatter.Deserialize(stream);
             }
+
+
         }
 
         public JsonResult GetVersionSml(string RecipeVersionId)
@@ -495,8 +511,8 @@ namespace Rms.Web.Controllers.Rms
             var recipe = db.Queryable<RMS_RECIPE>().In(version.RECIPE_ID).First();
             var eqp = db.Queryable<RMS_EQUIPMENT>().In(recipe.EQUIPMENT_ID).First();
             try
-            {       
-               // if (eqp.RECIPE_TYPE != "secsSml" || eqp.) return Json(new { Result = false, Message = "This machine do not support displaying content!" }, JsonRequestBehavior.AllowGet);
+            {
+                // if (eqp.RECIPE_TYPE != "secsSml" || eqp.) return Json(new { Result = false, Message = "This machine do not support displaying content!" }, JsonRequestBehavior.AllowGet);
                 var serverdata = db.Queryable<RMS_RECIPE_DATA>().In(version.RECIPE_DATA_ID).First();
                 var dataobj = ByteArrayToObject(serverdata.CONTENT);
                 var bodySml = Encoding.Unicode.GetString((dataobj as RecipeBody).FormattedBody);
@@ -514,6 +530,7 @@ namespace Rms.Web.Controllers.Rms
         {
             try
             {
+                return Json(new { Result = false, Message = "禁用修改功能" }, JsonRequestBehavior.AllowGet);
                 string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/editrecipebody";
                 var body = JsonConvert.SerializeObject(new AddNewRecipeVersionWithBodyRequest { TrueName = User.TRUENAME, RecipeVersionId = RecipeVersionId, RecipeBody = RecipeBody });
 
@@ -525,6 +542,20 @@ namespace Rms.Web.Controllers.Rms
             {
                 return Json(new { Result = false, Message = ex.Message }, JsonRequestBehavior.AllowGet);
             }
+        }
+
+        public JsonResult CompareRecipe(string reciepId)
+        {
+            var db = DbFactory.GetSqlSugarClient();
+            var recipe = db.Queryable<RMS_RECIPE>().In(reciepId).First();
+
+            string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/CompareRecipeBody";
+            var body = JsonConvert.SerializeObject(new DownloadEffectiveRecipeToMachineRequest { EquipmentId = recipe.EQUIPMENT_ID, RecipeName = recipe.NAME });
+
+            var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(apiURL, body);
+            var replyItem = JsonConvert.DeserializeObject<DownloadEffectiveRecipeToMachineResponse>(apiresult);
+            return Json(replyItem);
+
         }
     }
 }

@@ -196,9 +196,16 @@ namespace Rms.Services.Core.Rms.RecipeTypeFunction
                     return (false, "Recipe do not have data.");
                 }
                 var recipe = db.Queryable<RMS_RECIPE>().InSingle(recipe_version.RECIPE_ID);
-                var data = db.Queryable<RMS_RECIPE_DATA>().InSingle(recipe_version.RECIPE_DATA_ID)?.CONTENT;
+
+                var serverdata = db.Queryable<RMS_RECIPE_DATA>().InSingle(recipe_version.RECIPE_DATA_ID)?.CONTENT;
+                //从serverdata从取出Unformatted Body
+                var dataobj = ByteArrayToObject(serverdata);
+
+                //var data = db.Queryable<RMS_RECIPE_DATA>().InSingle(recipe_version.RECIPE_DATA_ID)?.CONTENT;
                 string rabbitMqRoute = $"EAP.SecsClient.{EquipmentId}";
-                var body = Convert.ToBase64String(data);
+                var body = Convert.ToBase64String((dataobj as RecipeBody).UnformattedBody);
+                var paras = Encoding.Unicode.GetString((dataobj as RecipeBody).FormattedBody);
+                //var body = Convert.ToBase64String(data);
 
                 var trans = new RabbitMqTransaction
                 {
@@ -206,7 +213,7 @@ namespace Rms.Services.Core.Rms.RecipeTypeFunction
                     EquipmentID = EquipmentId,
                     NeedReply = true,
                     ExpireSecond = 15,
-                    Parameters = new Dictionary<string, object>() { { "RecipeName", recipe.NAME }, { "RecipeBody", body } }
+                    Parameters = new Dictionary<string, object>() { { "RecipeName", recipe.NAME }, { "RecipeBody", body },{ "RecipeParameters" , paras } }
                 };
                 var rabbitRes = rabbitMq.ProduceWaitReply(rabbitMqRoute, trans);
                 if (rabbitRes != null)

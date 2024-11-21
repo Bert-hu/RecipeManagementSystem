@@ -117,10 +117,10 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             , limits: [1000]
             , height: 'full-235'
             , cols: [[
-                { field: 'RECIPE_NAME', title: 'Recipe Name', width: '45%' }
-                , { field: 'RECIPE_LATEST_VERSION', title: 'Latest Version', width: '15%' }
-                , { field: 'RECIPE_EFFECTIVE_VERSION', title: 'Effective Version', width: '15%' }
-                , { fixed: 'right', width: '25%', align: 'center', toolbar: '#recipetoolbar' }
+                { field: 'RECIPE_NAME', title: 'Recipe Name', width: '400' }
+                , { field: 'RECIPE_LATEST_VERSION', title: 'Latest Version', width: '100' }
+                , { field: 'RECIPE_EFFECTIVE_VERSION', title: 'Effective Version', width: '100' }
+                , { fixed: 'right', width: '200', align: 'center', toolbar: '#recipetoolbar' }
             ]]
             , where: {
                 EQID: id
@@ -142,7 +142,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                     if (data.canEdit) {
                         //20231225暂时不开放修改功能
                         //tr.find('a[lay-event="editbody"]').show();
-                        
+
                     }
                 });
                 //ShowVersionTable(data.data[0].RECIPE_ID)
@@ -228,8 +228,8 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                     EQPsel.setValue([
                         seldata[0]
                     ])
-                   
-                    
+
+
                 },
                 error: function () {
                 }
@@ -320,6 +320,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
     table.on('tool(rcptable)', function (obj) { //注：tool 是工具条事件名，recipe 是 table 原始容器的属性 lay-filter="对应的值"
         var selectdata = obj.data //获得当前行数据
             , layEvent = obj.event; //获得 lay-event 对应的值
+        console.log(layEvent);
         if (layEvent === 'download') {
             layer.prompt({
                 formType: 2,
@@ -396,10 +397,24 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                 }
             });
         }
-        else if (layEvent === 'editbody'){
+        else if (layEvent === 'compare') {
+            $.post('/Recipe/CompareRecipe', { reciepId: selectdata.RECIPE_ID }, function (res) {
 
-            ShowBodyEditPage(selectdata.RECIPE_LATEST_VERSION_ID);
+                var icon = res.Result ? 1 : 2;
+                layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + res.Message + '</em>', { icon: icon });
+
+                //if (res.result) {
+                //    layer.alert('<em style="color:white;font-style:normal;font-weight:normal">' + res.message + '</em>');
+                //} else {
+                //    layer.alert('<em style="color:white;font-style:normal;font-weight:normal">' + res.message + '</em>');
+
+                //}
+            });
         }
+        //else if (layEvent === 'editbody'){
+
+        //    ShowBodyEditPage(selectdata.RECIPE_LATEST_VERSION_ID);
+        //}
 
     });
 
@@ -565,7 +580,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
         layer.open({
             title: 'Edit Recipe Body'
             , type: 2
-            , btn: ['提交Submit','取消Cancel']
+            , btn: ['提交Submit', '取消Cancel']
             , content: 'EditVersion?RecipeVersionId=' + recipeVersionId
             , area: ['90%', '90%']
 

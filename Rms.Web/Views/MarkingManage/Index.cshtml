@@ -12,7 +12,7 @@
         background-color: #89cff0 !important;
     }
 </style>
-<script src="~/Scripts/Marking/markingmanage.js"></script>
+<script src="~/Scripts/Marking/markingmanage.js?v=1.1"></script>
 
 <script type="text/html" id="toolbar">
     <div>
@@ -52,14 +52,33 @@
                 <div class="layui-inline">
                     <button type="button" class="layui-btn layui-btn-normal" id="addversion">新增版本</button>
                 </div>
+                <div class="layui-inline" id="templateDiv">
+                    <label class="layui-form-label">Template</label>
+                    <div class="layui-input-block">
+                        <select name="textselect" id="versionTemplate" lay-filter="versionTemplate">
+                            <option value="Main">Main</option>
+                            <option value="Backup">Backup</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="layui-inline" style="float: right;">
-                    <button type="button" class="layui-btn layui-btn-danger" id="submitversion" >提交版本</button>
+                    <button type="button" class="layui-btn layui-btn-danger" id="submitversion">提交版本</button>
                 </div>
             </div>
             <fieldset class="layui-elem-field layui-field-title">
                 @*<legend id="lg_version"></legend>*@
             </fieldset>
-
+            @*<div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">Version Template</label>
+                    <div class="layui-input-block">
+                        <select name="textselect" id="versionTemplate" lay-filter="versionTemplate">
+                            <option value="Main">Main</option>
+                            <option value="Backup">Backup</option>     
+                        </select>
+                    </div>
+                </div>
+            </div>*@
             <div class="layui-form-item">
                 <div class="layui-inline">
                     <label class="layui-form-label">Select Text</label>
@@ -147,11 +166,11 @@
         </form>
         <style>
             .sample {
-                padding: 5% 10%;
+                padding: 2% 8% 8% 8%;
                 background-color: black;
                 color: white;
-                height: 17rem;
-                margin-top: 5%;
+                height: 20vh;
+                margin-top: 2%;
                 margin-right: 10%;
                 margin-bottom: 10%;
                 margin-left: 10%;

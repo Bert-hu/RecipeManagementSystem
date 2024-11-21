@@ -15,6 +15,10 @@ using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.UI.WebControls;
+using Rms.Models.DataBase.Mms;
+using System.Collections;
+using System.Web.Http.Results;
+using Antlr.Runtime.Misc;
 
 namespace Rms.Web.Controllers.Production
 {
@@ -108,7 +112,7 @@ WHERE RE.ID = '{0}'", equipmentid);
             return Json(data, JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult DownloadRecipeByPanelID(string equipmentid,string panelid)
+        public JsonResult DownloadRecipeByPanelID(string equipmentid, string panelid)
         {
             string sfis_step7_req = $"EQXXXXXX01,{panelid},7,M001603,JORDAN,,OK,SN_MODEL_NAME_INFO=???";
             string sfis_step7_res = string.Empty;
@@ -240,5 +244,7 @@ WHERE RE.ID = '{0}'", equipmentid);
                     MESSAGE = message
                 }).ExecuteCommand();
         }
+
+
     }
 }

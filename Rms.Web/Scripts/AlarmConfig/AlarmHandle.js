@@ -21,6 +21,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                 { field: 'DATETIME', title: 'Time', templet: '<div>{{ FormDate(d.DATETIME, "yyyy-MM-dd HH:mm:ss") }}</div>', width: 180 }
                 , { field: 'EQID', title: 'Equipment' }
                 , { field: 'ALID', title: 'AlarmCode' }
+                , { field: 'ALTX', title: 'AlarmText' }
                 , { field: 'ISHANDLED', title: 'IsHandled' }
                 , { field: 'USERNAME', title: 'HandledBy' }
                 , { field: 'REMARK', title: 'Remark', width: 480 }

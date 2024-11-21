@@ -250,6 +250,7 @@
     <Compile Include="Controllers\Ams\AlarmConfigController.cs" />
     <Compile Include="Controllers\Ems\EquipmentTypeController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\Mms\MaterialController.cs" />
     <Compile Include="Controllers\Pms\AccountController.cs" />
     <Compile Include="Controllers\Pms\BaseController.cs" />
     <Compile Include="Controllers\Pms\ModuleController.cs" />
@@ -282,11 +283,15 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\RabbitMqService.cs" />
     <Compile Include="Utils\HttpClientHelper.cs" />
+    <Compile Include="Utils\NetworkConnection.cs" />
     <Compile Include="Utils\SsoHelper.cs" />
+    <Compile Include="Utils\USerializationBinder.cs" />
+    <Compile Include="ViewModels\MaterialConfigViewModel.cs" />
     <Compile Include="ViewModels\AlarmConfigViewModel.cs" />
     <Compile Include="ViewModels\ChangePasswordViewModel.cs" />
     <Compile Include="ViewModels\EquipmentViewModel.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
+    <Compile Include="ViewModels\MaterialToolingViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\animate\dashboard.css" />
@@ -379,6 +384,7 @@
     <Content Include="Scripts\ECharts\theme-vintage.js" />
     <Content Include="Scripts\Ems\EquipmentType.js" />
     <Content Include="Scripts\Image\Image.js" />
+    <None Include="Properties\PublishProfiles\HPH.pubxml" />
     <None Include="Scripts\jquery-3.7.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.1.js" />
     <Content Include="Scripts\jquery-3.7.1.min.js" />
@@ -402,6 +408,13 @@
     <Content Include="Scripts\layui-v2.7.6\css\modules\layer\default\loading-2.gif" />
     <Content Include="Scripts\layui-v2.7.6\font\iconfont.svg" />
     <Content Include="Scripts\layui-v2.7.6\layui.js" />
+    <Content Include="Scripts\layui_NEW\css\layui.css" />
+    <Content Include="Scripts\layui_NEW\font\iconfont.svg" />
+    <Content Include="Scripts\layui_NEW\layui.all.js" />
+    <Content Include="Scripts\layui_NEW\layui.js" />
+    <Content Include="Scripts\layui_NEW\layui.table.formdate.js" />
+    <Content Include="Scripts\layui_NEW\tableEdit.js" />
+    <Content Include="Scripts\layui_NEW\xm-select.js" />
     <Content Include="Scripts\layui\css\layui.css" />
     <Content Include="Scripts\layui\css\layui.mobile.css" />
     <Content Include="Scripts\layui\css\modules\code.css" />
@@ -486,6 +499,10 @@
     <Content Include="Scripts\layui\images\face\8.gif" />
     <Content Include="Scripts\layui\images\face\9.gif" />
     <Content Include="Scripts\layui\layui.all.js" />
+    <Content Include="Scripts\layui_NEW\font\iconfont.eot" />
+    <Content Include="Scripts\layui_NEW\font\iconfont.ttf" />
+    <Content Include="Scripts\layui_NEW\font\iconfont.woff" />
+    <Content Include="Scripts\layui_NEW\font\iconfont.woff2" />
     <None Include="Scripts\layui\layui.js.2.5" />
     <Content Include="Scripts\layui\layui.js" />
     <Content Include="Scripts\layui\layui.table.formdate.js" />
@@ -514,6 +531,8 @@
     <Content Include="Scripts\Marking\markingfields.js" />
     <Content Include="Scripts\Marking\markingmanage.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
+    <Content Include="Scripts\partices\app.js" />
+    <Content Include="Scripts\partices\particles.js" />
     <Content Include="Scripts\Production\UvIrradiation\Index.js" />
     <Content Include="Scripts\Production\Fvi\Index.js" />
     <Content Include="Scripts\Production\WaferAOI\Index.js" />
@@ -599,6 +618,9 @@
     <Content Include="Views\AlarmConfig\AddConfig.cshtml" />
     <Content Include="Views\AlarmConfig\AlarmRecords.cshtml" />
     <Content Include="Views\AlarmConfig\AlarmHandle.cshtml" />
+    <Content Include="Views\Equipment\EqpConfig.cshtml" />
+    <Content Include="Views\Material\Index.cshtml" />
+    <Content Include="Views\Material\AddConfig.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

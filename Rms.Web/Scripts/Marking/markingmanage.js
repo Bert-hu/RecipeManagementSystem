@@ -20,7 +20,9 @@ layui.use(['layer', 'table', 'form', 'upload'], function () {
             , { field: 'EQNAME', title: '设备名', width: 100 }
             , { field: 'RECIPENAME', title: '机种名', width: 300 }
             , { field: 'EFFECTIVE_VERSION', title: '生效版', width: 80 }
+            , { field: 'EFFECTIVE_CREATOR', title: '创建者', width: 180 }
             , { field: 'LATEST_VERSION', title: '最新版', width: 80 }
+            , { field: 'EFFECTIVE_CREATOR', title: '创建者', width: 180 }
 
         ]]
         , done: function (res, curr, count) {
@@ -54,7 +56,7 @@ layui.use(['layer', 'table', 'form', 'upload'], function () {
         , id: "markingitem"
         , limit: 1000
         , limits: [1000]
-        , height: '400'
+        , height: 'full-600'
         , defaultToolbar: []
         //, toolbar: '#toolbar'
         , cols: [[
@@ -65,11 +67,15 @@ layui.use(['layer', 'table', 'form', 'upload'], function () {
             , { field: 'TYPE', title: 'Type', width: 80 }
             , { field: 'START_INDEX', title: 'Start', width: 70 }
             , { field: 'LENGTH', title: 'Length', width: 80 }
-            , { fixed: 'right', title: '', width: 50, align: 'center', toolbar: '#configtoolbar' }
+            , { field: 'CREATOR', title: 'CREATOR', width: 180 }
+            , { fixed: 'right', width: 50, toolbar: '#configtoolbar' }
 
         ]]
         , done: function (res, curr, count) {
-
+            console.log(res);
+            if (count > 0) {
+                ReloadPreviewDie(currentMarkingVersionId);
+            }
         }
     });
     table.on('row(markingrecipe)', function (obj) {
@@ -77,9 +83,6 @@ layui.use(['layer', 'table', 'form', 'upload'], function () {
         var data = obj.data;//data为当前点击行的数据
         //console.log(obj);
         UpdateSubpage(data.RECIPEID);
-
-
-
 
         //标注选中样式
         obj.tr.addClass('selected').siblings().removeClass('selected');
@@ -138,9 +141,18 @@ layui.use(['layer', 'table', 'form', 'upload'], function () {
         form.render();
     });
 
+    var currentMarkingVersionId = null;
     //版本选择
     form.on('select(version)', function (data) {
-        ReloadItemTable(data.value);
+        currentMarkingVersionId = data.value;
+        ReloadItemTable(currentMarkingVersionId, currentIsMainConfig);
+
+    });
+    var currentIsMainConfig = true;
+    form.on('select(versionTemplate)', function (data) {
+
+        currentIsMainConfig = data.value == 'Main';
+        ReloadItemTable(currentMarkingVersionId, currentIsMainConfig);
 
     });
 
@@ -154,13 +166,15 @@ layui.use(['layer', 'table', 'form', 'upload'], function () {
             dataType: 'json',
             url: '/MarkingManage/AddMarkingConfig',
             data: {
-                data: data.field
+                data: data.field,
+                isMainConfig: currentIsMainConfig
             },
             success: function (res) {
 
                 layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + res.message + '</em>');
                 if (res.result) {
-                    ReloadItemTable(data.field.version);
+                    //ReloadItemTable(data.field.version);
+                    ReloadItemTable(currentMarkingVersionId, currentIsMainConfig);
 
                 }
             },
@@ -229,6 +243,16 @@ layui.use(['layer', 'table', 'form', 'upload'], function () {
 
     function UpdateSubpage(recipeid) {
         //
+        currentMarkingVersionId = '';
+
+        table.reload('markingitem', {
+            url: '',
+            data: [],
+            done: function (res, curr, count) {
+    
+
+            }
+        });
         $.ajax({
             type: 'post',
             dataType: 'json',
@@ -237,7 +261,6 @@ layui.use(['layer', 'table', 'form', 'upload'], function () {
                 recipeid: recipeid
             },
             success: function (res) {
-                console.log(res);
                 $("#lg_recipeinfo").html(res.eqp.ID + ' ' + res.eqp.NAME + ' ' + res.recipe.NAME);
                 $("#recipeid").val(res.recipe.ID);//更新当前记录的RECIPEID
                 $('#version').html('');
@@ -245,7 +268,9 @@ layui.use(['layer', 'table', 'form', 'upload'], function () {
                     $('#version').append(new Option(value.VERSION, value.ID));
                 });
                 if (res.markingversions.length > 0) {
-                    ReloadItemTable(res.markingversions[0].ID);
+                    //ReloadItemTable(res.markingversions[0].ID, true);
+                    currentMarkingVersionId = res.markingversions[0].ID;
+                    ReloadItemTable(currentMarkingVersionId, currentIsMainConfig);
                 }
 
                 form.render('select');
@@ -299,15 +324,25 @@ layui.use(['layer', 'table', 'form', 'upload'], function () {
         });
 
     }
-    function ReloadItemTable(markingversionid) {
+    function ReloadItemTable(markingversionid, isMainConfig) {
         table.reload('markingitem', {
             url: '/MarkingManage/GetMarkingConfigs'
             , where: {
-                markingversionid: markingversionid
+                markingversionid: currentMarkingVersionId,
+                isMainConfig: currentIsMainConfig
             }, done: function (res, curr, count) {
-                ReloadPreviewDie(markingversionid);
+                const sampleDiv = document.querySelector('.sample');
+                sampleDiv.innerHTML = '';
+                if (res.errmsg == '') {
+                    if (res.data.length > 0) {
+                        ReloadPreviewDie(currentMarkingVersionId);
+                    }
+                } else {
+                    layer.alert(res.errmsg);
+                }
+
             }
-            //,height: 300
+
         });
     }
     function ReloadPreviewDie(markingversionid) {
@@ -316,11 +351,11 @@ layui.use(['layer', 'table', 'form', 'upload'], function () {
             dataType: 'json',
             url: '/MarkingManage/GetMarkingTexts',
             data: {
-                markingversionid: markingversionid
+                markingversionid: markingversionid,
+                isMainConfig: currentIsMainConfig
             },
             success: function (data) {
                 //layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + data.message + '</em>');
-                console.log(data);
                 if (data.result) {
                     const jsonData = data.markingtexts;
                     const sampleDiv = document.querySelector('.sample');
@@ -328,15 +363,15 @@ layui.use(['layer', 'table', 'form', 'upload'], function () {
                     const keys = Object.keys(jsonData);
                     const numOfLines = keys.length > 4 ? keys.length : 4;
                     const baseFontSize = 1.5;
-                    const maxHeightRem = 17;
+                    const maxHeightRem = 20;
 
                     const lineHeightPercent = (100 / numOfLines).toFixed(2);
-                    sampleDiv.style.height = `${maxHeightRem}rem`;
+                    sampleDiv.style.height = `${maxHeightRem}vh`;
 
                     keys.forEach((key, index) => {
                         const lineContent = jsonData[key];
 
-                        const fontSize = `${baseFontSize * (10 / numOfLines)}rem`;
+                        const fontSize = `${20 / numOfLines}vh`;
                         const lineDiv = document.createElement('div');
                         lineDiv.textContent = lineContent;
                         lineDiv.style.fontSize = fontSize;
@@ -356,14 +391,15 @@ layui.use(['layer', 'table', 'form', 'upload'], function () {
             dataType: 'json',
             url: '/MarkingManage/DeleteMarkingConfig',
             data: {
-                configid: config.ID
+                configid: config.ID,
+                isMainConfig: currentIsMainConfig
             },
             success: function (res) {
 
                 layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + res.message + '</em>');
                 if (res.result) {
-                    ReloadItemTable(config.MARKING_VERSION_ID);
-
+                    //ReloadItemTable(config.MARKING_VERSION_ID);
+                    ReloadItemTable(currentMarkingVersionId, currentIsMainConfig);
                 }
             },
             error: function (err) {

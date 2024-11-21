@@ -153,12 +153,20 @@ namespace Rms.Services.Core.Rms.RecipeTypeFunction
                 Parameters = new Dictionary<string, object>() { { "RecipeName", RecipeName } }
             };
             var rabbitRes = rabbitMq.ProduceWaitReply(rabbitmqRoute, trans);
-            if (rabbitRes != null)
+           if (rabbitRes != null)
             {
                 var result = rabbitRes.Parameters["Result"].ToString().ToUpper() == "TRUE";
                 rabbitRes.Parameters.TryGetValue("Message", out object message);
-                var body = Convert.FromBase64String(rabbitRes.Parameters["RecipeBody"].ToString());
-                return (result, message?.ToString(), body);
+                if (result)
+                {
+                    var body = Convert.FromBase64String(rabbitRes.Parameters["RecipeBody"].ToString());
+                    return (result, message?.ToString(), body);
+                }
+                else
+                {
+                    return (result, message?.ToString(), null);
+                }
+
             }
             else//Rabbit Mq失败
             {

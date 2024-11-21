@@ -15,6 +15,7 @@ namespace Rms.Models.DataBase.Ams
         public string EQID { get; set; }
         public string ETID { get; set; }
         public string ALID { get; set; }
+        public string ALTX { get; set; }
         public int TRIGGER_INTERVAL { get; set; }
         public int TRIGGER_COUNT { get; set; }
 

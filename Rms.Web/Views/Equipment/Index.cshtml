@@ -1,11 +1,10 @@
-﻿
-@{
+﻿@{
 
 }
 <style>
     .scrollable-div {
         max-height: 80vh;
-        overflow-y: auto; /* 或者使用 overflow-y: auto; */
+        overflow-y: auto; /* or use overflow-y: auto; */
     }
 
     .selected {
@@ -15,25 +14,33 @@
 <script src="~/Scripts/layui/xm-select.js"></script>
 <script src="~/Scripts/layui/layui.table.formdate.js"></script>
 <script src="~/Scripts/Ems/Equipment.js"></script>
+<script src="~/Scripts/layui_NEW/layui.js"></script>
 
 <form class="layui-form layui-form-pane" action="">
     <div class="layui-form-item layui-row">
         <div class="layui-row">
             <div class="layui-input-inline" style="width:15%">
                 <select name="process" id="process" lay-filter="process" lay-verify="required">
-                    <option value="">请选择Process</option>
+                    <option value="">Please select Process</option>
                     <option value="DPS">DPS</option>
                 </select>
             </div>
-            @*<div class="layui-input-inline" style="width: 80% ;margin-left: 1%">
-                <div id="eqps" lay-filter="index" class="xm-select-demo"></div>
-            </div>*@
+            <div class="layui-input-inline" style="width: 80%; margin-left: 1%">
+                <input type="text" lay-affix="search" lay-filter="search" lay-options="{split: true}" placeholder="Search…" class="layui-input" id="searchInput">
+            </div>
         </div>
     </div>
 </form>
-
 <table class="layui-hide" id="equipmenttable" lay-filter="equipmenttable"></table>
 
+<script type="text/html" id="eqpToolbar">
+    <div>
+        <div class="layui-btn-container" style="float:left;display:inline">
+            <button class="layui-btn layui-btn-sm" lay-event="add">Add Machine</button>
+        </div>
+    </div>
+</script>
 
-
-
+<script type="text/html" id="eqpLineToolBar">
+    <a class="layui-btn layui-btn layui-btn-xs" lay-event="edit">Edit</a>
+</script>

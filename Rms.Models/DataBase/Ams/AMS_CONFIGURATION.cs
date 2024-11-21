@@ -14,6 +14,7 @@ namespace Rms.Models.DataBase.Ams
         public string NAME { get; set; }
         public string EQUIPMENT_TYPE_ID { get; set; }
         public string ALID { get; set; }
+        public string ALTX { get; set; }
         public int TRIGGER_INTERVAL { get; set; }
         public int TRIGGER_COUNT { get; set; }
         public string ACTIONID { get; set; }

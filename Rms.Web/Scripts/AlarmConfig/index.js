@@ -76,6 +76,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             , cols: [[
                 { field: 'NAME', title: 'Name' }
                 , { field: 'ALID', title: 'AlarmCode' }
+                , { field: 'ALTX', title: 'AlarmText' }
                 , { field: 'TRIGGER_INTERVAL', title: 'Trigger Interval(min)' }
                 , { field: 'TRIGGER_COUNT', title: 'Trigger Count' }
                 , { field: 'ISVALID', title: 'Enabled' }

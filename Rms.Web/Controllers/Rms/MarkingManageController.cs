@@ -53,7 +53,7 @@ namespace Rms.Web.Controllers.Rms
             var markingversion = new RMS_MARKING_VERSION
             {
                 RECIPE_ID = recipeid,
-                
+
                 VERSION = (lastmarkingversion?.VERSION ?? 0) + 1,
                 FLOW_ROLES = eqtype.FLOWROLEIDS,
                 CURRENT_FLOW_INDEX = 0,
@@ -77,40 +77,82 @@ namespace Rms.Web.Controllers.Rms
         }
 
 
-        public JsonResult AddMarkingConfig(MarkingConfig data)
+        public JsonResult AddMarkingConfig(MarkingConfig data, bool isMainConfig)
         {
             if (data.version == null) return Json(new ResponseResult { result = false, message = "请选择版本" });
             var db = DbFactory.GetSqlSugarClient();
             var version = db.Queryable<RMS_MARKING_VERSION>().In(data.version).First();
             if (version.CURRENT_FLOW_INDEX > 0) return Json(new { result = false, message = "已提交版本禁止修改" });
-            var textconfigs = db.Queryable<RMS_MARKING_CONFIG>().Where(it => it.MARKING_VERSION_ID == data.version && it.TEXTINDEX == data.textselect).OrderBy(it => it.TEXTORDER).ToList();
-            var isfixed = data.marktype == "Fixed";
-            var config = new RMS_MARKING_CONFIG
+
+            if (!isMainConfig && version.CREATOR == User.TRUENAME) return Json(new { result = false, message = "版本创建者禁止修改Backup版本！" });
+            if (isMainConfig && version.CREATOR != User.TRUENAME) return Json(new { result = false, message = "版本创建者才能修改Main版本！" });
+
+            if (isMainConfig)
             {
-                MARKING_VERSION_ID = data.version,
-                TEXTINDEX = data.textselect,
-                TEXTORDER = textconfigs.Count + 1,
-                TYPE = data.marktype,
-                CONTENT = isfixed ? data.fixedtext : data.field,
-                START_INDEX = isfixed ? -1 : data.startindex,
-                LENGTH = isfixed ? -1 : data.length,
-                CREATOR = User.TRUENAME
-            };
-            db.Insertable<RMS_MARKING_CONFIG>(config).ExecuteCommand();
+                var textconfigs = db.Queryable<RMS_MARKING_CONFIG>().Where(it => it.MARKING_VERSION_ID == data.version && it.TEXTINDEX == data.textselect).OrderBy(it => it.TEXTORDER).ToList();
+                var isfixed = data.marktype == "Fixed";
+                var config = new RMS_MARKING_CONFIG
+                {
+                    MARKING_VERSION_ID = data.version,
+                    TEXTINDEX = data.textselect,
+                    TEXTORDER = textconfigs.Count + 1,
+                    TYPE = data.marktype,
+                    CONTENT = isfixed ? data.fixedtext : data.field,
+                    START_INDEX = isfixed ? -1 : data.startindex,
+                    LENGTH = isfixed ? -1 : data.length,
+                    CREATOR = User.TRUENAME
+                };
+                db.Insertable<RMS_MARKING_CONFIG>(config).ExecuteCommand();
+            }
+            else//备用模板
+            {
+                var textconfigs = db.Queryable<RMS_MARKING_CONFIG_BACKUP>().Where(it => it.MARKING_VERSION_ID == data.version && it.TEXTINDEX == data.textselect).OrderBy(it => it.TEXTORDER).ToList();
+                var isfixed = data.marktype == "Fixed";
+                var config = new RMS_MARKING_CONFIG_BACKUP
+                {
+                    MARKING_VERSION_ID = data.version,
+                    TEXTINDEX = data.textselect,
+                    TEXTORDER = textconfigs.Count + 1,
+                    TYPE = data.marktype,
+                    CONTENT = isfixed ? data.fixedtext : data.field,
+                    START_INDEX = isfixed ? -1 : data.startindex,
+                    LENGTH = isfixed ? -1 : data.length,
+                    CREATOR = User.TRUENAME
+                };
+                db.Insertable<RMS_MARKING_CONFIG_BACKUP>(config).ExecuteCommand();
+            }
+
             return Json(new { result = true, message = "添加成功" });
         }
-        public JsonResult DeleteMarkingConfig(string configid)
+        public JsonResult DeleteMarkingConfig(string configid, bool isMainConfig)
         {
             var db = DbFactory.GetSqlSugarClient();
-            var config = db.Queryable<RMS_MARKING_CONFIG>().In(configid).First();
-            var version = db.Queryable<RMS_MARKING_VERSION>().In(config.MARKING_VERSION_ID).First();
-            if (version.CURRENT_FLOW_INDEX > 0) return Json(new { result = false, message = "已提交版本禁止修改" });
 
-            var textconfigs = db.Queryable<RMS_MARKING_CONFIG>().Where(it => it.TEXTINDEX == config.TEXTINDEX && it.TEXTORDER > config.TEXTORDER).OrderBy(it => it.TEXTORDER).ToList();
-            textconfigs.ForEach(it => it.TEXTORDER = it.TEXTORDER - 1);
+            if (isMainConfig)
+            {
+                var config = db.Queryable<RMS_MARKING_CONFIG>().In(configid).First();
+                var version = db.Queryable<RMS_MARKING_VERSION>().In(config.MARKING_VERSION_ID).First();
+                if (version.CURRENT_FLOW_INDEX > 0) return Json(new { result = false, message = "已提交版本禁止修改" });
 
-            db.Deleteable<RMS_MARKING_CONFIG>(config).ExecuteCommand();
-            db.Updateable<RMS_MARKING_CONFIG>(textconfigs).UpdateColumns(it => it.TEXTORDER).ExecuteCommand();
+                var textconfigs = db.Queryable<RMS_MARKING_CONFIG>().Where(it => it.TEXTINDEX == config.TEXTINDEX && it.TEXTORDER > config.TEXTORDER).OrderBy(it => it.TEXTORDER).ToList();
+                textconfigs.ForEach(it => it.TEXTORDER = it.TEXTORDER - 1);
+
+                db.Deleteable<RMS_MARKING_CONFIG>(config).ExecuteCommand();
+                db.Updateable<RMS_MARKING_CONFIG>(textconfigs).UpdateColumns(it => it.TEXTORDER).ExecuteCommand();
+            }
+            else
+            {
+                var config = db.Queryable<RMS_MARKING_CONFIG_BACKUP>().In(configid).First();
+                var version = db.Queryable<RMS_MARKING_VERSION>().In(config.MARKING_VERSION_ID).First();
+                if (version.CURRENT_FLOW_INDEX > 0) return Json(new { result = false, message = "已提交版本禁止修改" });
+
+                var textconfigs = db.Queryable<RMS_MARKING_CONFIG_BACKUP>().Where(it => it.TEXTINDEX == config.TEXTINDEX && it.TEXTORDER > config.TEXTORDER).OrderBy(it => it.TEXTORDER).ToList();
+                textconfigs.ForEach(it => it.TEXTORDER = it.TEXTORDER - 1);
+
+                db.Deleteable<RMS_MARKING_CONFIG_BACKUP>(config).ExecuteCommand();
+                db.Updateable<RMS_MARKING_CONFIG_BACKUP>(textconfigs).UpdateColumns(it => it.TEXTORDER).ExecuteCommand();
+
+            }
 
             return Json(new { result = true, message = "删除成功" });
         }
@@ -121,7 +163,9 @@ namespace Rms.Web.Controllers.Rms
             var sql = @"select eq.ID EQID,eq.NAME EQNAME,eq.FLOW_ID FLOW_ID,r.ID RECIPEID,r.NAME RECIPENAME,
 r.MARKING_LATEST_ID MARKING_LATEST_ID,r.MARKING_EFFECTIVE_ID MARKING_EFFECTIVE_ID,
 mv.VERSION LATEST_VERSION,
-mv2.VERSION EFFECTIVE_VERSION
+mv.CREATOR LATEST_CREATOR,
+mv2.VERSION EFFECTIVE_VERSION,
+mv2.CREATOR EFFECTIVE_CREATOR
  from RMS_EQUIPMENT eq
 inner join RMS_RECIPE r  on eq.ID = r.EQUIPMENT_ID 
 left join RMS_MARKING_VERSION mv  on mv.ID = r.MARKING_LATEST_ID
@@ -136,60 +180,77 @@ where eq.TYPE = 'WaferMarking'";
             return Json(new { data = data, code = 0, count = totalnum }, JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult GetMarkingConfigs(int page, int limit, string markingversionid)
+        public JsonResult GetMarkingConfigs(int page, int limit, string markingversionid, bool isMainConfig)
         {
             var db = DbFactory.GetSqlSugarClient();
+            var version = db.Queryable<RMS_MARKING_VERSION>().In(markingversionid).First();
+            if (version.CURRENT_FLOW_INDEX != 100 && (version.CREATOR == User.TRUENAME && !isMainConfig))
+            {
+                return Json(new { data = new List<RMS_MARKING_CONFIG>(), code = 0, count = 0, errmsg = "版本创建者无法查看Backup版本" }, JsonRequestBehavior.AllowGet);
+            }
+            if (version.CURRENT_FLOW_INDEX != 100 && (version.CREATOR != User.TRUENAME && isMainConfig))
+            {
+                return Json(new { data = new List<RMS_MARKING_CONFIG>(), code = 0, count = 0, errmsg = "非版本创建者无法查看Main版本" }, JsonRequestBehavior.AllowGet);
+            }
+
             var totalnum = 0;
-            var data = db.Queryable<RMS_MARKING_CONFIG>().Where(it => it.MARKING_VERSION_ID == markingversionid).OrderBy(it => new { it.TEXTINDEX, it.TEXTORDER }).ToList();
-
-
-
-            return Json(new { data = data, code = 0, count = totalnum }, JsonRequestBehavior.AllowGet);
-        }
-
-        public JsonResult GetMarkingTexts(string markingversionid)
-        {
-            var db = DbFactory.GetSqlSugarClient();
-            var codevalues = db.Queryable<RMS_MARKING_FIELD>().ToList().ToDictionary(it => it.NAME, va => va.SAMPLE);
-            try
+            if (isMainConfig)
             {
                 var data = db.Queryable<RMS_MARKING_CONFIG>().Where(it => it.MARKING_VERSION_ID == markingversionid).OrderBy(it => new { it.TEXTINDEX, it.TEXTORDER }).ToList();
-                var markingindexs = data.Select(it => it.TEXTINDEX).Distinct().OrderBy(it => it).ToList();
-                Dictionary<string, string> markingtexts = new Dictionary<string, string>();
-                markingindexs.ForEach(it =>//遍历每一行内容
-                {
-                    var rowconfigs = data.Where(o => o.TEXTINDEX == it).OrderBy(o => o.TEXTORDER).ToList();
-                    string rowtext = string.Empty;
-                    rowconfigs.ForEach(o =>//遍历每一行的配置内容并拼接
-                    {
-                        if (o.TYPE == "Fixed")
-                        {
-                            rowtext += o.CONTENT;
-                        }
-                        else if (o.TYPE == "Code")
-                        {
-                            string codevalue;
-                            if (codevalues.TryGetValue(o.CONTENT, out codevalue))
-                            {
-                                if (o.START_INDEX + o.LENGTH > codevalue.Length)
-                                {
-                                    throw new Exception($"Config error: Field:{o.CONTENT}, Value '{codevalue}', StartIndex: {o.START_INDEX}, Length: {o.LENGTH}.");
-                                }
-                                else
-                                {
-                                    rowtext += codevalue.Substring(o.START_INDEX, o.LENGTH);
-                                }
-                            }
-                            else
-                            {
-                                throw new Exception($"Can not get the value of code '{o.CONTENT}'");
-                            }
+                return Json(new { data = data, code = 0, count = totalnum, errmsg = "" }, JsonRequestBehavior.AllowGet);
+            }
+            else
+            {
+                var data = db.Queryable<RMS_MARKING_CONFIG_BACKUP>().Where(it => it.MARKING_VERSION_ID == markingversionid).OrderBy(it => new { it.TEXTINDEX, it.TEXTORDER }).ToList();
+                return Json(new { data = data, code = 0, count = totalnum, errmsg = "" }, JsonRequestBehavior.AllowGet);
+            }
+        }
 
-                        }
+        public JsonResult GetMarkingTexts(string markingversionid, bool isMainConfig)
+        {
+            try
+            {
+                Dictionary<string, string> markingtexts = GetMarkingTextsDict(markingversionid, isMainConfig);
+                //var db = DbFactory.GetSqlSugarClient();
+                //var codevalues = db.Queryable<RMS_MARKING_FIELD>().ToList().ToDictionary(it => it.NAME, va => va.SAMPLE);
 
-                    });
-                    markingtexts.Add(it.ToString(), rowtext);
-                });
+                //var data = db.Queryable<RMS_MARKING_CONFIG>().Where(it => it.MARKING_VERSION_ID == markingversionid).OrderBy(it => new { it.TEXTINDEX, it.TEXTORDER }).ToList();
+                //var markingindexs = data.Select(it => it.TEXTINDEX).Distinct().OrderBy(it => it).ToList();
+                //Dictionary<string, string> markingtexts = new Dictionary<string, string>();
+                //markingindexs.ForEach(it =>//遍历每一行内容
+                //{
+                //    var rowconfigs = data.Where(o => o.TEXTINDEX == it).OrderBy(o => o.TEXTORDER).ToList();
+                //    string rowtext = string.Empty;
+                //    rowconfigs.ForEach(o =>//遍历每一行的配置内容并拼接
+                //    {
+                //        if (o.TYPE == "Fixed")
+                //        {
+                //            rowtext += o.CONTENT;
+                //        }
+                //        else if (o.TYPE == "Code")
+                //        {
+                //            string codevalue;
+                //            if (codevalues.TryGetValue(o.CONTENT, out codevalue))
+                //            {
+                //                if (o.START_INDEX + o.LENGTH > codevalue.Length)
+                //                {
+                //                    throw new Exception($"Config error: Field:{o.CONTENT}, Value '{codevalue}', StartIndex: {o.START_INDEX}, Length: {o.LENGTH}.");
+                //                }
+                //                else
+                //                {
+                //                    rowtext += codevalue.Substring(o.START_INDEX, o.LENGTH);
+                //                }
+                //            }
+                //            else
+                //            {
+                //                throw new Exception($"Can not get the value of code '{o.CONTENT}'");
+                //            }
+
+                //        }
+
+                //    });
+                //    markingtexts.Add(it.ToString(), rowtext);
+                //});
 
                 return Json(new { result = true, markingtexts = markingtexts, message = "" }, JsonRequestBehavior.AllowGet);
             }
@@ -197,6 +258,61 @@ where eq.TYPE = 'WaferMarking'";
             {
                 return Json(new { result = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
             }
+        }
+
+        private Dictionary<string, string> GetMarkingTextsDict(string markingversionid, bool isMainConfig)
+        {
+            var db = DbFactory.GetSqlSugarClient();
+            var codevalues = db.Queryable<RMS_MARKING_FIELD>().ToList().ToDictionary(it => it.NAME, va => va.SAMPLE);
+            List<RMS_MARKING_CONFIG> data;
+            if (isMainConfig)
+            {
+                data = db.Queryable<RMS_MARKING_CONFIG>().Where(it => it.MARKING_VERSION_ID == markingversionid).OrderBy(it => new { it.TEXTINDEX, it.TEXTORDER }).ToList();
+            }
+            else
+            {
+                var data1 = db.Queryable<RMS_MARKING_CONFIG_BACKUP>().Where(it => it.MARKING_VERSION_ID == markingversionid).OrderBy(it => new { it.TEXTINDEX, it.TEXTORDER }).ToList();
+                data = data1.Select(it => (RMS_MARKING_CONFIG)it).ToList();
+            }
+            var markingindexs = data.Select(it => it.TEXTINDEX).Distinct().OrderBy(it => it).ToList();
+            Dictionary<string, string> markingtexts = new Dictionary<string, string>();
+            markingindexs.ForEach(it =>//遍历每一行内容
+            {
+                var rowconfigs = data.Where(o => o.TEXTINDEX == it).OrderBy(o => o.TEXTORDER).ToList();
+                string rowtext = string.Empty;
+                rowconfigs.ForEach(o =>//遍历每一行的配置内容并拼接
+                {
+                    if (o.TYPE == "Fixed")
+                    {
+                        rowtext += o.CONTENT;
+                    }
+                    else if (o.TYPE == "Code")
+                    {
+                        string codevalue;
+                        if (codevalues.TryGetValue(o.CONTENT, out codevalue))
+                        {
+                            if (o.START_INDEX + o.LENGTH > codevalue.Length)
+                            {
+                                throw new Exception($"Config error: Field:{o.CONTENT}, Value '{codevalue}', StartIndex: {o.START_INDEX}, Length: {o.LENGTH}.");
+                            }
+                            else
+                            {
+                                rowtext += codevalue.Substring(o.START_INDEX, o.LENGTH);
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception($"Can not get the value of code '{o.CONTENT}'");
+                        }
+
+                    }
+
+                });
+                markingtexts.Add(it.ToString(), rowtext);
+            });
+
+            return markingtexts;
+
         }
 
 
@@ -213,6 +329,14 @@ where eq.TYPE = 'WaferMarking'";
 
         public JsonResult SubmitVersion(string markingversionid)
         {
+            //TODO: 比较Main和Backup版本
+            Dictionary<string, string> mainMarkingTexts = GetMarkingTextsDict(markingversionid, true);
+            Dictionary<string, string> backupMarkingtexts = GetMarkingTextsDict(markingversionid, false);
+            if (!CompareDictionary(mainMarkingTexts, backupMarkingtexts))
+            {
+                return Json(new { result = false, message = "Main和Backup内容不一致，无法提交！" });
+            }
+
             var db = DbFactory.GetSqlSugarClient();
             var version = db.Queryable<RMS_MARKING_VERSION>().In(markingversionid).First();
             //if(version.CURRENT_FLOW_INDEX > 0) return Json(new { result = false, message = "请勿重复提交" });
@@ -223,6 +347,17 @@ where eq.TYPE = 'WaferMarking'";
             db.Updateable<RMS_MARKING_VERSION>(version).UpdateColumns(it => it.CURRENT_FLOW_INDEX).ExecuteCommand();
             db.Updateable<RMS_RECIPE>(recipe).UpdateColumns(it => it.MARKING_EFFECTIVE_ID).ExecuteCommand();
             return Json(new { result = true, message = "提交成功" });
+        }
+
+        private bool CompareDictionary(Dictionary<string, string> mainMarkingTexts, Dictionary<string, string> backupMarkingtexts)
+        {
+            if (mainMarkingTexts.Count != backupMarkingtexts.Count) return false;
+            foreach (var item in mainMarkingTexts)
+            {
+                if (!backupMarkingtexts.ContainsKey(item.Key)) return false;
+                if (backupMarkingtexts[item.Key] != item.Value) return false;
+            }
+            return true;
         }
     }
 

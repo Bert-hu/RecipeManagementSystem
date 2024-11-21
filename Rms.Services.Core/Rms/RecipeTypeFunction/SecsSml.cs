@@ -6,6 +6,7 @@ using SqlSugar;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
 
 namespace Rms.Services.Core.Rms.RecipeTypeFunction
 {
@@ -115,7 +116,51 @@ namespace Rms.Services.Core.Rms.RecipeTypeFunction
 
         public (bool result, string message) CompareRecipe(string EquipmentId, string RecipeVersionId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var recipe_version = db.Queryable<RMS_RECIPE_VERSION>().InSingle(RecipeVersionId);
+                if (recipe_version.RECIPE_DATA_ID == null)
+                {
+                    return (false, "Recipe do not have data.");
+                }
+                var recipe = db.Queryable<RMS_RECIPE>().InSingle(recipe_version.RECIPE_ID);
+
+                var serverdata = db.Queryable<RMS_RECIPE_DATA>().InSingle(recipe_version.RECIPE_DATA_ID)?.CONTENT;
+                //从serverdata从取出Unformatted Body
+                var dataobj = ByteArrayToObject(serverdata);
+
+                //var data = db.Queryable<RMS_RECIPE_DATA>().InSingle(recipe_version.RECIPE_DATA_ID)?.CONTENT;
+                string rabbitMqRoute = $"EAP.SecsClient.{EquipmentId}";
+                var body = Convert.ToBase64String((dataobj as RecipeBody).UnformattedBody);
+                var paras = Encoding.Unicode.GetString((dataobj as RecipeBody).FormattedBody);
+                //var body = Convert.ToBase64String(data);
+
+                var trans = new RabbitMqTransaction
+                {
+                    TransactionName = "CompareRecipe",
+                    EquipmentID = EquipmentId,
+                    NeedReply = true,
+                    ExpireSecond = 15,
+                    Parameters = new Dictionary<string, object>() { { "RecipeName", recipe.NAME }, { "RecipeBody", body }, { "RecipeParameters", paras } }
+                };
+                var rabbitRes = rabbitMq.ProduceWaitReply(rabbitMqRoute, trans);
+                if (rabbitRes != null)
+                {
+                    var result = rabbitRes.Parameters["Result"].ToString().ToUpper() == "TRUE";
+                    rabbitRes.Parameters.TryGetValue("Message", out object message);
+                    return (result, message?.ToString());
+                }
+                else//Rabbit Mq失败
+                {
+                    Log.Error($"Compare recipe Time out!");
+                    return (false, "Equipment offline or EAP client error!");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.Message, ex);
+                return (false, "Rms Service Error");
+            }
         }
 
 

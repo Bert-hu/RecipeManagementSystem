@@ -15,6 +15,8 @@ using System.Net;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using Rms.Models.DataBase.Mms;
+using Rms.Web.ViewModels;
 
 namespace Rms.Web.Controllers.Production
 {
@@ -240,6 +242,147 @@ ORDER BY CREATE_TIME", string.IsNullOrEmpty(logid) ? "" : $"AND CREATE_TIME>(SEL
             return Json(new { Result = result, Message = repmsg }, JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult GetMaterialTooling(string equipmentid)
+        {
+            var db = DbFactory.GetSqlSugarClient();
+            var sql = string.Format(@"SELECT  
+    RE.ID AS EQID, 
+    RET.ID AS ETID, 
+    MMD.ID AS MID,
+    MMD.SHOWNAME AS SHOWNAME,
+    MMD.TYPE AS MTYPE,
+    MMC.ID AS MMCID,
+    MMC.VALUE AS VALUE,
+    MMC.LASTEDITOR AS LASTEDITOR,
+    MMC.LASTEDITTIME AS LASTEDITTIME,
+		MMD.ORDER_SORT
+FROM RMS_EQUIPMENT RE
+JOIN RMS_EQUIPMENT_TYPE RET
+    ON RE.TYPE = RET.ID
+JOIN MMS_MATERIAL_DIC MMD
+    ON MMD.EQUIPMENT_TYPE_ID = RET.ID
+LEFT JOIN MMS_MACHINE_CONFIG MMC
+    ON MMC.MMDID = MMD.ID
+WHERE RE.ID = '{0}'
+ORDER BY ORDER_SORT", equipmentid);
+            var data = db.SqlQueryable<MachineConfigVM>(sql).ToList();
 
+            return Json(new { code = 0, data = data, count = data.Count }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult UpdateMaterialTooling(string EQID, string MID, string MMCID, string NewValue)
+        {
+            try
+            {
+                var db = DbFactory.GetSqlSugarClient();
+                MMS_MACHINE_CONFIG config;
+                string oldValue = string.Empty;
+                var dic = db.Queryable<MMS_MATERIAL_DIC>().InSingle(MID);
+                if (string.IsNullOrEmpty(MMCID))
+                {
+                    config = new MMS_MACHINE_CONFIG
+                    {
+                        MMDID = MID,
+                        EQUIPMENT_ID = EQID,
+                        VALUE = NewValue,
+                        LASTEDITOR = User.TRUENAME,
+                        LASTEDITTIME = DateTime.Now
+                    };
+                }
+                else
+                {
+                    config = db.Queryable<MMS_MACHINE_CONFIG>().InSingle(MMCID);
+                    oldValue = config.VALUE;
+                    config.VALUE = NewValue;
+                    config.LASTEDITOR = User.TRUENAME;
+                    config.LASTEDITTIME = DateTime.Now;
+                }
+
+                var hist = new MMS_MACHINE_CONFIG_HIST
+                {
+                    MMCID = MMCID,
+                    EQUIPMENT_ID = EQID,
+                    SHOWNAME = dic.SHOWNAME,
+                    OLDVALUE = oldValue,
+                    NEWVALUE = NewValue,
+                    EDITOR = User.TRUENAME,
+                    TIME = DateTime.Now
+                };
+                db.Insertable<MMS_MACHINE_CONFIG_HIST>(hist).ExecuteCommand();
+                db.Storageable<MMS_MACHINE_CONFIG>(config).ExecuteCommand();
+                db.Insertable<RMS_PRODUCTIONLOG>(
+                 new RMS_PRODUCTIONLOG()
+                 {
+                     EQUIPMENT_ID = EQID,
+                     ACTION = "UpdateMaterial&Tooling",
+                     RESULT = "TRUE",
+                     MESSAGE = $"{User.TRUENAME} change '{dic.SHOWNAME}' from '{oldValue}' to '{NewValue}'"
+                 }).ExecuteCommand();
+            }
+            catch (Exception ex)
+            {
+                return Json(new { Result = false, Message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { Result = true, Message = "OK" }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult CheckMaterialTooling(string equipmentid,string lotid)
+        {
+            //Get Model Name
+            string sfis_step7_req = $"{equipmentid},{lotid},7,M068397,JORDAN,,OK,MODEL_NAME=???";
+            string sfis_step7_res = string.Empty;
+            string errmsg = string.Empty;
+            string repmsg = $"Lot:{lotid}";
+            bool result = false;
+            if (SendMessageToSfis(sfis_step7_req, ref sfis_step7_res, ref errmsg)) //获取modelname（recipe group）方便后面pp-select调用
+            {
+                Dictionary<string, string> sfispara = sfis_step7_res.Split(',')[1].Split(' ').Select(keyValueString => keyValueString.Split('='))
+               .Where(keyValueArray => keyValueArray.Length == 2)
+          .ToDictionary(keyValueArray => keyValueArray[0], keyValueArray => keyValueArray[1]);
+                string modelname = sfispara["MODEL_NAME"];
+
+                var db = DbFactory.GetSqlSugarClient();
+                var sql = string.Format(@"SELECT  
+    RE.ID AS EQID, 
+    RET.ID AS ETID, 
+    MMD.ID AS MID,
+    MMD.SHOWNAME AS SHOWNAME,
+    MMD.TYPE AS MTYPE,
+    MMC.ID AS MMCID,
+    MMC.VALUE AS VALUE,
+    MMC.LASTEDITOR AS LASTEDITOR,
+    MMC.LASTEDITTIME AS LASTEDITTIME,
+		MMD.ORDER_SORT
+FROM RMS_EQUIPMENT RE
+JOIN RMS_EQUIPMENT_TYPE RET
+    ON RE.TYPE = RET.ID
+JOIN MMS_MATERIAL_DIC MMD
+    ON MMD.EQUIPMENT_TYPE_ID = RET.ID
+LEFT JOIN MMS_MACHINE_CONFIG MMC
+    ON MMC.MMDID = MMD.ID
+WHERE RE.ID = '{0}'
+ORDER BY ORDER_SORT", equipmentid);
+                var data = db.SqlQueryable<MachineConfigVM>(sql).ToList();
+
+                string materialAndToolingString = string.Empty;
+                var materials = data.Where(x => x.MTYPE == "Material").ToList();
+                var toolings = data.Where(x => x.MTYPE == "Tooling").ToList();
+                var materialString = string.Join(";", materials.Select(x => $"{x.VALUE}"));
+                var toolingString = string.Join(";", toolings.Select(x => $"{x.SHOWNAME}={x.VALUE}"));
+
+
+                string sfis_step4_req = $"{equipmentid},DPSLOAD,4,M001603,JORDAN,,OK,REEL_ID=TC-0240417-2081;TC-0240417-2083; TOOLING=WBG_WHEEL:111:000;WBG_WHEEL2:333:000,,,,,,,,2103-231099-01";
+
+            }
+            else
+            {
+                repmsg += $"Can not connect to SFIS";
+            }
+            AddProductionLog(equipmentid, "LotEnd", result.ToString(), repmsg);
+            return Json(new { Result = result, Message = repmsg }, JsonRequestBehavior.AllowGet);
+
+
+        }
     }
 }

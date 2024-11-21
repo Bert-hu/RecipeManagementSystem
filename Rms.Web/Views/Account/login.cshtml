@@ -92,6 +92,7 @@
                             <label>
                                 <span>Account:</span>
                                 @Html.TextBoxFor(m => m.UserName, new { placeholder = "Please enter a user name" })
+                                
                                 @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "error" })
                             </label>
                         </div>

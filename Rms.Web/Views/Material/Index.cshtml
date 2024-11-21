@@ -1,0 +1,294 @@
+﻿
+@{
+
+}
+<style>
+    .scrollable-div {
+        max-height: 80vh;
+        overflow-y: auto; /* 或者使用 overflow-y: auto; */
+    }
+
+    .selected {
+        background-color: #89cff0 !important;
+    }
+</style>
+<script src="~/Scripts/layui/xm-select.js"></script>
+<script src="~/Scripts/layui/layui.table.formdate.js"></script>
+
+<div class="layui-row layui-col-space10" style=" margin-bottom: 50px">
+    <div class="layui-col-md3">
+        <form class="layui-form layui-form-pane" action="">
+            <div class="layui-form-item layui-row">
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <div id="processSelect" class="xm-select-demo"></div>
+                    </div>
+
+                </div>
+
+            </div>
+        </form>
+        <table class="layui-hide" id="equipmentTypeTable" lay-filter="equipmentTypeTable"></table>
+    </div>
+    <div class="layui-col-md9">
+        <table class="layui-hide" id="configTable" lay-filter="configTable"></table>
+    </div>
+
+</div>
+
+
+<script type="text/html" id="configHeaderToolBar">
+    <div>
+        <div class="layui-btn-container" style="float:left;display:inline">
+            <button class="layui-btn layui-btn-sm" lay-event="add">Add New</button>
+        </div>
+
+    </div>
+</script>
+
+
+<script type="text/html" id="configToolBar">
+    <a class="layui-btn layui-btn layui-btn-xs" lay-event="edit">Edit</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="delete">Delete</a>
+</script>
+
+<script>
+    layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
+        var layer = layui.layer
+            , table = layui.table
+            , form = layui.form
+            , upload = layui.upload
+            , element = layui.element;
+
+        var processSel = xmSelect.render({
+            el: '#processSelect',
+            //initValue: [0],
+            radio: true,
+            clickClose: true,
+            model: {
+                icon: 'hidden',
+                label: {
+                    type: 'text'
+                }
+            },
+            tips: '请选择Process',
+            block: {
+                //最大显示数量, 0:不限制
+                showCount: 0,
+                //是否显示删除图标
+                showIcon: false,
+            },
+            on: function (data) {
+                //arr:  当前多选已选中的数据
+                var arr = data.arr;
+                //change, 此次选择变化的数据,数组
+                var change = data.change;
+                //isAdd, 此次操作是新增还是删除
+                var isAdd = data.isAdd;
+
+                currentLine = arr[0].value;
+
+                //var projectid = change[0].value;
+
+                //var line = change[0].value;
+
+                ShowEquipmentTypeTable(arr[0].value);
+            },
+
+        })
+
+
+        function ShowEquipmentTypeTable(process) {
+            table.render({
+                elem: '#equipmentTypeTable'
+                , url: '/Material/GetEquipmentType'
+                , id: "equipmentTypeTable"
+                , limit: 1000
+                , limits: [1000]
+                , height: 'full-235'
+                , cols: [[
+                    { field: 'NAME', title: 'Name', sort: true },
+                    { field: 'VENDOR', title: 'Vendor', sort: true },
+                    { field: 'TYPE', title: 'Type', sort: true }
+                ]]
+                , where: {
+                    process: process
+                }
+
+            });
+
+        }
+
+        function ShowMaterialTable(equipmentTypeId) {
+            window.configTable = table.render({
+                elem: '#configTable'
+                , url: '/Material/GetMaterialDicConfig'
+                , toolbar: '#configHeaderToolBar'
+                , id: "configTable"
+                , limit: 1000
+                , limits: [1000]
+                , height: 'full-235'
+                , cols: [[
+                    { field: 'ORDER_SORT', title: '序号' }
+                    , { field: 'SHOWNAME', title: '显示名称' }
+                    , { field: 'TYPE', title: '类型' }
+                    , { field: 'MATERIAL_TYPE', title: 'Type Code' }
+                    , { fixed: 'right', width: '15%', align: 'center', toolbar: '#configToolBar' }
+                ]],
+                done: function (res, curr, count, origin) {
+                    //console.log(res);
+                    //var that = $("#configTable").siblings();
+                    //res.data.forEach(function (item, index) {
+                    //    console.log(index);
+                    //    var tr = that.find(".layui-table-box tbody tr[data-index='" + index + "']");
+                    //    if (item.ISVALID == false) {//黄色
+                    //        tr.css("background-color", "#FFB800");
+                    //    }
+                    //});
+                }
+                , where: {
+                    equipmentTypeId: equipmentTypeId
+                }
+
+
+            });
+
+        }
+
+
+
+
+        Initialization();
+
+        async function Initialization() {
+            try {
+                let result1 = await $.ajax({
+                    type: 'post',
+                    dataType: 'json',
+                    url: '/Material/GetProcesses',
+                    data: {
+
+                    },
+                    success: function (data) {
+
+                        var seldata = data.map((item, index) => ({
+                            name: item,
+                            value: item,
+                            selected: index === 0
+                        }));
+
+
+                        processSel.update({
+                            data: seldata,
+                        });
+
+                        ShowEquipmentTypeTable(data[0]);
+                    },
+                    error: function () {
+                    }
+                });
+
+
+            } catch (error) {
+                //处理错误
+            }
+        }
+
+
+        table.on('tool(configTable)', function (obj) {
+            var event = obj.event, //当前单元格事件属性值
+                selectdata = obj.data;
+            console.log(selectdata);
+            if (event === 'delete') {
+                layer.confirm('Delete Config?', { icon: 3 }, function () {
+                    $.post('/Material/DeleteConfig', { configId: selectdata.ID }, function (res) {
+                        // 处理响应数据
+                        console.log(res);
+                        if (res.result) {
+                            window.configTable.reload();
+                            layer.msg("OK", { icon: 1 });
+                        } else {
+                            layer.msg(res.message);
+                        }
+                    });
+
+                }, function () {
+                });
+
+            }
+            else if (event === 'edit') {
+                layer.open({
+                    type: 2,
+                    content: 'AddConfig?equipmentTypeId=' + selectdata.EQUIPMENT_TYPE_ID + '&configId=' + selectdata.ID,
+                    title: 'Edit Config',
+                    area: ['60%', '45%'],
+                    success: function (layero, index) {
+
+                        var iframeWindow = layero.find('iframe')[0].contentWindow;
+
+                    }
+                }, function (value, index, elem) {
+
+
+
+
+                });
+            }
+        })
+
+
+        table.on('row(equipmentTypeTable)', function (obj) {
+
+            var data = obj.data;//data为当前点击行的数据
+            //console.log(data)
+            var selectEquipmentTypeId = data.ID;
+            ShowMaterialTable(selectEquipmentTypeId);
+            //标注选中样式
+            obj.tr.addClass('selected').siblings().removeClass('selected');
+        });
+
+
+
+
+        table.on('toolbar(configTable)', function (obj) {
+            //console.log(obj);
+            //console.log(obj.config.where.equipmentTypeId);
+            var equipmentTypeId = obj.config.where.equipmentTypeId;
+
+            window.selectedEQP = { "eqid": obj.config.currenteqpid };
+            if (obj.event == 'add') {
+                layer.open({
+                    type: 2,
+                    content: 'AddConfig',
+                    title: 'AddConfig',
+                    area: ['60%', '45%'],
+                    success: function (layero, index) {
+                        ////向layer页面传值，传值主要代码
+                        //var body = layer.getChildFrame('body', index);
+                        ////将弹窗页面中属性名id="xxxx"的标签赋值
+                        //body.find("[id='equipmentTypeId']").val(equipmentTypeId);
+                        //把equipmentTypeId传递给子页面
+                        var iframeWindow = layero.find('iframe')[0].contentWindow;
+
+                        // 直接赋值给子页面的变量
+                        iframeWindow.equipmentTypeId = equipmentTypeId;
+                    }
+                }, function (value, index, elem) {
+
+
+
+
+                });
+            }
+
+
+
+        })
+
+
+
+
+    });
+</script>
+
+

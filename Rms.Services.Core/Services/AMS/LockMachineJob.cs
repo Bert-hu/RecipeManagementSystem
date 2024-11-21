@@ -58,7 +58,7 @@ namespace Rms.Services.Core.Services.AMS
                     };
                     var alarmRecords = sqlSugarClient.Queryable<AMS_ALARM_RECORD>()
                          .InnerJoin<RMS_EQUIPMENT>((aar, re) => aar.EQID == re.ID)
-                         .Where((aar, re) => re.TYPE == config.EQUIPMENT_TYPE_ID && aar.ALID == config.ALID && aar.ALTIME > DateTime.Now.AddHours(-12))
+                         .Where((aar, re) => re.TYPE == config.EQUIPMENT_TYPE_ID &&aar.ALTX == config.ALTX && aar.ALID == config.ALID  && aar.ALTIME > DateTime.Now.AddHours(-12))
                          .Select((aar, re) => new AMS_ALARM_RECORD_VM
                          {
                              ID = aar.ID,
@@ -103,6 +103,7 @@ namespace Rms.Services.Core.Services.AMS
                                             EQID = eqp,
                                             ETID = config.EQUIPMENT_TYPE_ID,
                                             ALID = config.ALID,
+                                            ALTX = eqpAlarmRecords.First().ALTX,
                                             TRIGGER_INTERVAL = config.TRIGGER_INTERVAL,
                                             TRIGGER_COUNT = config.TRIGGER_COUNT,
                                             DATETIME = DateTime.Now,

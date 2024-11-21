@@ -2,7 +2,10 @@
 using Rms.Models.DataBase.Rms;
 using Rms.Models.RabbitMq;
 using Rms.Services.Core.RabbitMq;
+using Rms.Services.Core.Utils;
 using SqlSugar;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace Rms.Services.Core.Rms.RecipeTypeFunction
@@ -68,10 +71,13 @@ namespace Rms.Services.Core.Rms.RecipeTypeFunction
                     DeleteAllMachineRecipes(EquipmentId);//暂时不处理删除的答复
                 }
                 var recipe = db.Queryable<RMS_RECIPE>().InSingle(recipe_version.RECIPE_ID);
-                var data = db.Queryable<RMS_RECIPE_DATA>().InSingle(recipe_version.RECIPE_DATA_ID)?.CONTENT;
+                var serverdata = db.Queryable<RMS_RECIPE_DATA>().InSingle(recipe_version.RECIPE_DATA_ID)?.CONTENT;
+                //从serverdata从取出Unformatted Body
+                var dataobj = ByteArrayToObject(serverdata);
+
                 string rabbitMqRoute = $"EAP.SecsClient.{EquipmentId}";
                 //var body = Convert.ToBase64String(data);
-                string body = Encoding.UTF8.GetString(data);
+                string body = Encoding.UTF8.GetString((dataobj as RecipeBody).UnformattedBody);
                 var trans = new RabbitMqTransaction
                 {
                     TransactionName = "SetUnformattedRecipe",
@@ -160,7 +166,11 @@ namespace Rms.Services.Core.Rms.RecipeTypeFunction
                 if (result)
                 {
                     //var body = Convert.FromBase64String(rabbitRes.Parameters["RecipeBody"].ToString());
-                    byte[] body = Encoding.UTF8.GetBytes(rabbitRes.Parameters["RecipeBody"].ToString());
+                    byte[] unformattedBody = Encoding.UTF8.GetBytes(rabbitRes.Parameters["RecipeBody"].ToString());
+                    var formattedBody = System.Text.Encoding.Unicode.GetBytes(rabbitRes.Parameters["RecipeBody"].ToString());
+                    var body = ObjectToByteArray(new RecipeBody { UnformattedBody = unformattedBody, FormattedBody = formattedBody });
+
+
                     return (result, message?.ToString(), body);
                 }
                 else
@@ -179,7 +189,79 @@ namespace Rms.Services.Core.Rms.RecipeTypeFunction
 
         public (bool result, string message) CompareRecipe(string EquipmentId, string RecipeVersionId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var recipe_version = db.Queryable<RMS_RECIPE_VERSION>().InSingle(RecipeVersionId);
+                if (recipe_version.RECIPE_DATA_ID == null)
+                {
+                    return (false, "Recipe do not have data.");
+                }
+                var recipe = db.Queryable<RMS_RECIPE>().InSingle(recipe_version.RECIPE_ID);
+
+                var serverdata = db.Queryable<RMS_RECIPE_DATA>().InSingle(recipe_version.RECIPE_DATA_ID)?.CONTENT;
+                //从serverdata从取出Unformatted Body
+                var dataobj = ByteArrayToObject(serverdata);
+
+                string rabbitMqRoute = $"EAP.SecsClient.{EquipmentId}";
+                var body = Convert.ToBase64String((dataobj as RecipeBody).UnformattedBody); //string类型
+                var paras = Encoding.Unicode.GetString((dataobj as RecipeBody).FormattedBody);//string类型
+
+                var trans = new RabbitMqTransaction
+                {
+                    TransactionName = "CompareRecipe",
+                    EquipmentID = EquipmentId,
+                    NeedReply = true,
+                    ExpireSecond = 5,//5s timeout
+                    Parameters = new Dictionary<string, object>() { { "RecipeName", recipe.NAME }, { "RecipeBody", body }, { "RecipeParameters", paras } }
+                };
+                var rabbitRes = rabbitMq.ProduceWaitReply(rabbitMqRoute, trans);
+                if (rabbitRes != null)
+                {
+                    var result = rabbitRes.Parameters["Result"].ToString().ToUpper() == "TRUE";
+                    rabbitRes.Parameters.TryGetValue("Message", out object message);
+                    return (result, message?.ToString());
+                }
+                else//Rabbit Mq失败
+                {
+                    Log.Error($"Compare recipe Time out!");
+                    return (false, "Equipment offline or EAP client error!");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.Message, ex);
+                return (false, "Rms Service Error");
+            }
+        }
+        private byte[] ObjectToByteArray(object obj)
+        {
+            if (obj == null)
+                return null;
+
+            IFormatter formatter = new BinaryFormatter();
+            formatter.Binder = new USerializationBinder();
+            using (MemoryStream stream = new MemoryStream())
+            {
+                formatter.Serialize(stream, obj);
+                return stream.ToArray();
+            }
+
+
+
+        }
+        private object ByteArrayToObject(byte[] data)
+        {
+            if (data == null)
+                return null;
+
+            IFormatter formatter = new BinaryFormatter();
+            formatter.Binder = new USerializationBinder();
+            using (MemoryStream stream = new MemoryStream(data))
+            {
+                return formatter.Deserialize(stream);
+            }
+
+
         }
     }
 }

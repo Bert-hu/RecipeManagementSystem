@@ -45,7 +45,9 @@ namespace Rms.Models.DataBase.Rms
         public string MARKING_LATEST_ID { get; set; }
         public string MARKING_EFFECTIVE_ID { get; set; }
         public int LATEST_VERSION { get; set; }
+        public string LATEST_CREATOR { get; set; }
         public int EFFECTIVE_VERSION { get; set; }
+        public string EFFECTIVE_CREATOR { get; set; }
 
     }
 }

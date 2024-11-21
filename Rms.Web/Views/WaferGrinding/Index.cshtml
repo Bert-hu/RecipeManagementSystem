@@ -17,6 +17,7 @@
 <script src="~/Scripts/layui/xm-select.js"></script>
 <script src="~/Scripts/layui/layui.table.formdate.js"></script>
 <script src="~/Scripts/Production/WaferGrinding/Index.js"></script>
+<script src="~/Scripts/layui_NEW/layui.js"></script>
 
 <div class="layui-card layui-bg-gray" style="padding: 5px;">
     <div class="layui-card-header" style="font-weight: bold; font-size:25px">WaferGrinding</div>
@@ -103,12 +104,26 @@
                     </div>
                 </div>
             </div>
+            <div class="layui-col-md3">
+                <div class="layui-card">
+                    <div class="layui-card-header">Material & Tooling</div>
 
-            <div class="layui-col-md6">
+                    <div class="layui-card-body">
+                        <div class="layui-btn-container">
+                            <button type="button" class="layui-btn" id="checkMandT" style="background-color:chartreuse">
+                                <i class="layui-icon layui-icon-release layui-font-12"></i>Check
+                            </button>
+                        </div>
+                        <table class="layui-hide" id="materialToolingTable" lay-filter="materialToolingTable"></table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-col-md3">
                 <div class="layui-card">
                     <div class="layui-card-header">历史记录</div>
                     <div class="layui-card-body" id="logCardContainer">
-                        <div id="logContainer" style="overflow-y: scroll auto;font-size:20px"></div>
+                        <div id="logContainer" style="overflow-y: scroll auto;font-size:13px"></div>
                     </div>
                 </div>
             </div>

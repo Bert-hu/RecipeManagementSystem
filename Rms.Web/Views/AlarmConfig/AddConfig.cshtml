@@ -36,6 +36,12 @@
             </div>
         </div>
         <div class="layui-form-item">
+            <label class="layui-form-label">Alarm Text</label>
+            <div class="layui-input-block">
+                <input type="text" name="ALTX" required lay-verify="required" placeholder="ÇëÊäÈëAlarm TEXT" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label">Interval(min)</label>
                 <div class="layui-input-inline">
@@ -98,6 +104,7 @@
                     form.val('configForm', {
                         "NAME": res.NAME,
                         "ALID": res.ALID,
+                        "ALTX":res.ALTX,
                         "TRIGGER_INTERVAL": res.TRIGGER_INTERVAL,
                         "TRIGGER_COUNT": res.TRIGGER_COUNT,
                         "ISVALID": res.ISVALID ? 'true': 'false'
