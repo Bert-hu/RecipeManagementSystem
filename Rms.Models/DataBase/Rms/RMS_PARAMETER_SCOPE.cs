@@ -21,6 +21,10 @@ namespace Rms.Models.DataBase.Rms
         public string RecipeID { get; set; }
         [SugarColumn(ColumnName = "PARAMETER_KEY")]
         public string ParamKey { get; set; }
+
+        [SugarColumn(IsIgnore = true)]
+        public string PARAMETER_NAME { get; set; }
+
         [SugarColumn(ColumnName = "TYPE")]
         public string Type { get; set; }
         [SugarColumn(ColumnName = "LAST_EDITOR")]

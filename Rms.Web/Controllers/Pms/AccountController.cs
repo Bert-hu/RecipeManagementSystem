@@ -89,7 +89,7 @@ namespace Rms.Web.Controllers
             }
             else
             {
-                var ipAddress = Request.UserHostAddress;              
+                var ipAddress = Request.UserHostAddress;
                 ssouser = SsoHelper.GetUserWithUP(ipAddress, model.UserName, model.Password);
             }
 
@@ -197,7 +197,7 @@ namespace Rms.Web.Controllers
         {
             try
             {
-                if (!(Session["user_account"] as PMS_USER).LOCALUSER)
+                if (Session["user_account"] != null && !(Session["user_account"] as PMS_USER).LOCALUSER)
                 {
                     string ipAddress = Request.UserHostAddress;
                     SsoHelper.SignOut(ipAddress);

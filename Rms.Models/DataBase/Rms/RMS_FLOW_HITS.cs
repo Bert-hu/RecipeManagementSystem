@@ -24,9 +24,9 @@ namespace Rms.Models.DataBase.Rms
         public int FLOW_INDEX { get; set; }
 
         public string CREATOR { get; set; }
-
+        [SugarColumn(IsNullable = true)]
         public DateTime CREATE_TIME { get; set; }
-
+        [SugarColumn(IsNullable = true)]
         public string REMARK { get; set; }
 
         public FlowAction ACTION { get; set; }

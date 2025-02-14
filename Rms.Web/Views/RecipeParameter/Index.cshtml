@@ -4,30 +4,47 @@
 }
 
 
+<style>
+    .scrollable-div {
+        max-height: 80vh;
+        overflow-y: auto; /* 或者使用 overflow-y: auto; */
+    }
 
+    .selected {
+        background-color: #dbe9f4 !important;
+    }
+</style>
 
+<script src="~/Scripts/layui/layui.table.formdate.js"></script>
+@*<script src="~/Scripts/layui_NEW/tableFilter.js"></script>
+<link href="~/Scripts/layui_NEW/tableFilter.css" rel="stylesheet" />*@
+<div class="layui-row">
+    <form class="layui-form layui-form-pane" action="">
+        <div class="layui-form-item layui-col-lg6">
+            <div class="layui-row">
+                <div class="layui-input-inline" style="width:15%">
+                    <select name="process" id="process" lay-filter="process" lay-verify="required">
+                        <option value="">请选择Process</option>
+                        <option value="DPS">DPS</option>
+                    </select>
+                </div>
+                <div class="layui-input-inline" style="width: 70% ;margin-left: 1%">
+                    <div id="eqps" lay-filter="index" class="xm-select-demo"></div>
+                </div>
 
-<form class="layui-form layui-form-pane" action="">
-    <div class="layui-form-item layui-row">
-        <div class="layui-row">
-            <div class="layui-input-inline" style="width:15%">
-                <select name="process" id="process" lay-filter="process" lay-verify="required">
-                    <option value="">请选择Process</option>
-                    <option value="DPS">DPS</option>
-                </select>
-            </div>
-            <div class="layui-input-inline" style="width: 80% ;margin-left: 1%">
-                <div id="eqps" lay-filter="index" class="xm-select-demo"></div>
             </div>
         </div>
-    </div>
-</form>
+    </form>
+    <button id="param_dict" class="layui-btn layui-btn-normal" lay-event="dictionary">参数字典/Parameter Dictionary</button>
+</div>
+
+
 <fieldset class="layui-elem-field layui-field-title">
-    <legend id="info">EQP:</legend>
+    <legend><span id="eqpSelected" style="font-weight:bold;">EQP</span> -- <span id="recipeSelected">RCP</span></legend>
 </fieldset>
 
-<div class="layui-row layui-col-space10" style=" margin-bottom: 50px">
-    <div class="layui-row layui-col-space10" style=" margin-bottom: 50px">
+<div class="layui-row layui-col-space10" @*style=" margin-bottom: 50px"*@>
+    <div class="layui-row layui-col-space10" @*style=" margin-bottom: 50px"*@>
         <div class="layui-col-md4">
             <div class="grid-demo grid-demo-bg1">
                 <table class="layui-hide" id="rcptable" lay-filter="rcptable"></table>
@@ -45,31 +62,22 @@
 </div>
 
 
-<script type="text/html" id="newspec">
-    <div>
-        <div class="layui-btn-container" style="float:left;display:inline">
-            <button class="layui-btn layui-btn-sm" lay-event="newspec">添加默认SPEC</button>
-        </div>
-
-    </div>
-</script>
-
 <script type="text/html" id="toolbar1">
-    <a class="layui-btn layui-btn-success layui-btn-xs" lay-event="setParams">新增参数管控</a>
+    <a class="layui-btn layui-btn-success layui-btn-xs" lay-event="setParams">新增参数管控/Add New SPEC</a>
 
 
 </script>
 <script type="text/html" id="toolbar2">
 
-    <a class="layui-btn layui-btn layui-btn-xs" lay-event="delete">删除</a>
+    <a class="layui-btn layui-btn layui-btn-xs" lay-event="delete">删除/Delete</a>
 
 </script>
 
-<script type="text/html" id="toolbar3">
+@*<script type="text/html" id="toolbar3">*@
 
-    <a class="layui-btn layui-btn layui-btn-xs" lay-event="dictionary">参数字典</a>
+@*<a class="layui-btn layui-btn layui-btn-xs" lay-event="dictionary">参数字典</a>
 
-</script>
+    </script>*@
 <script src="~/Scripts/layui/xm-select.js"></script>
 <script>
 
@@ -77,7 +85,8 @@
     layui.use(['table', 'jquery'], function () {
         var table = layui.table
             , form = layui.form
-            , $ = layui.jquery;
+            , $ = layui.jquery
+            //, tableFilter = layui.tableFilter;
         form.render();
         var paramtable;
         getProcess();
@@ -108,12 +117,39 @@
 
                 var eqpid = change[0].value;
                 window.currenteqid = change[0].value;
-                document.getElementById("info").innerHTML = eqpid;
+                document.getElementById("eqpSelected").innerHTML = eqpid;
                 ShowRCPTable(eqpid);
 
             },
 
         })
+        $("#param_dict").click(function () {
+            console.log(window.currenteqid)
+            layer.open({
+                title: `${window.currenteqid}-参数字典`
+                , type: 2
+                , btn: []
+                , content: 'ParamsDictionary?EQID=' + window.currenteqid //data = eqp_type_id
+                , area: ['50%', '65%']
+                , success: function (layero, index) {
+                    //向layer页面传值，传值主要代码
+                    var body = layer.getChildFrame('body', index);
+
+                    ////将弹窗页面中属性名id="xxxx"的标签赋值
+                    //var select = document.getElementById("rcpid");
+
+                    //var index = select.selectedIndex;
+                    // body.find("[id='rcpid']").val(data);
+                    //body.find("[id='rcpid']").val(options[index].value);
+                }
+
+
+            });
+        })
+        form.on('select(process)', function (data) {
+            var selectedValue = data.value; // 获取选中的值
+            getEQP(selectedValue);
+        });
         async function getProcess() {
             try {
                 let result1 = await $.ajax({
@@ -169,7 +205,8 @@
                         });
 
                         var eqpid = data.data[0].ID;
-                        document.getElementById("info").innerHTML = eqpid;
+                        document.getElementById("eqpSelected").innerHTML = eqpid;
+                        window.currenteqid = eqpid;
                         ShowRCPTable(eqpid);
 
                         EQPsel.update({
@@ -202,14 +239,25 @@
                 , height: 'full-235'
                 , cols: [[
                     { field: 'RECIPE_NAME', title: 'RecipeName', width: '60%' }
-                    , { field: 'RECIPE_EFFECTIVE_VERSION', align: 'center', title: 'EffectiveVer.', width: '20%' }
-                    , { fixed: 'right', width: '20%', align: 'center', toolbar: '#recipetoolbar' }
+                    , { field: 'RECIPE_EFFECTIVE_VERSION', align: 'center', title: 'Effective Ver.', width: '40%' }
+                    //, { fixed: 'right', width: '20%', align: 'center', toolbar: '#recipetoolbar' }
                 ]]
                 , where: {
                     EQID: id
                 }
                 , currenteqpid: id
                 , done: function (data) {
+                    //console.log(data.data[0])
+                    var that = $("#rcptable").siblings();
+                    if (data.data.length > 0) {
+                        selid = data.data[0].RECIPE_ID
+                        document.getElementById("recipeSelected").innerHTML = data.data[0].RECIPE_NAME;
+                        SelectParamsScope(selid)
+                        that.find(".layui-table-box tbody tr[data-index='" + 0 + "']").addClass('selected').siblings().removeClass('selected');
+                    } else {
+                        document.getElementById("recipeSelected").innerHTML = "";
+                        SelectParamsScope("")
+                    }
 
                 }
             });
@@ -223,9 +271,9 @@
             var data = obj.data;//data为当前点击行的数据
             selid = data.RECIPE_ID;
             SelectParamsScope(selid);//级联，调用右表数据加载函数
-
+            document.getElementById("recipeSelected").innerHTML = data.RECIPE_NAME;
             //标注选中样式
-            obj.tr.addClass('layui-table-click').siblings().removeClass('layui-table-click');
+            obj.tr.addClass('selected').siblings().removeClass('selected');
         });
 
 
@@ -314,14 +362,6 @@
         }
 
 
-
-
-
-
-
-
-
-
         //监听行工具事件
         table.on('toolbar(recipeparams)', function (obj) { //注：tool 是工具条事件名，recipe 是 table 原始容器的属性 lay-filter="对应的值"
             var selectdata = obj.config.where.rcpFilter //获得当前行数据
@@ -375,20 +415,20 @@
                 // , toolbar: 'default' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
                 // , totalRow: true //开启合计行
                 , id: "recipeparams"
-                , limits: [9999]
+                , limits: [15,30,45,60]
                 , toolbar:"#toolbar1"
-                , limit: 9999
+                , limit: 15
                 , defaultToolbar: ['filter']
                 , cols: [[ //表头
-                    { field: 'SOURCE', title: 'Source', edit: true, align: 'center' }
-                    , { field: 'ParamKey', title: 'Key', align: 'center' }
-                    , { field: 'Name', title: 'Name', align: 'center' }
-                    , { field: 'Type', title: 'Type', align: 'center' }
-                    , { field: 'LCL', title: 'LCL', edit: true, align: 'center' }
-                    , { field: 'UCL', title: 'UCL', edit: true, align: 'center' }                   
-                    , { field: 'EnumValue', title: 'EnumValue', edit: true, align: 'center' }
-                    , { field: 'LastEditor', title: 'LastEditor', align: 'center' }
-                    , { field: 'LastEditTime', title: 'LastEditTime', templet: '<div>{{ FormDate(d.LastEditTime, "yyyy-MM-dd HH:mm:ss") }}</div>', align: 'center' }
+                    //{ field: 'SOURCE', title: 'Source', edit: true, align: 'center' }
+                    { field: 'ParaKey', title: '参数键', align: 'center',sort:true }
+                    , { field: 'Name', title: '参数名', align: 'center', sort: true }
+                    , { field: 'Type', title: '管控类型', align: 'center' }
+                    , { field: 'LCL', title: '下限', edit: true, align: 'center' }
+                    , { field: 'UCL', title: '上限', edit: true, align: 'center' }
+                    , { field: 'EnumValue', title: '枚举值', edit: true, align: 'center' }
+                    , { field: 'LastEditor', title: '最后修改者', align: 'center' }
+                    , { field: 'LastEditTime', title: '最后修改时间', templet: '<div>{{ FormDate(d.LastEditTime, "yyyy-MM-dd HH:mm:ss") }}</div>', align: 'center' }
                     , { fixed: 'right', width: 100, align: 'center', toolbar: '#toolbar2' }
 
                 ]]
@@ -396,7 +436,12 @@
                     "rcpFilter": data
 
                 }
+                , done: function (data) {
+                    //apitableFilterIns.reload();
+                }
+                
             });
+
             var cols = paramtable.config.cols;
 
             table.on('tool(recipeparams)', function (obj) {
@@ -457,7 +502,7 @@
                         contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
                         async: false,
                         success: function (data) {
-                            layer.msg(data.message);
+                            layer.open({ content: data.message });
                             paramtable.reload();
 
                         },
@@ -606,72 +651,6 @@
                 , method: 'post'
             });
         }
-        function ReloadEqpSPECTable() {
-            table.reload('eqpspec', {
-                where: {//这里传参 向后台
-                    "eqpid": $("#eqp").val(),
-                }
-                , url: '/RecipeParameter/GetSpecList/' //数据接口
-                , method: 'post'
-            });
-        }
-        $(document).on('click', '#newspec', function () {
-            layer.open({
-                title: '新增参数SPEC'
-                , type: 2
-                , btn: ['确定', '取消']
-                , content: 'setparams'
-                , area: ['40%', '50%']
-                , success: function (layero, index) {
-                    //向layer页面传值，传值主要代码
-                    //   var body = layer.getChildFrame('body', index);
-                    var body = layer.getChildFrame('body', index);
-                    var select = document.getElementById("eqp");
-                    var options = select.options;
-                    var index = select.selectedIndex;
-                    body.find("[id='eqp']").val(options[index].text);
-                }
-                , yes: function (index) {
-                    var res = window["layui-layer-iframe" + index].callback();
-                    var data = JSON.parse(res);
-                    console.log(data);
-                    if (data.eqpid == "") {
-                        layer.msg('请输入信息');
-                    } else {
-                        //console.log(data);
-                        // layer.msg(res);
-                        //layer.msg('新增设备功能未开放');
-                        AddNewSPECByEQP(data);
-                        layer.close(index);
-                    }
-
-                }, btn2: function (index, layero) {
-                    layer.msg('取消操作');
-                }
-
-            });
-        });
-        function AddNewSPECByEQP(data) {
-            $.ajax({
-                url: '/RecipeParameter/AddNewSPECByEQP',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
-                data: {
-                    data
-                },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
-                type: 'POST',
-                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
-                async: false,
-                success: function (resdata) {
-                    layer.open({ content: resdata.message });
-                    //ReloadEqpSPECTable();
-                },
-                error: function (message) {
-                    alert('error!');
-                }
-            });
-        }
-
-
-
 
     });
 </script>

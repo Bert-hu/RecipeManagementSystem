@@ -31,6 +31,16 @@ namespace Rms.Services.Core.Services
                 MoreSettings = new ConnMoreSettings()
                 {
                     IsAutoToUpper = false // 是否转大写，默认是转大写的可以禁止转大写
+                },
+                ConfigureExternalServices = new ConfigureExternalServices//把不包含id的字段设为可空
+                {
+                    EntityService = (t, column) =>
+                    {
+                        if (!column.PropertyName.ToLower().Contains("id"))
+                        {
+                            column.IsNullable = true;
+                        }
+                    }
                 }
             };
 

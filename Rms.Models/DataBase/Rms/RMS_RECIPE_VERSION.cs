@@ -24,9 +24,13 @@ namespace Rms.Models.DataBase.Rms
         public string RECIPE_ID { get; set; }
         public decimal? VERSION { get; set; } = 1;
         public string FLOW_ROLES { get; set; } = "[]";
+        [SugarColumn(IsNullable = true)]
         public int CURRENT_FLOW_INDEX { get; set; }
+        [SugarColumn(IsNullable = true)]
         public string RECIPE_DATA_ID { get; set; }
+        [SugarColumn(IsNullable = true)]
         public string REMARK { get; set; }
+        [SugarColumn(IsNullable = true)]
         public string CREATOR { get; set; } = "Default";
         public DateTime? CREATE_TIME { get; set; } = DateTime.Now;
 

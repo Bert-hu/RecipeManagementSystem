@@ -247,6 +247,8 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\SwaggerConfig.cs" />
+    <Compile Include="Controllers\Production\DpsProductionController.cs" />
+    <Compile Include="Controllers\StripMap\StripMapController.cs" />
     <Compile Include="Controllers\Ams\AlarmConfigController.cs" />
     <Compile Include="Controllers\Ems\EquipmentTypeController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
@@ -414,6 +416,8 @@
     <Content Include="Scripts\layui_NEW\layui.js" />
     <Content Include="Scripts\layui_NEW\layui.table.formdate.js" />
     <Content Include="Scripts\layui_NEW\tableEdit.js" />
+    <Content Include="Scripts\layui_NEW\tableFilter.css" />
+    <Content Include="Scripts\layui_NEW\tableFilter.js" />
     <Content Include="Scripts\layui_NEW\xm-select.js" />
     <Content Include="Scripts\layui\css\layui.css" />
     <Content Include="Scripts\layui\css\layui.mobile.css" />
@@ -621,6 +625,12 @@
     <Content Include="Views\Equipment\EqpConfig.cshtml" />
     <Content Include="Views\Material\Index.cshtml" />
     <Content Include="Views\Material\AddConfig.cshtml" />
+    <Content Include="Views\Recipe\recipeParams.cshtml" />
+    <Content Include="Views\RecipeParameter\ParamsDictionary.cshtml" />
+    <Content Include="Views\RecipeParameter\SetDictionary.cshtml" />
+    <Content Include="Views\StripMap\Index.cshtml" />
+    <Content Include="Views\DpsProduction\Index.cshtml" />
+    <Content Include="Views\RecipeMapping\AliasMapping.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -671,7 +681,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>50802</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>https://localhost:44309/</IISUrl>
+          <IISUrl>http://localhost:44309/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

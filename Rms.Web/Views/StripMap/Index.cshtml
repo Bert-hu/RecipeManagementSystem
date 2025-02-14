@@ -1,0 +1,558 @@
+﻿
+@{
+
+}
+<style>
+    .scrollable-div {
+        max-height: 80vh;
+        overflow-y: auto; /* 或者使用 overflow-y: auto; */
+    }
+
+    .selected {
+        background-color: #89cff0 !important;
+    }
+</style>
+<script src="~/Scripts/layui/layui.table.formdate.js"></script>
+<script src="~/Scripts/layui_NEW/layui.js"></script>
+<script src="~/Scripts/ECharts/echarts.js"></script>
+<script src="~/Scripts/jquery-3.7.1.js"></script>
+
+<div class="layui-row" style="height:90vh">
+    <div class="layui-col-xs3">
+        <div class="layui-upload-drag" style="display: block;" id="uploadMapFile">
+            <i class="layui-icon layui-icon-upload"></i>
+            <div>点击上传，或将文件拖拽到此处</div>
+
+        </div>
+        <table id="mapTable"></table>
+    </div>
+    <div class="layui-col-xs9">
+        <div class="layui-btn-container" style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; height: 100%;">
+
+
+            <button type="button" class="layui-btn" id="setTo0">
+                <i class="layui-icon layui-icon-component layui-font-12"></i>设置为0
+            </button>
+            <button type="button" class="layui-btn" id="setTo1">
+                <i class="layui-icon layui-icon-component layui-font-12"></i>设置为1
+            </button>
+
+            <button type="button" class="layui-btn" id="returnToOriginal">
+                <i class="layui-icon layui-icon-return layui-font-12"></i>退回原始数据
+            </button>
+            <button type="button" class="layui-btn" id="dataCompare">
+                <i class="layui-icon layui-icon-release layui-font-12"></i>数据对比
+            </button>
+            <button type="button" class="layui-btn" id="saveMap">
+                <i class="layui-icon layui-icon-ok layui-font-12"></i>保存
+            </button>
+            <button type="button" class="layui-btn" id="downloadNewMap">
+                <i class="layui-icon layui-icon-download-circle layui-font-12"></i>下载新Map
+            </button>
+
+        </div>
+        <div id="heatmap-chart" style="height:70vh;width:90%; margin: 1%;"></div>
+        <div id="statsTextDiv"></div>
+    </div>
+    @*<div class="layui-col-xs3">
+            333
+        </div>*@
+</div>
+
+<script type="text/html" id="mapToolBar">
+    <a class="layui-btn layui-btn layui-btn-xs" lay-event="load">Load</a>
+    @*<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="delete">Delete</a>*@
+</script>
+<script>
+    layui.use(['form', 'slider', 'laydate', 'element'], function () {
+        var form = layui.form
+            , laydate = layui.laydate
+            , slider = layui.slider
+            , element = layui.element
+            , upload = layui.upload
+            , table =layui.table
+            , $ = layui.$;
+
+        table.render({
+            elem: '#mapTable',
+            url: './GetMaps', // 此处为静态模拟数据，实际使用时需换成真实接口
+            page: true,
+            limit: 20,
+            toolbar:true,
+            defaultToolbar: ['filter'],
+            cols: [[
+                // {type: 'radio', fixed: 'left'},
+                //{ field: 'id', title: 'ID', width: 80, fixed: 'left', unresize: true },
+                { fixed: 'left', width: 100, align: 'center', toolbar: '#mapToolBar' },
+                { field: 'NAME', title: 'Name', width: 150 },
+                { field: 'LASTEDITOR', title: 'LastEditor', width: 120 },
+                { field: 'LASTEDIT_TIME', title: 'LastEditTime', templet: '<div>{{ FormDate(d.LASTEDIT_TIME, "yyyy-MM-dd HH:mm:ss") }}</div>', width: 180 },
+                { field: 'CREATOR', title: 'Creator', width: 120, hide:true },
+                { field: 'CREATE_TIME', title: 'CreateTime', templet: '<div>{{ FormDate(d.CREATE_TIME, "yyyy-MM-dd HH:mm:ss") }}</div>', width: 180, hide: true }
+            ]],
+            height: 'full-330'
+        });
+
+        table.on('tool(mapTable)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+            var data = obj.data; //获得当前行数据
+            var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+            var tr = obj.tr; //获得当前行 tr 的DOM对象
+
+            if (layEvent === 'load') { //查看
+
+                layer.confirm('确认加载新Map？将失去所有修改', { icon: 3, title: '确认' }, function (index) {
+                    $.post('./GetMapData', { ID: data.ID }, function (res) {
+                        if (!res.result) {
+                            const colorMap = new Map([
+                                [0, '#fee08b'],
+                                [1, '#f46d43'],
+                                [100, '#66c2a5'],
+                                [101, '#3288bd']
+                            ]);
+                            SetScatterChart(res.map, colorMap);
+                        }
+                    });
+                    layer.close(index);
+                });
+            }
+        });
+
+
+        // 渲染
+        upload.render({
+            elem: '#uploadMapFile',
+            url: './UploadMap', // 实际使用时改成您自己的上传接口即可。
+            accept: 'file',
+            done: function (res) {
+
+
+                if (res.result) {
+                    const colorMap = new Map([
+                        [0, '#fee08b'],
+                        [1, '#f46d43'],
+                        [100, '#66c2a5'],
+                        [101, '#3288bd']
+                    ]);
+                    table.reload("mapTable");
+                    SetScatterChart(res.map, colorMap);
+                } else {
+                    layer.msg(res.message);
+                }
+            }
+        });
+
+
+        // 生成热力图数据
+        function generatemapData(xCount, yCount) {
+            let data = [];
+            for (let i = 1; i <= xCount; i++) {
+                for (let j = 1; j <= yCount; j++) {
+                    let value = Math.random() > 0.5 ? 1 : 0; // 随机生成0或1
+                    data.push([i, j, value]);
+                }
+            }
+            return data;
+        }
+        //var showMapData = generatemapData(10, 10);
+        //SetScatterChart(showMapData);
+        var valueCounts = {};
+
+        var showMapData;
+        var originalData;
+        var currentMapData = {
+            _value: null,
+            get value() {
+                return this._value;
+            },
+            set value(newValue) {
+                this._value = newValue;
+                let valueCounts = { unselected: 0, selected: 0 };
+
+                newValue.forEach(item => {
+                    let value = item[2]; // Assuming item[2] holds the status of selection (0 or 1)
+                    if (value === 0 || value ===100) {
+                        valueCounts.unselected++;
+                    } else if (value === 1|| value === 101) {
+                        valueCounts.selected++;
+                    }
+                });
+
+                let statsText = `
+<div style="
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  gap: 10px; 
+  font-family: Arial, sans-serif; 
+  flex-wrap: wrap; 
+  text-align: center;">
+`;
+
+                for (let value in valueCounts) {
+                    let displayText = value === 'unselected' ? '0+100 (不置件的数量)' : '1+101 (置件数量)';
+                    statsText += `
+    <span style="
+      padding: 5px 10px; 
+      background-color: #f5f5f5; 
+      border: 1px solid #ddd; 
+      border-radius: 4px;">
+      <strong>${displayText}</strong>: ${valueCounts[value]}
+    </span>`;
+                }
+
+                statsText += '</div>';
+
+                document.getElementById('statsTextDiv').innerHTML = statsText;
+
+
+
+            }
+        }
+        var showOldMap;
+        var currentMapObj;
+        var chart;
+        var selectedIndices = []; //选中的区域
+
+        function SetScatterChart(mapObj, colorMap) {
+            currentMapObj = mapObj;
+
+            currentMapData.value = mapObj.CONTENT;
+            originalData = mapObj.ORIGINAL_CONTENT;
+
+            showMapData = currentMapData.value;
+
+            // 初始化 ECharts 实例
+            chart = echarts.init(document.getElementById('heatmap-chart'));
+
+
+
+            const pieces = Array.from(colorMap.entries()).map(([value, color]) => ({
+                min: value,
+                max: value,
+                color: color
+            }));
+
+            const visualMapConfig = {
+                type: 'piecewise',  // 或者 'piecewise'，取决于你需要的样式
+                left: 'center',
+                bottom: '5%',
+                orient: 'horizontal',
+                pieces: pieces,
+                inRange: {
+                    color: pieces.map(piece => piece.color) // 将对应的颜色映射
+                },
+                outOfRange: {
+                    color: '#ccc' // 不在范围内的颜色
+                },
+                show: true
+            };
+
+
+
+            //深拷贝
+            originalData = originalData;
+            currentMapData.value = JSON.parse(JSON.stringify(showMapData));
+
+            var fontSizeScale = 30; // Target font size for 100 elements
+            var minFontSize = 1; 
+            var firstDimensionLength = showMapData.length; // Number of elements in the first dimension
+
+            // Calculate font size based on the number of elements in the first dimension
+            var fontSize = fontSizeScale * Math.sqrt(100 / firstDimensionLength); 
+
+
+
+            var xAxisData = Array.from({ length: Math.max(...showMapData.map(d => d[0])) + 1 }, (_, i) => i);
+            var yAxisData = Array.from({ length: Math.max(...showMapData.map(d => d[1])) + 1 }, (_, i) => i);
+            var option = {
+                tooltip: {
+                    position: 'top',
+                    formatter: function (params) {
+                        return `X: ${params.value[0]}<br>Y: ${params.value[1]}<br>Value: ${params.value[2]}`;
+                    },
+                    backgroundColor: 'rgba(0,0,0,0.9)', // 设置提示框背景色
+                    textStyle: {
+                        color: '#fff', // 设置提示框字体颜色
+                        fontSize: 12
+                    }
+                },
+                grid: {
+                    //left: '5%',
+                    right: '5%',
+                    top: '10%',
+                    bottom: '10%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: xAxisData,
+                    name: 'Col',
+                    nameLocation: 'middle',
+                    nameGap: 25,
+                    min: 1,
+                    axisLine: {
+                        show: true,
+                        lineStyle: {
+                            color: '#666', // 坐标轴线颜色
+                            width: 2 // 坐标轴线宽度
+                        }
+                    },
+                    axisTick: {
+                        show: false
+                    },
+                    axisLabel: {
+                        fontSize: 20,
+                        fontWeight: 'bold',
+                        textStyle: {
+                            color: '#555'
+                        }
+                    }
+                },
+                yAxis: {
+                    type: 'category',
+                    data: yAxisData,
+                    name: 'Row',
+                    nameLocation: 'middle',
+                    nameGap: 40,
+                    min: 1,
+                    axisLine: {
+                        show: true,
+                        lineStyle: {
+                            color: '#666', // 坐标轴线颜色
+                            width: 2 // 坐标轴线宽度
+                        }
+                    },
+                    axisTick: {
+                        show: false
+                    },
+                    axisLabel: {
+                        fontSize: 20,
+                        fontWeight: 'bold',
+                        textStyle: {
+                            color: '#555'
+                        }
+                    }
+                },
+                visualMap: visualMapConfig,
+                series: [
+                    {
+                        name: 'Heatmap',
+                        type: 'heatmap',
+                        data: showMapData,
+                        itemStyle: {
+                            borderColor: '#333',
+                            borderWidth: 3
+                        },
+                        emphasis: {
+                            itemStyle: {
+                                borderColor: '#333',
+                                borderWidth: 8
+                            }
+                        },
+                        label: {
+                            show: true,
+                            color: '#000',
+                            fontSize: fontSize,
+                            fontWeight: 'bold'
+                        }
+                    }
+                ],
+                brush: {
+                    toolbox: ['rect', 'clear'], // 工具箱：矩形框选、多边形框选、清除
+                    xAxisIndex: 'all',
+                    throttleType: 'debounce', // 事件延迟
+                    throttleDelay: 500, // 延迟时间
+                    brushLink: 'all', // 使得框选操作链接所有坐标轴
+                    title: 'Click and Drag to Select Area', // 提示框内容
+                    brushStyle: {
+                        borderWidth: 2,
+                        borderColor: '#ccc', // 框选区域边框颜色
+                        color: 'rgba(0,0,0,0.2)' // 框选区域填充颜色
+                    }
+                }
+            };
+
+
+
+            // 渲染图表
+            chart.setOption(option);
+
+            chart.dispatchAction({
+                type: 'takeGlobalCursor',
+                key: 'brush',
+                brushOption: {
+                    brushType: 'rect' // 矩形框选
+                }
+            });
+
+            selectedIndices = [];
+            chart.on('brushSelected', function (params) {
+
+                selectedIndices = [];
+
+                let selectedData = [];
+
+                // 遍历选中的区域
+                params.batch[0].areas.forEach((area) => {
+                    // 获取当前选中区域的坐标范围
+                    const coordRange = area.coordRange;  // [[xMin, xMax], [yMin, yMax]]
+
+                    const xRange = coordRange[0]; // X轴的范围：[xMin, xMax]
+                    const yRange = coordRange[1]; // Y轴的范围：[yMin, yMax]
+
+                    // 遍历 showMapData，筛选出在选中区域内的数据
+                    showMapData.forEach((dataPoint, index) => {
+                        const x = dataPoint[0]; // 数据点的X值
+                        const y = dataPoint[1]; // 数据点的Y值
+
+                        // 判断数据点是否在选择的范围内
+                        if (x >= xRange[0] && x <= xRange[1] && y >= yRange[0] && y <= yRange[1]) {
+                            selectedData.push(dataPoint);
+                            selectedIndices.push(index);
+                        }
+                    });
+                });
+
+                //console.log('Selected Data:', selectedData);
+            });
+
+
+            showOldMap = false;
+
+        }
+
+        document.getElementById('setTo0').addEventListener('click', function () {
+
+            // 更新选中区域的数据点值为2
+            selectedIndices.forEach(index => {
+                if (originalData[index][2] == 1) {
+                    showMapData[index][2] = 100;
+                } else if (originalData[index][2] == 0) {
+                    showMapData[index][2] = 0;
+                }
+            });
+
+            // 重新设置图表数据
+            chart.setOption({
+                series: [{
+                    data: showMapData
+                }]
+            });
+            currentMapData.value = JSON.parse(JSON.stringify(showMapData));
+
+        });
+
+        document.getElementById('setTo1').addEventListener('click', function () {
+
+            // 更新选中区域的数据点值为3
+            selectedIndices.forEach(index => {
+                if (originalData[index][2] == 0) {
+                    showMapData[index][2] = 101;
+                } else if (originalData[index][2] == 1) {
+                    showMapData[index][2] = 1;
+                }
+            });
+
+            // 重新设置图表数据
+            chart.setOption({
+                series: [{
+                    data: showMapData
+                }]
+            });
+            currentMapData.value = JSON.parse(JSON.stringify(showMapData));
+
+        });
+
+        document.getElementById('dataCompare').addEventListener('click', function () {
+
+            showOldMap = !showOldMap;
+            var showData = showOldMap ? originalData : showMapData;
+
+            // 重新设置图表数据
+            chart.setOption({
+                series: [{
+                    data: showData
+                }]
+            });
+        });
+
+
+        document.getElementById('returnToOriginal').addEventListener('click', function () {
+            layer.confirm('确认退回？将失去所有修改', { icon: 3, title: '确认' }, function (index) {
+                showMapData = JSON.parse(JSON.stringify(originalData));
+                currentMapData.value = JSON.parse(JSON.stringify(showMapData));
+                chart.setOption({
+                    series: [{
+                        data: showMapData
+                    }]
+                });
+                layer.close(index);
+            });
+        });
+
+        document.getElementById('downloadNewMap').addEventListener('click', function () {
+            // 发送 POST 请求到后端
+            $.post('./SaveMapData', {
+                ID: currentMapObj.ID,
+                data: currentMapData.value // 发送的参数
+            }, function (response, status, xhr) {
+                // 检查响应状态
+                table.reload("mapTable");
+                // 下载
+                $.post('./DownloadUpdatedMap', {
+                    data: currentMapData.value,
+                    name: currentMapObj.NAME
+                }, function (response, status, xhr) {
+                    // 检查响应状态
+                    if (xhr.status === 200) {
+                        // 获取文件名（从 Content-Disposition 中提取）
+                        const contentDisposition = xhr.getResponseHeader('Content-Disposition');
+                        let fileName = "downloaded_file.txt"; // 默认文件名
+                        if (contentDisposition && contentDisposition.includes('filename=')) {
+                            const match = contentDisposition.match(/filename="?(.+)"?/);
+                            if (match) fileName = decodeURIComponent(match[1]);
+                        }
+
+                        // 创建 Blob 对象并生成下载链接
+                        const blob = new Blob([response], { type: xhr.getResponseHeader('Content-Type') });
+                        const url = window.URL.createObjectURL(blob);
+
+                        // 创建一个隐藏的 <a> 元素，用于触发下载
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = fileName; // 设置文件名
+                        document.body.appendChild(a);
+                        a.click();
+
+                        // 移除链接并释放 URL
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+                    } else {
+                        console.error('文件下载失败');
+                    }
+                }).fail(function (xhr, status, error) {
+                    console.error('请求失败:', error);
+                });
+
+            }).fail(function (xhr, status, error) {
+                console.error('请求失败:', error);
+            });
+
+        });
+
+        document.getElementById('saveMap').addEventListener('click', function () {
+            // 发送 POST 请求到后端
+            $.post('./SaveMapData', {
+                ID: currentMapObj.ID,
+                data: currentMapData.value // 发送的参数
+            }, function (response, status, xhr) {
+                // 检查响应状态
+                table.reload("mapTable");
+
+            }).fail(function (xhr, status, error) {
+                console.error('请求失败:', error);
+            });
+        });
+    });
+
+</script>

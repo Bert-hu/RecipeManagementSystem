@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web.Mvc;
 using Rms.Models.DataBase.Ams;
 using Rms.Web.ViewModels;
+using System.Collections.Generic;
 
 namespace Rms.Web.Controllers.Ams
 {
@@ -18,6 +19,12 @@ namespace Rms.Web.Controllers.Ams
         public ActionResult AddConfig(string equipmentTypeId, string configId)
         {
             ViewBag.equipmentTypeId = equipmentTypeId;
+            ViewBag.configId = configId;
+            return View();
+        }
+
+        public ActionResult EditBinding(string configId)
+        {
             ViewBag.configId = configId;
             return View();
         }
@@ -88,5 +95,46 @@ namespace Rms.Web.Controllers.Ams
             db.Deleteable<MMS_MATERIAL_DIC>().In(configId).ExecuteCommand();
             return Json(new { result = true, message = "" });
         }
+
+
+        public JsonResult GetRecipeGroups(string configId)
+        {
+            //var config = db.Queryable<MMS_MATERIAL_DIC>().InSingle(configId);
+            var bindings = db.Queryable<MMS_GROUP_MAPPING>().Includes(it => it.RECIPE_GROUP).Where(it => it.MATERIAL_DIC_ID == configId).ToList();
+
+            var recipeGroups = db.Queryable<RMS_RECIPE_GROUP>().OrderBy(it => it.NAME).ToList();
+
+            var showdata = recipeGroups.Select(it =>
+            new
+            {
+                LAY_CHECKED = bindings.Any(b => b.RECIPE_GROUP_ID == it.ID),
+                ID = it.ID,
+                NAME = it.NAME
+
+            }).ToList();
+
+            return Json(new { data = showdata, code = 0, count = showdata.Count }, JsonRequestBehavior.AllowGet);
+
+
+
+        }
+
+
+        public JsonResult SetGroups(string ConfigId, List<string> GroupIds)
+        {
+            db.Deleteable<MMS_GROUP_MAPPING>().Where(it => it.MATERIAL_DIC_ID == ConfigId).ExecuteCommand();
+            if (GroupIds != null)
+            {
+                var mappings = GroupIds.Select(it => new MMS_GROUP_MAPPING
+                {
+                    MATERIAL_DIC_ID = ConfigId,
+                    RECIPE_GROUP_ID = it
+                }).ToList();
+                db.Insertable(mappings).ExecuteCommand();
+            }
+            return Json(new { result = true, message = "OK" });
+
+        }
+
     }
 }

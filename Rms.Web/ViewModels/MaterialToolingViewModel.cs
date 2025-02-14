@@ -16,6 +16,7 @@ namespace Rms.Web.ViewModels
         public string MID { get; set; }            // 对应 MMD.ID
         public string SHOWNAME { get; set; }       // 对应 MMD.SHOWNAME
         public string MTYPE { get; set; }          // 对应 MMD.TYPE
+        public string TYPE_CODE { get; set; }
         public string MMCID { get; set; }          // 对应 MMC.ID
         public string VALUE { get; set; }          // 对应 MMC.VALUE
         public string LASTEDITOR { get; set; }     // 对应 MMC.LASTEDITOR

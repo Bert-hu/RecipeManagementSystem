@@ -49,6 +49,7 @@
 
 <script type="text/html" id="configToolBar">
     <a class="layui-btn layui-btn layui-btn-xs" lay-event="edit">Edit</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="binding">Binding</a>
     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="delete">Delete</a>
 </script>
 
@@ -226,6 +227,52 @@
 
                         var iframeWindow = layero.find('iframe')[0].contentWindow;
 
+                    }
+                }, function (value, index, elem) {
+
+
+
+
+                });
+            } else if (event === 'binding') {
+                layer.open({
+                    type: 2,
+                    content: 'EditBinding?configId=' + selectdata.ID,
+                    title: 'Edit Binding',
+                    btn: ['Confirm', 'Cancel'],
+                    area: ['40%', '85%'],
+                    success: function (layero, index) {
+
+                        var iframeWindow = layero.find('iframe')[0].contentWindow;
+
+                    },
+                    yes: function (index) {
+                        var res = window["layui-layer-iframe" + index].callback();
+                        var jdata = JSON.parse(res);
+                        var groupids = jdata.roles.map(obj => obj.ID);
+                        console.log(groupids);
+                        $.ajax({
+                            url: '/Material/SetGroups',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                            data: {
+                                ConfigId: selectdata.ID,
+                                GroupIds: groupids
+                            },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
+                            type: 'POST',
+                            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
+                            async: false,
+                            success: function (data) {
+                                layer.open({ content: data.message });
+
+                            },
+                            error: function (message) {
+                                alert('error!');
+                            }
+                        });
+                        layer.close(index);
+
+
+                    }, btn2: function (index, layero) {
+                        layer.msg('取消Cancel');
                     }
                 }, function (value, index, elem) {
 

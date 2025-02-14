@@ -52,9 +52,12 @@
     <Compile Include="DataBase\Ams\AMS_CONFIGURATION.cs" />
     <Compile Include="DataBase\Ams\AMS_ACTION_RECORD.cs" />
     <Compile Include="DataBase\COMMON_CONFIG.cs" />
+    <Compile Include="DataBase\Map\MAP_EDITMAP.cs" />
+    <Compile Include="DataBase\Map\MAP_COLORCONFIG.cs" />
     <Compile Include="DataBase\Mms\MMS_MACHINE_CONFIG_HIST.cs" />
     <Compile Include="DataBase\Mms\MMS_MACHINE_CONFIG.cs" />
     <Compile Include="DataBase\Mms\MMS_MATERIAL_DIC.cs" />
+    <Compile Include="DataBase\Mms\MMS_RECIPE_MAPPING.cs" />
     <Compile Include="DataBase\Pms\PMS_MODULE.cs" />
     <Compile Include="DataBase\Pms\PMS_MODULEROLE.cs" />
     <Compile Include="DataBase\Pms\PMS_OPERATIONLOG.cs" />
@@ -72,6 +75,7 @@
     <Compile Include="DataBase\Rms\RMS_MARKING_CONFIG.cs" />
     <Compile Include="DataBase\Rms\RMS_MARKING_FIELD.cs" />
     <Compile Include="DataBase\Rms\RMS_MARKING_VERSION.cs" />
+    <Compile Include="RMS_DIFFERENT_PARAMETER.cs" />
     <Compile Include="DataBase\Rms\RMS_RECIPE_GROUP.cs" />
     <Compile Include="DataBase\Rms\RMS_RECIPE_DATA.cs" />
     <Compile Include="DataBase\Rms\RMS_RECIPE_GROUP_MAPPING.cs" />

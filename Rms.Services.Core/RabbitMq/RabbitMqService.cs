@@ -12,7 +12,8 @@ namespace Rms.Services.Core.RabbitMq
     {
         private readonly IConfiguration _configuration;
 
-        private static log4net.ILog Log = log4net.LogManager.GetLogger("Logger");
+        //private static log4net.ILog Log = log4net.LogManager.GetLogger("Logger");
+        private static log4net.ILog RabbitMqLog = log4net.LogManager.GetLogger("RabbitMQ");
 
 
         ConnectionFactory factory;
@@ -51,7 +52,7 @@ namespace Rms.Services.Core.RabbitMq
             {
                 logmsg = logmsg.Substring(0, 5000);
             }
-            Log.Info(logmsg);
+            RabbitMqLog.Info(logmsg);
             Dictionary<string, object> arguments = new Dictionary<string, object>() { { "x-message-ttl", 300000 } };
             //channel.QueueDeclare(routingKey, false, false, true, arguments);
             var properties = channel.CreateBasicProperties();
@@ -66,6 +67,7 @@ namespace Rms.Services.Core.RabbitMq
         {
             try
             {
+
                 trans.ReplyChannel = consumeSubQueue;
                 var tcs = new TaskCompletionSource<RabbitMqTransaction>();
                 var message = JsonConvert.SerializeObject(trans);
@@ -81,16 +83,17 @@ namespace Rms.Services.Core.RabbitMq
                 else
                 {
                     waitTransactions.TryRemove(tid, out _);
-                    Log.Warn($"Tansaction {trans.TransactionName} timeout, {trans.ExpireSecond} s");
+                    RabbitMqLog.Warn($"Tansaction {trans.TransactionName} timeout, {trans.ExpireSecond} s");
                     return null;
                 }
             }
             catch (Exception ex)
             {
-                Log.Warn(ex);
+                RabbitMqLog.Warn(ex);
                 return null;
             }
         }
+
 
     }
 }

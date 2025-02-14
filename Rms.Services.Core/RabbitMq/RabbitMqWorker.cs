@@ -13,13 +13,13 @@ namespace Rms.Services.Core.RabbitMq
     internal class RabbitMqWorker : BackgroundService
     {
 
-        private static log4net.ILog Log = log4net.LogManager.GetLogger("Logger");
+        //private static log4net.ILog Log = log4net.LogManager.GetLogger("Logger");
+        private static log4net.ILog RabbitMqLog = log4net.LogManager.GetLogger("RabbitMQ");
 
         private readonly IConfiguration _configuration;
         private readonly RabbitMqService _rabbitMqService;
         private readonly ISqlSugarClient _sqlSugarClient;
 
-        private readonly System.Threading.Timer _equipmentStatusTimer;
         public RabbitMqWorker(IConfiguration configuration, RabbitMqService rabbitMqService, ISqlSugarClient sqlSugarClient)
         {
             _configuration = configuration;
@@ -38,7 +38,7 @@ namespace Rms.Services.Core.RabbitMq
                 {
                     logmsg = logmsg.Substring(0, 5000);
                 }
-                Log.Info(logmsg);
+                RabbitMqLog.Info(logmsg);
                 Task.Run(async () => await HandleRecivedTrans(message));
             };
             Dictionary<string, object> arguments = new Dictionary<string, object>() { { "x-message-ttl", 300000 } };
@@ -81,13 +81,13 @@ namespace Rms.Services.Core.RabbitMq
                     }
                     else
                     {
-                        Log.Error($"Transaction '{trans.TransactionName}' does not implement ITransactionHandler.");
+                        RabbitMqLog.Error($"Transaction '{trans.TransactionName}' does not implement ITransactionHandler.");
                     }
                 }
             }
             catch (Exception ex)
             {
-                Log.Error(ex.ToString());
+                RabbitMqLog.Error(ex.ToString());
             }
         }
     }

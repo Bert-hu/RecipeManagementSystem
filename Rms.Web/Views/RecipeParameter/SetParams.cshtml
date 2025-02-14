@@ -7,7 +7,7 @@
 <link href="~/Scripts/layui/css/layui.css" rel="stylesheet" />
 <script src="~/Scripts/layui/layui.js"></script>
 
-<form class="layui-form layui-form-pane" action="" style="width: 60%;margin: 0 auto;margin-top: 20px">
+<form class="layui-form layui-form-pane" action="" style="width: 90%;margin: 0 auto;margin-top: 20px">
     <div class="layui-form-item" hidden>
         <label class="layui-form-label">EQID</label>
         <div class="layui-input-block">
@@ -22,78 +22,90 @@
         </div>
     </div>
     <div class="layui-form-item">
-        <label class="layui-form-label">参数名</label>
-        <div class="layui-input-block">
+        <label class="layui-form-label" style="width:40%;">参数名/ParameterName</label>
+        <div class="layui-input-block" style="margin-left:40%;">
             @*<input id="paramname" class="layui-input" lay-filter="paramname">*@
             <select lay-verify="required" lay-search="" id="paramname" lay-filter="paramname">
             </select>
         </div>
     </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">类型</label>
+    <div class="layui-form-item" hidden>
+        <label class="layui-form-label" style="width:40%;">参数键</label>
         <div class="layui-input-block">
+            @*<input id="paramname" class="layui-input" lay-filter="paramname">*@
+            <input class="layui-input" id="paramkey" lay-filter="paramkey" disabled>
+
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label" style="width:40%;">类型/Type</label>
+        <div class="layui-input-block" style="margin-left:40%;">
             <select id="type" class="layui-select" lay-filter="type">
                 <option value="floatvalue">±</option>
-                <option value="percent">百分比</option>
-                <option value="enum">枚举值</option>
-                <option value="value">固定阈值</option>
+                <option value="percent">百分比/Percentage</option>
+                <option value="enum">枚举值/Enum</option>
+                <option value="value">定义域范围/Range</option>
             </select>
             @*<input type="checkbox" id="type" class="layui-form-checkbox" lay-filter="type" value="true">*@
         </div>
     </div>
 
-    <div id="floatvalue" hidden>
+    <div id="floatvalue">
         <div class="layui-form-item">
-            <label class="layui-form-label">+</label>
-            <div class="layui-input-block">
+            <label class="layui-form-label" style="width:40%;">+</label>
+            <div class="layui-input-block" style="margin-left:40%;">
                 <input type="number" id="uplimit" class="layui-input" lay-filter="uplimit">
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">-</label>
-            <div class="layui-input-block">
+            <label class="layui-form-label" style="width:40%;">-</label>
+            <div class="layui-input-block" style="margin-left:40%;">
                 <input type="number" id="lowlimit" class="layui-input" lay-filter="lowlimit">
             </div>
         </div>
     </div>
     <div id="percent" hidden>
         <div class="layui-form-item">
-            <label class="layui-form-label">增幅</label>
-            <div class="layui-input-block">
+            <label class="layui-form-label" style="width:40%;">增幅/Increase</label>
+            <div class="layui-input-block" style="margin-left:40%;">
                 <input type="number" id="uplimit2" class="layui-input" lay-filter="uplimit" placeholder="%">
 
             </div>
 
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">减幅</label>
-            <div class="layui-input-block">
+            <label class="layui-form-label" style="width:40%;">减幅/Decrease</label>
+            <div class="layui-input-block" style="margin-left:40%;">
                 <input type="number" id="lowlimit2" class="layui-input" lay-filter="lowlimit" placeholder="%">
             </div>
         </div>
     </div>
     <div id="enum" hidden>
         <div class="layui-form-item">
-            <label class="layui-form-label">枚举值</label>
-            <div class="layui-input-block">
-                <input type="text" id="enumvalue" class="layui-input" lay-filter="enumvalue" placeholder="请以/隔开，如：90/100/110">
+            <label class="layui-form-label" style="width:40%;">枚举值/Enum</label>
+            <div class="layui-input-block" style="margin-left:40%;">
+                <input type="text" id="enumvalue" class="layui-input" lay-filter="enumvalue" placeholder="请以‘/’隔开，Please separate by '/'; eg.90/100/110">
             </div>
 
         </div>
 
     </div>
     <div id="value" hidden>
-        <div class="layui-inline">
-            <label class="layui-form-label">范围</label>
-            <div class="layui-input-inline" style="width: 25%;">
-                <input type="number" id="lowlimit3" name="lowlimit" placeholder="下限" autocomplete="off" class="layui-input" lay-filter="lowlimit">
+        <div class="layui-form-item">
+            <label class="layui-form-label" style="width:40%;">最小值/Minimum</label>
+            <div class="layui-input-block" style="margin-left: 40%;">
+                <input type="number" id="lowlimit3" name="lowlimit" placeholder="最小值/Minimum" autocomplete="off" class="layui-input" lay-filter="lowlimit">
             </div>
-            <div class="layui-input-inline" style="width: 15%; text-align:center">
-                ~
+        </div>
+        <div class="layui-form-item">
+
+            <label class="layui-form-label" style="width:40%; ">
+                最大值/Maximum
+            </label>
+            <div class="layui-input-block" style="margin-left: 40%; ">
+                <input type="number" id="uplimit3" name="uplimit" placeholder="最大值/Maximum" autocomplete="off" class="layui-input" lay-filter="uplimit">
             </div>
-            <div class="layui-input-inline" style="width: 25%;">
-                <input type="number" id="uplimit3" name="uplimit" placeholder="上限" autocomplete="off" class="layui-input" lay-filter="uplimit">
-            </div>
+
         </div>
     </div>
 
@@ -127,13 +139,21 @@
                     console.log(data)
                     $("#paramname").html(data);
                     form.render();
-
+                    var sel = document.querySelector("#paramname");
+                    var index = sel.selectedIndex;
+                    var val = sel.options[index].value;
+                    $("#paramkey").val(val)
+                    console.log("select:" + val)
                 },
                 error: function (message) {
                     alert('error!');
                 }
             });
         }
+        form.on('select(paramname)', function (data) {
+            console.log("select:" + data.value)
+            $("#paramkey").val(data.value)
+        })
         form.on('select(type)', function (data) {
             //console.log(data.value);
             if (data.value == 'floatvalue') {
@@ -172,7 +192,11 @@
         window.callback = function () {
             retdata.eqpid = $("#eqp").val()
             retdata.rcpid = $("#rcpid").val();
-            retdata.paramname = $("#paramname").val();
+            var sel = document.querySelector("#paramname");
+            var index = sel.selectedIndex;
+            var val = sel.options[index].text;
+            retdata.paramname = val;
+            retdata.paramkey = $("#paramkey").val();
             retdata.type = $("#type").val();
             retdata.enum = $("#enumvalue").val();
             if (retdata.type == 'percent') {

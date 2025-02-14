@@ -1,0 +1,53 @@
+﻿
+@{
+    Layout = null;
+    ViewBag.Title = "setdictionary";
+}
+
+
+<link href="~/Scripts/layui/css/layui.css" rel="stylesheet" />
+<script src="~/Scripts/layui/layui.js"></script>
+
+<form class="layui-form layui-form-pane" action="" style="width: 80%;margin: 0 auto;margin-top: 20px">
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">参数键值</label>
+        <div class="layui-input-block">
+            <input id="paramkey" class="layui-input" lay-filter="paramkey" placeholder="与Recipe实际参数键值一致">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">参数名称</label>
+        <div class="layui-input-block">
+            <input id="paramname" class="layui-input" lay-filter="paramname" placeholder="中文名称">
+        </div>
+    </div>
+
+
+</form>
+<script>
+
+    layui.use(['jquery', 'form'], function () {
+        var $ = layui.jquery;
+        const form = layui.form;
+        form.render();
+        //回传给母页面的数据
+        var retdata = {};
+
+
+        window.callback = function () {
+            retdata.eqpid = null;
+            retdata.paramkey = $("#paramkey").val();
+            retdata.paramname = $("#paramname").val();
+
+            return JSON.stringify(retdata);
+        };
+
+
+
+
+
+    });
+
+</script>
+

@@ -1,0 +1,58 @@
+
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<link href="~/Scripts/layui_NEW/css/layui.css" rel="stylesheet" />
+<style>
+
+    .site-block {
+        padding: 20px;
+        border: 2px solid #eee;
+    }
+
+    .site-text {
+        position: relative;
+    }
+</style>
+<script src="~/Scripts/layui_NEW/layui.js"></script>
+
+
+<table class="layui-hide" id="recipegrouptable" lay-filter="recipegrouptable"></table>
+<script>
+
+    layui.use(['table', 'jquery'], function () {
+        var table = layui.table
+            , $ = layui.jquery;
+        table.render({
+            elem: '#recipegrouptable'
+            , height: 'full'
+            , url: '/Material/GetRecipeGroups/' //数据接口
+            , title: 'Recipe Group'
+            , id: "recipegrouptable"
+           // , page: true
+            , limit: 9999
+            , cols: [[
+                {  type: 'checkbox', fixed: 'left', height: 'auto' }
+                , { field: 'ID', title: 'ID', filter: true,hide:true }
+                , { field: 'NAME', title: 'NAME' }
+            ]]
+            ,where: {//这里传参 向后台
+                "configId": '@ViewBag.configId',
+            }
+            , done: function (res, curr, count) {
+
+            }
+        });
+
+        //回传给母页面的数据
+        var retdata = {};
+
+        window.callback = function () {
+            var selectData = layui.table.checkStatus('recipegrouptable').data;
+            retdata.roles = selectData;
+            return JSON.stringify(retdata);
+        };
+
+    })
+</script>

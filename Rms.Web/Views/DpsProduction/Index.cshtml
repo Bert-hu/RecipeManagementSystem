@@ -16,11 +16,11 @@
 </style>
 <script src="~/Scripts/layui/xm-select.js"></script>
 <script src="~/Scripts/layui/layui.table.formdate.js"></script>
-@*<script src="~/Scripts/Production/WaferGrinding/Index.js"></script>*@
+@*<script src="~/Scripts/Production/DpsProduction/Index.js"></script>*@
 <script src="~/Scripts/layui_NEW/layui.js"></script>
 
 <div class="layui-card layui-bg-gray" style="padding: 5px;">
-    <div class="layui-card-header" style="font-weight: bold; font-size:25px">WaferGrinding</div>
+    <div class="layui-card-header" style="font-weight: bold; font-size:25px">DPS Line</div>
     <div id="equipments" class="xm-select-demo"></div>
     <div class="layui-bg-gray" style="padding: 15px;">
         <div class="layui-row layui-col-space10">
@@ -41,12 +41,12 @@
                                     <input type="text" name="NAME" autocomplete="off" class="layui-input" readonly>
                                 </div>
                             </div>
-                            <div class="layui-form-item">
+                            @*<div class="layui-form-item">
                                 <label class="layui-form-label">Status</label>
                                 <div class="layui-input-block">
                                     <input type="text" name="STATUS" autocomplete="off" class="layui-input" readonly>
                                 </div>
-                            </div>
+                            </div>*@
                             <div class="layui-form-item">
                                 <label class="layui-form-label">机种</label>
                                 <div class="layui-input-block">
@@ -86,7 +86,7 @@
                                 <i class="layui-icon layui-icon-upload layui-font-12"></i>By lot下载机种
                             </button>
                         </div>
-                        <div class="layui-btn-container">
+                        @*<div class="layui-btn-container">
                             <button type="button" class="layui-btn layui-btn-normal" id="portalotstart">
                                 <i class="layui-icon layui-icon-play layui-font-12"></i>A Port LotStart
                             </button>
@@ -95,7 +95,7 @@
                             <button type="button" class="layui-btn layui-btn-normal" id="portblotstart">
                                 <i class="layui-icon layui-icon-play layui-font-12"></i>B Port LotStart
                             </button>
-                        </div>
+                        </div>*@
                         <div class="layui-btn-container">
                             <button type="button" class="layui-btn" id="lotend" style="background-color:chartreuse">
                                 <i class="layui-icon layui-icon-release layui-font-12"></i>LotEnd
@@ -204,6 +204,7 @@
                 setTimeout(function () {
                     loadLogs(arr[0].value);
                     LoadEquipmentInfo(arr[0].value);
+                    loadMaterialToolingTable(arr[0].value);
                     layer.close(loadingIndex);
                 }, 10);
             },
@@ -236,7 +237,7 @@
                 let result1 = await $.ajax({
                     type: 'post',
                     dataType: 'json',
-                    url: '/WaferGrinding/GetEquipments',
+                    url: '/DpsProduction/GetEquipments',
                     data: {
 
                     },
@@ -321,6 +322,11 @@
 
         window.materialToolingTable;
         function loadMaterialToolingTable(eqid) {
+
+            if (eqid === undefined) {
+                eqid = equipmentSel.getValue()[0].value;
+                //console.log(eqid);
+            }
 
             window.materialToolingTable = table.render({
                 elem: '#materialToolingTable'
@@ -416,7 +422,7 @@
                                     } else {
                                         layer.msg(data.Message);
                                     }
-                                    window.materialToolingTable.reload();
+                                    loadMaterialToolingTable();
                                 },
                                 error: function (message) {
                                     alert('Error!');
@@ -547,7 +553,7 @@
                 $.ajax({
                     type: 'post',
                     dataType: 'json',
-                    url: '/WaferGrinding/PortLotStart',
+                    url: '/DpsProduction/PortLotStart',
                     data: {
                         equipmentid: equipmentSel.getValue()[0].value,
                         lotid: value,
@@ -594,7 +600,7 @@
                 $.ajax({
                     type: 'post',
                     dataType: 'json',
-                    url: '/WaferGrinding/LotEnd',
+                    url: '/DpsProduction/LotEnd',
                     data: {
                         equipmentid: equipmentSel.getValue()[0].value,
                         lotid: value,

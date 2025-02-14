@@ -19,15 +19,15 @@ namespace Rms.Services.Core.Services
 
 
             //Code First 生成表
-            //Assembly wrsmodels = Assembly.Load("Rms.Models");
-            //var typesInNamespace = wrsmodels.GetTypes()
-            //   .Where(t => t.Namespace != null && t.Namespace.StartsWith("Rms.Models.DataBase.Mms"))
-            //   .ToList();
-            //
-            //foreach (var type in typesInNamespace)
-            //{
-            //    sqlSugarClient.CodeFirst.InitTables(type);
-            //}
+           // Assembly wrsmodels = Assembly.Load("Rms.Models");
+           // var typesInNamespace = wrsmodels.GetTypes()
+           //    .Where(t => t.Namespace != null && t.IsClass && t.Namespace.StartsWith("Rms.Models.DataBase.Mms"))
+           //    .ToList();
+           // 
+           // foreach (var type in typesInNamespace)
+           // {
+           //     sqlSugarClient.CodeFirst.InitTables(type);
+           // }
 
             return Task.CompletedTask;
         }

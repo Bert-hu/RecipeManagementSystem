@@ -170,12 +170,50 @@ layui.use(['jquery', 'layer', 'table', 'form', 'upload', 'element', 'code'], fun
             async: false,
             success: function (data) {
                 if (data.Result) {
-                    var convertedText = data.BodySml.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    switch (data.RecipeType) {
+                        case "GeneralNonSecs":
+                        case "NonSecsGroup":
+                            var bodyObjArray = JSON.parse(data.BodySml);
+                            console.log(bodyObjArray)
+                            table.render({
+                                elem: '#recipebody'
+                                , height: 'full'
+                                , data: bodyObjArray
+                                //, url: '/RecipeVersion/GetRecipeBody/' //数据接口
+                                , title: 'Recipe Body'
+                                , page: true //开启分页
+                                // , toolbar: 'default' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
+                                // , totalRow: true //开启合计行
+                                , id: "recipebody"
+                                , limits: [20]
+                                , toolbar
+                                , limit: 20
+                                , defaultToolbar: ['filter']
+                                , cols: [[ //表头
 
-                    document.getElementById("textarea_recipebody").innerHTML = convertedText;
-                    layui.code({
-                        //encode: true //是否转义html标签。默认不开启
-                    });
+                                    { field: 'Key', title: '参数', align: 'center' }
+                                    , { field: 'Name', title: '名称', align: 'center' }
+                                    , { field: 'Value', title: '参数值 ', align: 'center' }
+
+                                    //, { field: 'Remark', title: '备注',  align: 'center' }
+                                    //, { field: 'CheckTime', title: '检查时间', templet: '<div>{{ FormDate(d.CheckTime, "yyyy-MM-dd HH:mm:ss") }}</div>',align: 'center'}
+
+
+                                ]]
+
+                            });
+                            break;
+                        default:
+                            var convertedText = data.BodySml.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+                            document.getElementById("textarea_recipebody").innerHTML = convertedText;
+                            layui.code({
+                                //encode: true //是否转义html标签。默认不开启
+                            });
+                        break;
+
+                    }
+                   
 
                 } else {
                     document.getElementById("textarea_recipebody").innerHTML = data.Message;
@@ -259,11 +297,47 @@ layui.use(['jquery', 'layer', 'table', 'form', 'upload', 'element', 'code'], fun
                     rcpname: rcpname
                 },
                 success: function (data) {
-                    console.log(data)
+                    console.log(data.res.Message)
+                    var message = data.res.Message;
                     //console.log('testest')
                     //layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: data.result ? 1 : 4 });
                     if (data.res.Result) {
                         layer.msg('Uploaded Successfully!')
+                        if (message.length > 0) {
+                            layer.open({
+                                title: '不同参数'
+                                , type: 2
+                                , btn: ['确认', '取消']
+                                , content: 'recipeParams?data=' + encodeURIComponent(message)
+
+                                , area: ['80%', '90%']
+                                , success: function (layero, index) {
+                                    //向layer页面传值，传值主要代码
+                                    var body = layer.getChildFrame('body', index);
+
+                                    //将弹窗页面中属性名id="xxxx"的标签赋值
+                                    //var select = document.getElementById("eqp");
+                                    //var options = select.options;
+                                    //var index = select.selectedIndex;
+                                    //body.find("[id='rcpid']").val(data.RecipeName);
+                                    //body.find("[id='eqpid']").val(data.EQID);
+                                    //body.find("[id='params']").val(data.Parameter);
+                                }
+                                , cancel: function () {
+                                   
+                                }
+                                , yes: function (index) {
+                                    layer.close(index);
+
+                                }, btn2: function (index, layero) {
+                                    layer.msg('取消操作');
+                                    layer.close(index);
+
+                                }
+
+                            });
+                        }
+                       
                         filetable.reload();
                     } else {
                         filetable.reload();

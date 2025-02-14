@@ -25,6 +25,7 @@ public class SsoHelper
     {
         try
         {
+            if (string.IsNullOrEmpty(ssoAdsignIn)) return null;
             ip = (ip == "::1") ? "127.0.0.2" : ip;
             string ssourl = ssoAdsignIn;
             string apiId = "s0003";
@@ -61,6 +62,7 @@ public class SsoHelper
     {
         try
         {
+            if (string.IsNullOrEmpty(ssoAdsignIn)) return null;
             ip = (ip == "::1") ? "127.0.0.2" : ip;
             string ssourl = ssoAdsignIn;
             string apiId = "s0003";
@@ -95,6 +97,7 @@ public class SsoHelper
     }
     public static SsoUser SignOut(string ip)
     {
+        if (string.IsNullOrEmpty(ssoSignOut)) return null;
         ip = (ip == "::1") ? "127.0.0.2" : ip;
         string ssourl = ssoSignOut;
         string apiId = "s0004";

@@ -9,7 +9,7 @@
     }
 
     .selected {
-        background-color: #89cff0 !important;
+        background-color: #dbe9f4 !important;
     }
 </style>
 <script src="~/Scripts/layui/xm-select.js"></script>
@@ -32,14 +32,14 @@
     </div>
 </form>
 <fieldset class="layui-elem-field layui-field-title">
-    <legend id="info">EQP:</legend>
+    <legend><span id="eqpSelected" style="font-weight:bold;">EQP</span> -- <span id="recipeSelected">RCP</span></legend>
 </fieldset>
-<div class="layui-row layui-col-space10" style=" margin-bottom: 50px">
-    <div class="layui-col-md5">
+<div class="layui-row layui-col-space10" @*style=" margin-bottom: 50px"*@>
+    <div class="layui-col-md6">
 
         <table class="layui-hide" id="rcptable" lay-filter="rcptable"></table>
     </div>
-    <div class="layui-col-md7 scrollable-div">
+    <div class="layui-col-md6 scrollable-div">
 
         <table class="layui-hide" id="versiontable" lay-filter="versiontable"></table>
     </div>

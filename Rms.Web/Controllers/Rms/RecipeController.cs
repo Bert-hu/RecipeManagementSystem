@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Rms.Models.DataBase.Rms;
 using Rms.Models.WebApi;
 using Rms.Utils;
@@ -32,6 +33,11 @@ namespace Rms.Web.Controllers.Rms
         public ActionResult EditVersion(string RecipeVersionId)
         {
             ViewBag.RecipeVersionId = RecipeVersionId;
+            return View();
+        }
+        public ActionResult recipeParams(string RecipeVersionId)
+        {
+            //ViewBag.RecipeVersionId = RecipeVersionId;
             return View();
         }
         public ActionResult GetRecipe(int page, int limit, string EQID)
@@ -514,14 +520,39 @@ namespace Rms.Web.Controllers.Rms
             {
                 // if (eqp.RECIPE_TYPE != "secsSml" || eqp.) return Json(new { Result = false, Message = "This machine do not support displaying content!" }, JsonRequestBehavior.AllowGet);
                 var serverdata = db.Queryable<RMS_RECIPE_DATA>().In(version.RECIPE_DATA_ID).First();
+
+                // 非标设备需要mapping参数字典
+                if (eqp.RECIPE_TYPE == "GeneralNonSecs"|| eqp.RECIPE_TYPE == "NonSecsGroup")
+                {
+                    var dataStr = Encoding.UTF8.GetString(serverdata.CONTENT);
+                    JObject goldenObj = JObject.Parse(dataStr);
+                    var paramDict = db.Queryable<RMS_PARAMETER_DIC>().Where(it => it.EQ_TYPE_ID == eqp.TYPE).ToList();
+                    List<dynamic> body = new List<dynamic>();
+                    foreach (var property in goldenObj.Properties())
+                    {
+                        var key = property.Name;
+                        var value = property.Value;
+                        var name = paramDict.Where(it => it.Key == key).FirstOrDefault()?.Name;
+                        var item = new 
+                        {
+                            Key = key,
+                            Name = name,
+                            Value = value.ToString(),
+                        };
+
+                        body.Add(item);
+                    }
+                    return Json(new { Result = true, BodySml =  JsonConvert.SerializeObject(body), RecipeType = eqp.RECIPE_TYPE });
+                }
+                
                 var dataobj = ByteArrayToObject(serverdata.CONTENT);
                 var bodySml = Encoding.Unicode.GetString((dataobj as RecipeBody).FormattedBody);
 
-                return Json(new { Result = true, BodySml = bodySml });
+                return Json(new { Result = true, BodySml = bodySml, RecipeType = eqp.RECIPE_TYPE });
             }
             catch (Exception ex)
             {
-                return Json(new { Result = false, Message = $"Recipe Type{eqp.RECIPE_TYPE} do not support." }, JsonRequestBehavior.AllowGet);
+                return Json(new { Result = false, Message = $"Recipe Type: {eqp.RECIPE_TYPE} do not support this function." }, JsonRequestBehavior.AllowGet);
             }
         }
 
@@ -531,12 +562,12 @@ namespace Rms.Web.Controllers.Rms
             try
             {
                 return Json(new { Result = false, Message = "禁用修改功能" }, JsonRequestBehavior.AllowGet);
-                string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/editrecipebody";
-                var body = JsonConvert.SerializeObject(new AddNewRecipeVersionWithBodyRequest { TrueName = User.TRUENAME, RecipeVersionId = RecipeVersionId, RecipeBody = RecipeBody });
+                //string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/editrecipebody";
+                //var body = JsonConvert.SerializeObject(new AddNewRecipeVersionWithBodyRequest { TrueName = User.TRUENAME, RecipeVersionId = RecipeVersionId, RecipeBody = RecipeBody });
 
-                var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(apiURL, body);
-                var rep = JsonConvert.DeserializeObject<AddNewRecipeVersionWithBodyResponse>(apiresult);
-                return Json(new { Result = rep.Result, Message = rep.Message }, JsonRequestBehavior.AllowGet);
+                //var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(apiURL, body);
+                //var rep = JsonConvert.DeserializeObject<AddNewRecipeVersionWithBodyResponse>(apiresult);
+                //return Json(new { Result = rep.Result, Message = rep.Message }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
@@ -553,6 +584,14 @@ namespace Rms.Web.Controllers.Rms
             var body = JsonConvert.SerializeObject(new DownloadEffectiveRecipeToMachineRequest { EquipmentId = recipe.EQUIPMENT_ID, RecipeName = recipe.NAME });
 
             var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(apiURL, body);
+            if (string.IsNullOrEmpty(apiresult))
+            {
+                return Json(new ResponseMessage
+                {
+                    Message = $"Recipe type do not support!",
+                    Result = false
+                });
+            }
             var replyItem = JsonConvert.DeserializeObject<DownloadEffectiveRecipeToMachineResponse>(apiresult);
             return Json(replyItem);
 

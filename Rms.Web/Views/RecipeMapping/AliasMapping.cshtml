@@ -1,0 +1,159 @@
+﻿
+@{
+
+}
+<style>
+    .scrollable-div {
+        max-height: 80vh;
+        overflow-y: auto; /* 或者使用 overflow-y: auto; */
+    }
+
+    .selected {
+        background-color: #89cff0 !important;
+    }
+</style>
+<script src="~/Scripts/layui/xm-select.js"></script>
+<script src="~/Scripts/layui/layui.table.formdate.js"></script>
+
+
+<div class="layui-row layui-col-space10" style=" margin-bottom: 50px">
+    <div class="layui-col-md3">
+
+        <table class="layui-hide" id="rcpgrouptable" lay-filter="rcpgrouptable"></table>
+    </div>
+    <div class="layui-col-md9">
+
+
+        <form class="layui-form layui-form-pane" action="">
+            <div class="layui-form-item layui-row">
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <div id="equipmentTypes" class="xm-select-demo"></div>
+                    </div>
+
+                </div>
+
+            </div>
+        </form>
+
+        <table class="layui-hide" id="equipmenttable" lay-filter="equipmenttable"></table>
+    </div>
+
+</div>
+
+
+<script type="text/html" id="addnewgroup">
+    <div>
+        <div class="layui-btn-container" style="float:left;display:inline">
+            <button class="layui-btn layui-btn-sm" lay-event="add">添加/Add Model Name</button>
+
+        </div>
+
+    </div>
+</script>
+
+
+
+<script type="text/html" id="equipmenttoolbar">
+    <a class="layui-btn layui-btn layui-btn-xs" lay-event="modify">更改/Change</a>
+</script>
+
+<script>
+    layui.use(['layer', 'table', 'form', 'upload', 'element', 'jquery', 'flow'], function () {
+        var layer = layui.layer
+            , table = layui.table
+            , form = layui.form
+            , upload = layui.upload
+            , element = layui.element
+            , $ = layui.jquery
+            , flow = layui.flow;
+
+        var equipmentTypeSel = xmSelect.render({
+            el: '#equipmentTypes',
+            //initValue: [0],
+            radio: true,
+            repeat: true,
+            clickClose: true,
+            model: {
+                icon: 'hidden',
+                label: {
+                    type: 'text'
+                }
+            },
+            tips: '请选择设备',
+            block: {
+                //最大显示数量, 0:不限制
+                showCount: 0,
+                //是否显示删除图标
+                showIcon: false,
+            },
+            on: function (data) {
+                //arr:  当前多选已选中的数据
+                var arr = data.arr;
+                //change, 此次选择变化的数据,数组
+                var change = data.change;
+                //isAdd, 此次操作是新增还是删除
+                var isAdd = data.isAdd;
+
+
+                //ShowEquipmentTypeMapping();
+
+            },
+
+        })
+
+
+
+        Initialization();
+        var currentType;
+
+        async function Initialization() {
+            try {
+                let result1 = await $.ajax({
+                    type: 'post',
+                    dataType: 'json',
+                    url: '/RecipeMapping/GetEquipmentType',//'/RecipeMapping/GetLines',
+                    data: {
+
+                    },
+                    success: function (data) {
+                        console.log(data);
+                        var seldata = data.map((item, index) => ({
+                            name: item,
+                            value: item,
+                            selected: index === 0
+                        }));
+
+
+                        equipmentTypeSel.update({
+                            data: seldata,
+                        });
+                        currentType = data[0];
+                    },
+                    error: function () {
+                    }
+                });
+
+
+
+
+            } catch (error) {
+                //处理错误
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    });
+
+</script>

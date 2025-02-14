@@ -10,6 +10,7 @@ namespace Rms.Models.DataBase.Rms
     /// <summary>
     /// 用于第二人的模版创建
     /// </summary>
+   [SugarTable(IsDisabledUpdateAll=true)]
     public class RMS_MARKING_CONFIG_BACKUP: RMS_MARKING_CONFIG
     {
         //[SugarColumn(IsPrimaryKey = true)]

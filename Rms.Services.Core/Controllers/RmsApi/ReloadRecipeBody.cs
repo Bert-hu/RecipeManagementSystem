@@ -45,6 +45,9 @@ namespace Rms.Services.Core.Controllers
                     recipeVersion.RECIPE_DATA_ID = data.ID;
                     db.Updateable<RMS_RECIPE_VERSION>(recipeVersion).UpdateColumns(it => new { it.RECIPE_DATA_ID }).ExecuteCommand();
                     res.RECIPE_DATA_ID = data.ID;
+
+                    //RMS_DIFFERENT_PARAMETER
+                    res.Message = message;
                 }
                 catch (Exception ex)
                 {

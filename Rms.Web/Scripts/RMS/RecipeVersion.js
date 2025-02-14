@@ -35,7 +35,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
 
             var eqpid = change[0].value;
             window.currenteqid = change[0].value;
-            document.getElementById("info").innerHTML = eqpid;
+            document.getElementById("eqpSelected").innerHTML = eqpid;
             ShowRCPTable(eqpid);
 
         },
@@ -65,7 +65,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                         if (d.CURRENT_FLOW_INDEX == 100) {
                             strstate = '已完成/Finished'
                         } else if (d.CURRENT_FLOW_INDEX == -1) {
-                            strstate = '未提交/'
+                            strstate = '未提交/UnSubmitted'
                         }
                         else {
                             strstate = d._FLOW_ROLES[d.CURRENT_FLOW_INDEX];
@@ -117,10 +117,10 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             , limits: [1000]
             , height: 'full-235'
             , cols: [[
-                { field: 'RECIPE_NAME', title: 'Recipe Name', width: '400' }
-                , { field: 'RECIPE_LATEST_VERSION', title: 'Latest Version', width: '100' }
-                , { field: 'RECIPE_EFFECTIVE_VERSION', title: 'Effective Version', width: '100' }
-                , { fixed: 'right', width: '200', align: 'center', toolbar: '#recipetoolbar' }
+                { field: 'RECIPE_NAME', title: 'RecipeName', width: '40%' }
+                , { field: 'RECIPE_LATEST_VERSION', title: 'Latest Ver.', width: '15%' }
+                , { field: 'RECIPE_EFFECTIVE_VERSION', title: 'Effective Ver.', width: '15%' }
+                , { fixed: 'right', title: 'Tools', width: '30%', align: 'center', toolbar: '#recipetoolbar' }
             ]]
             , where: {
                 EQID: id
@@ -145,6 +145,15 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
 
                     }
                 });
+                if (data.data.length > 0) {
+                    selid = data.data[0].RECIPE_ID
+                    document.getElementById("recipeSelected").innerHTML = data.data[0].RECIPE_NAME;
+                    ShowVersionTable(selid);
+                    that.find(".layui-table-box tbody tr[data-index='" + 0 + "']").addClass('selected').siblings().removeClass('selected');
+                } else {
+                    document.getElementById("recipeSelected").innerHTML = "";
+                    ShowVersionTable("");
+                }
                 //ShowVersionTable(data.data[0].RECIPE_ID)
             }
         });
@@ -216,7 +225,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                     });
 
                     var eqpid = data.data[0].ID;
-                    document.getElementById("info").innerHTML = eqpid;
+                    document.getElementById("eqpSelected").innerHTML = eqpid;
                     window.currenteqid = seldata[0].value;
                     console.log(window.currenteqid);
                     ShowRCPTable(eqpid);
@@ -310,6 +319,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
         var selectedRcp = data.RECIPE_ID
         //console.log(selectedRcp)
         ShowVersionTable(selectedRcp);
+        document.getElementById("recipeSelected").innerHTML = data.RECIPE_NAME;
         //selid = data.ID;
         //LoadRecipeVersion(selid);//级联，调用右表数据加载函数
 
@@ -330,6 +340,10 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             }, function (value, index, elem) {
                 if (value.toUpperCase() === 'Y') {
                     console.log(selectdata.RECIPE_ID);
+                    layer.msg("Downloading...");
+                    // 禁用确认按钮
+                    var $confirmBtn = $(elem).parents('.layui-layer').find('.layui-layer-btn0');
+                    $confirmBtn.addClass('layui-btn-disabled').attr('disabled', true).text('downloading...');
                     $.ajax({
                         type: 'post',
                         dataType: 'json',
@@ -339,6 +353,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                         },
                         success: function (data) {
                             var resultData = data.replyItem
+                            $confirmBtn.removeClass('layui-btn-disabled').removeAttr('disabled').text('确认');
 
                             if (resultData.Result) {
                                 layer.close(index)

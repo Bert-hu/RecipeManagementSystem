@@ -25,7 +25,7 @@ namespace Rms.Services.Core.Controllers
     public partial class ApiController : Controller
     {
         private static log4net.ILog Log = log4net.LogManager.GetLogger("Logger");
-        private static log4net.ILog ApiLog = log4net.LogManager.GetLogger("ApiLogger");
+        //private static log4net.ILog ApiLog = log4net.LogManager.GetLogger("ApiLogger");
 
         private readonly ISqlSugarClient db;
         private readonly RabbitMqService rabbitMq;
@@ -48,7 +48,6 @@ namespace Rms.Services.Core.Controllers
             var ip = context.HttpContext.Connection.RemoteIpAddress?.ToString();
             var path = context.HttpContext.Request.Path;
             Log.Info($"Request:{ip},{path},{requestBody}");
-            ApiLog.Info($"Request:{ip},{path},{requestBody}");
             base.OnActionExecuting(context);
 
         }
@@ -56,8 +55,8 @@ namespace Rms.Services.Core.Controllers
         {
             var responseBody = JsonConvert.SerializeObject((context.Result as JsonResult)?.Value);
             var ip = context.HttpContext.Connection.RemoteIpAddress?.ToString();
-            var path = context.HttpContext.Request.Path;         
-            ApiLog.Info($"{ip},{path},{responseBody}");
+            var path = context.HttpContext.Request.Path;
+            Log.Info($"{ip},{path},{responseBody}");
             base.OnActionExecuted(context);
         }
     }

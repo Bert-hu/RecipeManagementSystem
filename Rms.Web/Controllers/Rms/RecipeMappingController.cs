@@ -25,6 +25,11 @@ namespace Rms.Web.Controllers.Rms
             return View();
         }
 
+        public ActionResult AliasMapping()
+        {
+            return View();
+        }
+
         public JsonResult GetRecipeGroups(int page, int limit)
         {
             var totalnum = 0;
@@ -102,7 +107,7 @@ ORDER BY equipment.ORDERSORT", line, recipegroup_id);
                      EQUIPMENT_TYPE_NAME = filtereqps.eqptype.NAME,
                      RECIPE_GROUP_ID = recipegroup_id,
                      RECIPE_NAME = rcps.Select(x => x.NAME).FirstOrDefault(),
-                     VERSION_EFFECTIVE_ID =rcps.Select(x =>x.VERSION_EFFECTIVE_ID).FirstOrDefault(),
+                     VERSION_EFFECTIVE_ID = rcps.Select(x => x.VERSION_EFFECTIVE_ID).FirstOrDefault(),
 
                  }).ToList();
 
@@ -148,7 +153,7 @@ ORDER BY equipment.ORDERSORT", line, recipegroup_id);
             {
                 db.Insertable<RMS_RECIPE_GROUP_MAPPING>(new RMS_RECIPE_GROUP_MAPPING { RECIPE_ID = RECIPE_ID, RECIPE_GROUP_ID = RECIPE_GROUP_ID }).ExecuteCommand();
             }
-           
+
             return Json(new { result = true, message = "更新成功" });
 
         }
@@ -162,6 +167,16 @@ ORDER BY equipment.ORDERSORT", line, recipegroup_id);
             public string RECIPE_GROUP_ID { get; set; }
             public string RECIPE_NAME { get; set; }
             public string VERSION_EFFECTIVE_ID { get; set; }
+        }
+
+
+        //****************以下是ProjectMapping的方法
+
+        public JsonResult GetEquipmentType()
+        {
+            var eqTypes = db.Queryable<RMS_EQUIPMENT_TYPE>().In(equipmenttypeids).ToList();
+
+            return Json(eqTypes, JsonRequestBehavior.AllowGet);
         }
     }
 }

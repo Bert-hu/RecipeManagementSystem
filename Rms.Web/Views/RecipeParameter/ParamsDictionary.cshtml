@@ -1,0 +1,255 @@
+﻿
+@{
+    Layout = null;
+    ViewBag.Title = "paramsdictionary";
+}
+
+
+<link href="~/Scripts/layui/css/layui.css" rel="stylesheet" />
+<script src="~/Scripts/layui/layui.js"></script>
+<script src="~/Scripts/layui/layui.table.formdate.js"></script>
+<div style="width: 90%;margin: 0 auto;margin-top: 20px">
+    <button class="layui-btn layui-btn-sm" id="addRowBtn">新增一行/Add a Row</button>
+    <button class="layui-btn layui-btn-danger layui-btn-sm" id="deleteSelectedBtn">删除选中/Delete Selected Row</button>
+    <button class="layui-btn layui-btn-normal layui-btn-sm" id="submitBtn">提交修改/Submit</button>
+
+</div>
+<table class="layui-hide" id="paramslist" lay-filter="paramslist"></table>
+
+<script type="text/html" id="toolbar1">
+    @*<a class="layui-btn layui-btn-success layui-btn-sm" lay-event="setParams">新增</a>*@
+
+
+</script>
+<script type="text/html" id="toolbar2">
+
+    <a class="layui-btn layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">删除/Delete</a>
+
+</script>
+
+<script>
+
+    layui.use(['jquery', 'form', 'table'], function () {
+        var table = layui.table;
+        var $ = layui.jquery;
+        const form = layui.form;
+
+        var urlParams = new URLSearchParams(window.location.search);
+        var EQID = urlParams.get("EQID");
+
+        let addedRows = []; // 用于保存新增的行数据
+
+        console.log(EQID)
+        // 使用 JSON.parse 方法将字符串转换回对象数组
+
+
+        var paramtable = table.render({
+            elem: '#paramslist'
+            , height: 'auto'
+            //, data: childObjArray
+            , url: '/RecipeParameter/GetParamsDictionary/' //数据接口
+            , title: '不同参数'
+            , page: true //开启分页
+            // , toolbar: 'default' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
+            // , totalRow: true //开启合计行
+            , id: "paramslist"
+            , limits: [20]
+            , toolbar:"#toolbar1"
+            , limit: 20
+            , defaultToolbar: ['filter']
+            , cols: [[ //表头
+                { type: 'checkbox', fixed: 'left' },
+                  { field: 'Key', title: '参数键/Parameter Key', align: 'center',edit:"text"}
+                , { field: 'Name', title: '中文名/Parameter Name ', align: 'center', edit: "text" }
+
+                , { field: 'SOURCE', title: '来源/Source',  align: 'center' }
+                //, { field: 'CheckTime', title: '检查时间', templet: '<div>{{ FormDate(d.CheckTime, "yyyy-MM-dd HH:mm:ss") }}</div>',align: 'center'}
+                //, { fixed: 'right', title: "操作/Operation", width:'25%', align: 'center', toolbar: '#toolbar2' }
+
+            ]]
+            , where: {
+                "EQID": EQID
+            }
+
+            , parseData: function (res) {
+                // 将后台数据与新增行合并
+                return {
+                    code: res.code,
+                    msg: res.msg,
+                    count: res.count,
+                    data: res.data.concat(addedRows) // 合并新增行
+                };
+            }
+
+        });
+
+        //ADD
+        table.on('toolbar(paramslist)', function (obj) { //注：tool 是工具条事件名，recipe 是 table 原始容器的属性 lay-filter="对应的值"
+            var selectdata = obj.config.where.EQID //获得当前行数据
+                , layEvent = obj.event; //获得 lay-event 对应的值
+
+            layer.open({
+                title: '添加参数字典'
+                , type: 2
+                , btn: ['确定', '取消']
+                , content: 'SetDictionary'
+                , area: ['65%', '55%']
+                , success: function (layero, index) {
+                    //向layer页面传值，传值主要代码
+                    var body = layer.getChildFrame('body', index);
+
+                    ////将弹窗页面中属性名id="xxxx"的标签赋值
+                    //var select = document.getElementById("rcpid");
+
+                    //var index = select.selectedIndex;
+                    //body.find("[id='rcpid']").val(data);
+                    //body.find("[id='rcpid']").val(options[index].value);
+                }
+                , yes: function (index) {
+                    var res = window["layui-layer-iframe" + index].callback();
+                    var data = JSON.parse(res);
+                    data.eqpid = EQID;
+
+                    if (data.paramname == "" || data.paramkey == "") {
+                        layer.msg('请填写完整! Please fill the form!');
+                    } else {
+                        $.ajax({
+                            url: '/RecipeParameter/AddNewParamsDictionary',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                            data: {
+                                data
+                            },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
+                            type: 'POST',
+                            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
+                            async: false,
+                            success: function (data) {
+                                layer.open({ content: data.message });
+
+                            },
+                            error: function (message) {
+                                alert('error!');
+                            }
+                        });
+                        paramtable.reload();
+                        layer.close(index);
+                    }
+
+                }, btn2: function (index, layero) {
+                    layer.msg('取消操作');
+                }
+
+            });
+
+        });
+
+        //DELETE
+        table.on('tool(paramslist)', function (obj) { //注：tool 是工具条事件名，recipe 是 table 原始容器的属性 lay-filter="对应的值"
+            var selectdata = obj.data //获得当前行数据
+                , layEvent = obj.event; //获得 lay-event 对应的值
+            $.ajax({
+                url: '/RecipeParameter/DeleteDictionaryItem',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                data: {
+                    "data": selectdata,
+                },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
+                async: false,
+                success: function (data) {
+                    layer.open({ content: data.message });
+                    paramtable.reload();
+                },
+                error: function (message) {
+                    alert('删除失败，请联系管理员!');
+                }
+            });
+        });
+
+        // 动态新增行
+        $('#addRowBtn').on('click', function () {
+            const newRow = { ID: `newAdd-${addedRows.length}`, Key: '', Name: '' };
+            var currentData = table.cache['paramslist'] || []; // 获取当前表格数据
+            currentData = currentData.concat(newRow)
+            console.log(currentData)
+            addedRows.push(newRow); // 新增一条空数据
+            console.log(addedRows)
+            table.reload('paramslist', {
+                url: null,// 阻止重新请求后台
+                data: currentData
+            }); // 刷新表格
+        });
+
+        // 删除选中行
+        $('#deleteSelectedBtn').on('click', function () {
+            var checkStatus = table.checkStatus('paramslist'); // 获取选中的行数据
+            var selectedData = checkStatus.data;
+            if (selectedData.length === 0) {
+                layer.msg('请选择要删除的行!Please select the row to delete.');
+                return;
+            }
+            // 过滤未被选中的数据
+            var currentData = table.cache['paramslist'].filter(
+                //row => !selectedData.includes(row)
+                row => selectedData.every(key => row.ID !== key.ID)
+            );
+            addedRows.filter(row => !selectedData.includes(row));
+
+            console.log(currentData)
+            console.log(addedRows)
+            table.reload('paramslist', {
+                url: null,// 阻止重新请求后台
+                data: currentData
+            }); // 刷新表格
+        });
+
+        // 提交数据
+        $('#submitBtn').on('click', function () {
+            var currentData = table.cache['paramslist']; // 获取当前表格数据
+            var dataCheck = true;
+            currentData.forEach(item => {
+                if (item.Key == "" || item.Name == "") {
+                    //layer.msg("请填写完整！")
+                    dataCheck = false;
+                    //return;
+                }
+                item.eqpid = EQID;
+                
+            });
+            if (!dataCheck) {
+                layer.msg("数据填写不全，请填写完整！The data is incomplete, please fill it out completely!")
+                return;
+            }
+            console.log('提交数据:', JSON.stringify(currentData)); // 打印到控制台（或通过 Ajax 提交到后台）
+            // 将数据序列化为 key-value 的形式提交
+            const formData = currentData.map((row, index) => {
+                return `data[${index}][ID]=${row.ID}&data[${index}][key]=${row.Key}&data[${index}][value]=${row.Name}&data[${index}][eqpid]=${row.eqpid}`;
+            }).join('&');
+            console.log(formData)
+            $.ajax({
+                url: '/RecipeParameter/AddNewParamsDictionaryList', // 后端接口
+                method: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
+                data: formData, // 提交新增数据
+                success: function (res) {
+                    layer.open({ content: res.message });
+                    
+                    addedRows = []; // 清空新增数据
+                    table.reload('paramslist', {
+                        url: '/RecipeParameter/GetParamsDictionary/',
+                        data: currentData,
+                        where: {
+                            "EQID": EQID
+                        }
+                    }); // 刷新表格
+                },
+                error: function () {
+                    layer.open({ content: res.message });
+                }
+            });
+            //layer.msg('提交成功');
+        });
+
+
+
+    });
+
+</script>
+

@@ -229,4 +229,16 @@ namespace Rms.Models.WebApi
     public class SetRecipeNameAliasResponse : ResponseMessage
     { }
 
+    public class GetRecipeNameRequest
+    {
+        public string EquipmentTypeId { get; set; }
+        public string RecipeNameAlias { get; set; }
+    }
+
+    public class GetRecipeNameResponse : ResponseMessage
+    {
+        public string Id { get; set; }
+        public string EquipmentTypeId { get; set; }
+        public string RecipeName { get; set; }
+    }
 }

@@ -35,8 +35,6 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             //isAdd, 此次操作是新增还是删除
             var isAdd = data.isAdd;
 
-            console.log(change);
-            console.log(arr);
             currentLine = arr[0].value;
    
             //var projectid = change[0].value;

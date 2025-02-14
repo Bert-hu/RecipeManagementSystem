@@ -22,7 +22,9 @@ namespace Rms.Models.DataBase.Rms
         public string VERSION_LATEST_ID { get; set; }
         public string VERSION_EFFECTIVE_ID { get; set; }
         //public string FLOW_ID { get; set; }//
+        [SugarColumn(IsNullable = true)]
         public string MARKING_LATEST_ID { get; set; }
+        [SugarColumn(IsNullable = true)]
         public string MARKING_EFFECTIVE_ID { get; set; }
         // public string CREATOR { get; set; } = "Default";
         // public DateTime? CREATETIME { get; set; } = DateTime.Now;

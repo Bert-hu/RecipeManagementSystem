@@ -17,12 +17,29 @@ using System.Web;
 using System.Web.Mvc;
 using Rms.Models.DataBase.Mms;
 using Rms.Web.ViewModels;
+using OfficeOpenXml.ConditionalFormatting;
+using System.Diagnostics;
 
 namespace Rms.Web.Controllers.Production
 {
     public class CommonProductionController : Controller
     {
         protected new PMS_USER User => Session["user_account"] as PMS_USER;
+
+
+        protected override void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            // 在执行Action方法之前，你可以添加自己的逻辑
+            // 比如验证用户是否登录，验证请求参数是否合法等
+
+            base.OnActionExecuting(filterContext);
+        }
+
+        protected override void OnResultExecuting(ResultExecutingContext filterContext)
+        {
+
+            base.OnResultExecuting(filterContext);
+        }
         // GET: WaferGrinding
         public JsonResult GetEquipmentInfo(string equipmentid)
         {
@@ -38,12 +55,12 @@ ON RR.RECIPE_GROUP_ID = RRG.ID
 WHERE RE.ID = '{0}'", equipmentid);
             var data = db.SqlQueryable<EquipmentInfo>(sql).First();
 
-            string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/getequipmentstatus";
-            var body = JsonConvert.SerializeObject(new GetEquipmentStatusRequest { EquipmentId = equipmentid });
+            //string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/getequipmentstatus";
+            //var body = JsonConvert.SerializeObject(new GetEquipmentStatusRequest { EquipmentId = equipmentid });
 
-            var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(apiURL, body);
-            var replyItem = JsonConvert.DeserializeObject<GetEquipmentStatusResponse>(apiresult);
-            if (replyItem != null) data.STATUS = replyItem.Status;
+            //var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(apiURL, body);
+            //var replyItem = JsonConvert.DeserializeObject<GetEquipmentStatusResponse>(apiresult);
+            //if (replyItem != null) data.STATUS = replyItem.Status;
 
             return Json(data, JsonRequestBehavior.AllowGet);
         }
@@ -95,7 +112,7 @@ ORDER BY CREATE_TIME", string.IsNullOrEmpty(logid) ? "" : $"AND CREATE_TIME>(SEL
 
 
                     string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/downloadeffectiverecipebyrecipegroup";
-                    var body = JsonConvert.SerializeObject(new DownloadEffectiveRecipeByRecipeGroupRequest { TrueName = User?.TRUENAME??"NA", EquipmentId = eqid, RecipeGroupName = rcpgroupname });
+                    var body = JsonConvert.SerializeObject(new DownloadEffectiveRecipeByRecipeGroupRequest { TrueName = User?.TRUENAME ?? "NA", EquipmentId = eqid, RecipeGroupName = rcpgroupname });
 
                     var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(apiURL, body);
                     var replyItem = JsonConvert.DeserializeObject<DownloadEffectiveRecipeByRecipeGroupResponse>(apiresult);
@@ -165,14 +182,14 @@ ORDER BY CREATE_TIME", string.IsNullOrEmpty(logid) ? "" : $"AND CREATE_TIME>(SEL
                     return false;
                 }
             }
-            catch (Exception )
+            catch (Exception)
             {
                 errMsg = "EAP send message to SFIS fail.";
                 return false;
             }
         }
 
-        public void AddProductionLog(string equipmentid,string action,string result,string message)
+        public void AddProductionLog(string equipmentid, string action, string result, string message)
         {
             var db = DbFactory.GetSqlSugarClient();
             db.Insertable<RMS_PRODUCTIONLOG>(
@@ -185,19 +202,19 @@ ORDER BY CREATE_TIME", string.IsNullOrEmpty(logid) ? "" : $"AND CREATE_TIME>(SEL
                 }).ExecuteCommand();
         }
 
-        public RMS_RECIPE GetRecipeWithGroupName(string equipmentid, string recipegroupname,out string errmsg)
-        { 
+        public RMS_RECIPE GetRecipeWithGroupName(string equipmentid, string recipegroupname, out string errmsg)
+        {
             var db = DbFactory.GetSqlSugarClient();
             var eqp = db.Queryable<RMS_EQUIPMENT>().In(equipmentid).First();
             var recipegroup = db.Queryable<RMS_RECIPE_GROUP>().First(it => it.NAME == recipegroupname);
             if (recipegroup == null)
             {
-                db.Insertable<RMS_RECIPE_GROUP>(new RMS_RECIPE_GROUP { NAME = recipegroupname }).ExecuteCommand();    
+                db.Insertable<RMS_RECIPE_GROUP>(new RMS_RECIPE_GROUP { NAME = recipegroupname }).ExecuteCommand();
                 errmsg = $"Unable to find recipe bound to '{recipegroupname}'";
                 return null;
             }
             if (eqp == null)
-            {                
+            {
                 errmsg = "Equipment does not exist in RMS";
                 return null;
             }
@@ -217,27 +234,101 @@ ORDER BY CREATE_TIME", string.IsNullOrEmpty(logid) ? "" : $"AND CREATE_TIME>(SEL
 
         public virtual JsonResult LotEnd(string equipmentid, string lotid)
         {
-            string sfis_step2_req = $"{equipmentid},{lotid},2,M068397,JORDAN,,OK,";
-            string sfis_step2_res = string.Empty;
+            //STEP7---STEP1---STEP2
             string errmsg = string.Empty;
-            string repmsg = $"Lot:{lotid}";
+            string repmsg = $"Lot:{lotid},";
             bool result = false;
-            if (SendMessageToSfis(sfis_step2_req, ref sfis_step2_res, ref errmsg))
+            string sfis_step7_req = $"{equipmentid},{lotid},7,M001603,JORDAN,,OK,MODEL_NAME=???";
+            string sfis_step7_res = string.Empty;
+            if (SendMessageToSfis(sfis_step7_req, ref sfis_step7_res, ref errmsg))
             {
-                if (sfis_step2_res.ToUpper().StartsWith("OK"))//SFIS获取LOT INFO成功
+                if (sfis_step7_res.ToUpper().StartsWith("OK"))//SFIS获取LOT INFO成功
                 {
-                    repmsg += " LotEnd OK";
-                    result = true;
+
+                    Dictionary<string, string> sfisParameters = sfis_step7_res.Split(',')[1].Split(' ').Select(keyValueString => keyValueString.Split('='))
+          .Where(keyValueArray => keyValueArray.Length == 2)
+          .ToDictionary(keyValueArray => keyValueArray[0], keyValueArray => keyValueArray[1]);
+                    string modelName = sfisParameters["MODEL_NAME"];
+
+                    var db = DbFactory.GetSqlSugarClient();
+                    var sql = string.Format(@"SELECT  
+    RE.ID AS EQID, 
+    RET.ID AS ETID, 
+    MMD.ID AS MID,
+    MMD.SHOWNAME AS SHOWNAME,
+    MMD.TYPE AS MTYPE,
+    MMC.ID AS MMCID,
+    MMC.VALUE AS VALUE,
+    MMC.LASTEDITOR AS LASTEDITOR,
+    MMC.LASTEDITTIME AS LASTEDITTIME,
+		MMD.ORDER_SORT
+FROM RMS_EQUIPMENT RE
+JOIN RMS_EQUIPMENT_TYPE RET
+    ON RE.TYPE = RET.ID
+JOIN MMS_MATERIAL_DIC MMD
+    ON MMD.EQUIPMENT_TYPE_ID = RET.ID
+LEFT JOIN MMS_MACHINE_CONFIG MMC
+    ON MMC.MMDID = MMD.ID
+WHERE RE.ID = '{0}'
+ORDER BY ORDER_SORT", equipmentid);
+                    var data = db.SqlQueryable<MachineConfigVM>(sql).ToList();
+
+                    var materials = data.Where(x => x.MTYPE == "Material").ToList();
+                    var toolings = data.Where(x => x.MTYPE == "Tooling").ToList();
+                    var materialString = materials.Count > 0 ? "REEL_ID=" + string.Join(";", materials.Select(x => $"{x.VALUE}")) : string.Empty;
+                    var toolingString = toolings.Count > 0 ? "TOOLING=" + string.Join(";", toolings.Select(x => $"{x.SHOWNAME}={x.VALUE}")) : string.Empty;
+                    //都不为空时空格连接
+                    var materialAndToolingString = !string.IsNullOrEmpty(materialString) && !string.IsNullOrEmpty(toolingString) ? $"{materialString} {toolingString}" : $"{materialString}{toolingString}";
+
+
+
+                    string sfis_step1_req = $"{equipmentid},{lotid},1,M013129,JORDAN,,OK,{materialAndToolingString};";
+                    string sfis_step1_res = string.Empty;
+                    if (SendMessageToSfis(sfis_step1_req, ref sfis_step1_res, ref errmsg))
+                    {
+                        if (sfis_step1_res.ToUpper().StartsWith("OK"))//SFIS获取LOT INFO成功
+                        {
+                            string sfis_step2_req = $"{equipmentid},{lotid},2,M068397,JORDAN,,OK,";
+                            string sfis_step2_res = string.Empty;
+                            if (SendMessageToSfis(sfis_step2_req, ref sfis_step2_res, ref errmsg))
+                            {
+                                if (sfis_step2_res.ToUpper().StartsWith("OK"))//SFIS获取LOT INFO成功
+                                {
+                                    repmsg += " LotEnd OK";
+                                    result = true;
+                                }
+                                else//SFIS获取LOT INFO失败
+                                {
+                                    repmsg += $"Sfis reply FAIL:{sfis_step2_req},{sfis_step2_res}";
+                                }
+                            }
+                            else
+                            {
+                                repmsg += $"Can not connect to SFIS";
+                            }
+                        }
+                        else//SFIS获取LOT INFO失败
+                        {
+                            repmsg += $"Sfis reply FAIL:{sfis_step1_req},{sfis_step1_res}";
+                        }
+                    }
+                    else
+                    {
+                        repmsg += $"Can not connect to SFIS";
+                    }
                 }
-                else//SFIS获取LOT INFO失败
+                else
                 {
-                    repmsg += $"Sfis reply FAIL:{sfis_step2_res}";
+                    repmsg += $"Sfis reply FAIL:{sfis_step7_res}";
                 }
             }
             else
             {
                 repmsg += $"Can not connect to SFIS";
             }
+
+
+
             AddProductionLog(equipmentid, "LotEnd", result.ToString(), repmsg);
             return Json(new { Result = result, Message = repmsg }, JsonRequestBehavior.AllowGet);
         }
@@ -285,7 +376,7 @@ ORDER BY ORDER_SORT", equipmentid);
                         MMDID = MID,
                         EQUIPMENT_ID = EQID,
                         VALUE = NewValue,
-                        LASTEDITOR = User.TRUENAME,
+                        LASTEDITOR = User.TRUENAME ,
                         LASTEDITTIME = DateTime.Now
                     };
                 }
@@ -294,7 +385,7 @@ ORDER BY ORDER_SORT", equipmentid);
                     config = db.Queryable<MMS_MACHINE_CONFIG>().InSingle(MMCID);
                     oldValue = config.VALUE;
                     config.VALUE = NewValue;
-                    config.LASTEDITOR = User.TRUENAME;
+                    config.LASTEDITOR = User.TRUENAME ;
                     config.LASTEDITTIME = DateTime.Now;
                 }
 
@@ -316,7 +407,7 @@ ORDER BY ORDER_SORT", equipmentid);
                      EQUIPMENT_ID = EQID,
                      ACTION = "UpdateMaterial&Tooling",
                      RESULT = "TRUE",
-                     MESSAGE = $"{User.TRUENAME} change '{dic.SHOWNAME}' from '{oldValue}' to '{NewValue}'"
+                     MESSAGE = $"{User?.TRUENAME} change '{dic.SHOWNAME}' from '{oldValue}' to '{NewValue}'"
                  }).ExecuteCommand();
             }
             catch (Exception ex)
@@ -327,27 +418,53 @@ ORDER BY ORDER_SORT", equipmentid);
             return Json(new { Result = true, Message = "OK" }, JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult CheckMaterialTooling(string equipmentid,string lotid)
+        public JsonResult CheckMaterialTooling(string equipmentid, string lotid)
         {
             //Get Model Name
             string sfis_step7_req = $"{equipmentid},{lotid},7,M068397,JORDAN,,OK,MODEL_NAME=???";
             string sfis_step7_res = string.Empty;
             string errmsg = string.Empty;
-            string repmsg = $"Lot:{lotid}";
+            string repmsg = $"Lot:{lotid},";
             bool result = false;
             if (SendMessageToSfis(sfis_step7_req, ref sfis_step7_res, ref errmsg)) //获取modelname（recipe group）方便后面pp-select调用
             {
-                Dictionary<string, string> sfispara = sfis_step7_res.Split(',')[1].Split(' ').Select(keyValueString => keyValueString.Split('='))
-               .Where(keyValueArray => keyValueArray.Length == 2)
-          .ToDictionary(keyValueArray => keyValueArray[0], keyValueArray => keyValueArray[1]);
-                string modelname = sfispara["MODEL_NAME"];
 
-                var db = DbFactory.GetSqlSugarClient();
-                var sql = string.Format(@"SELECT  
+                if (sfis_step7_res.ToUpper().StartsWith("OK"))
+                {
+                    Dictionary<string, string> sfispara = sfis_step7_res.Split(',')[1].Split(' ').Select(keyValueString => keyValueString.Split('='))
+                 .Where(keyValueArray => keyValueArray.Length == 2)
+            .ToDictionary(keyValueArray => keyValueArray[0], keyValueArray => keyValueArray[1]);
+                    string modelname = sfispara["MODEL_NAME"];
+
+                    var db = DbFactory.GetSqlSugarClient();
+                    //                    var sql = string.Format(@"SELECT  
+                    //    RE.ID AS EQID, 
+                    //    RET.ID AS ETID, 
+                    //    MMD.ID AS MID,
+                    //    MMD.SHOWNAME AS SHOWNAME,
+                    //    MMD.TYPE AS MTYPE,
+                    //    MMC.ID AS MMCID,
+                    //    MMC.VALUE AS VALUE,
+                    //    MMC.LASTEDITOR AS LASTEDITOR,
+                    //    MMC.LASTEDITTIME AS LASTEDITTIME,
+                    //		MMD.ORDER_SORT
+                    //FROM RMS_EQUIPMENT RE
+                    //JOIN RMS_EQUIPMENT_TYPE RET
+                    //    ON RE.TYPE = RET.ID
+                    //JOIN MMS_MATERIAL_DIC MMD
+                    //    ON MMD.EQUIPMENT_TYPE_ID = RET.ID
+                    //LEFT JOIN MMS_MACHINE_CONFIG MMC
+                    //    ON MMC.MMDID = MMD.ID
+                    //WHERE RE.ID = '{0}'
+                    //ORDER BY ORDER_SORT", equipmentid);
+
+
+                    var sql = string.Format(@"SELECT  
     RE.ID AS EQID, 
     RET.ID AS ETID, 
     MMD.ID AS MID,
     MMD.SHOWNAME AS SHOWNAME,
+    MMD.MATERIAL_TYPE AS TYPE_CODE,
     MMD.TYPE AS MTYPE,
     MMC.ID AS MMCID,
     MMC.VALUE AS VALUE,
@@ -359,27 +476,55 @@ JOIN RMS_EQUIPMENT_TYPE RET
     ON RE.TYPE = RET.ID
 JOIN MMS_MATERIAL_DIC MMD
     ON MMD.EQUIPMENT_TYPE_ID = RET.ID
+JOIN MMS_GROUP_MAPPING MGM
+		ON MGM.MATERIAL_DIC_ID = MMD.ID
+JOIN RMS_RECIPE_GROUP RRG
+		ON MGM.RECIPE_GROUP_ID = RRG.ID
 LEFT JOIN MMS_MACHINE_CONFIG MMC
     ON MMC.MMDID = MMD.ID
 WHERE RE.ID = '{0}'
-ORDER BY ORDER_SORT", equipmentid);
-                var data = db.SqlQueryable<MachineConfigVM>(sql).ToList();
+AND RRG.NAME = '{1}' 
+ORDER BY ORDER_SORT", equipmentid, modelname);
+                    var data = db.SqlQueryable<MachineConfigVM>(sql).ToList();
 
-                string materialAndToolingString = string.Empty;
-                var materials = data.Where(x => x.MTYPE == "Material").ToList();
-                var toolings = data.Where(x => x.MTYPE == "Tooling").ToList();
-                var materialString = string.Join(";", materials.Select(x => $"{x.VALUE}"));
-                var toolingString = string.Join(";", toolings.Select(x => $"{x.SHOWNAME}={x.VALUE}"));
+                    var materials = data.Where(x => x.MTYPE == "Material").ToList();
+                    var toolings = data.Where(x => x.MTYPE == "Tooling").ToList();
+                    var materialString = materials.Count > 0 ? "REEL_ID=" + string.Join(";", materials.Select(x => $"{x.VALUE}")) : string.Empty;
+                    var toolingString = toolings.Count > 0 ? "TOOLING=" + string.Join(";", toolings.Select(x => $"{x.TYPE_CODE}:{x.VALUE}")) : string.Empty;
+                    //都不为空时空格连接
+                    var materialAndToolingString = !string.IsNullOrEmpty(materialString) && !string.IsNullOrEmpty(toolingString) ? $"{materialString} {toolingString}" : $"{materialString}{toolingString}";
+                    string sfis_step4_req = $"{equipmentid},DPSLOAD,4,M001603,JORDAN,,OK,{materialAndToolingString},,,,,,,,{modelname}";
 
+                    string sfis_step4_res = string.Empty;
+                    if (SendMessageToSfis(sfis_step4_req, ref sfis_step4_res, ref errmsg))
+                    {
+                        if (sfis_step4_res.ToUpper().StartsWith("OK"))//SFIS获取LOT INFO成功
+                        {
+                            repmsg += $"Material OK";
+                            result = true;
+                        }
+                        else
+                        {
+                            repmsg += $"Sfis reply FAIL:{sfis_step4_req},{sfis_step4_res}";
+                        }
 
-                string sfis_step4_req = $"{equipmentid},DPSLOAD,4,M001603,JORDAN,,OK,REEL_ID=TC-0240417-2081;TC-0240417-2083; TOOLING=WBG_WHEEL:111:000;WBG_WHEEL2:333:000,,,,,,,,2103-231099-01";
+                    }
+                    else
+                    {
+                        repmsg += $"Can not connect to SFIS";
+                    }
 
+                }
+                else//SFIS获取LOT INFO失败
+                {
+                    repmsg += $"Sfis reply FAIL:{sfis_step7_res}";
+                }
             }
             else
             {
                 repmsg += $"Can not connect to SFIS";
             }
-            AddProductionLog(equipmentid, "LotEnd", result.ToString(), repmsg);
+            AddProductionLog(equipmentid, "CheckMaterialTooling", result.ToString(), repmsg);
             return Json(new { Result = result, Message = repmsg }, JsonRequestBehavior.AllowGet);
 
 

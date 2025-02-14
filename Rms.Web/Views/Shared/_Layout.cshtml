@@ -2,7 +2,7 @@
 @{
     var user = (Rms.Models.DataBase.Pms.PMS_USER)Session["user_account"];
     var modules = (List<Rms.Models.DataBase.Pms.PMS_MODULE>)Session["modules"];
-    var equipmenttypeids = (List<string>)Session["equipmenttypeids"];
+    //var equipmenttypeids = (List<string>)Session["equipmenttypeids"];
     string name = "未登录";
     string role = "NA";
     if (user != null)
@@ -19,6 +19,56 @@
     <title>RMS</title>
     @*<link rel="stylesheet" href="../src/css/layui.css">*@
     <link href="~/Scripts/layui_NEW/css/layui.css" rel="stylesheet" />
+    <style>
+        /* 一级菜单样式 */
+        .layui-nav-item > a {
+            font-weight: bold;
+            padding: 10px 15px;
+            display: block;
+            cursor: pointer;
+            position: relative;
+        }
+
+        /* 二级菜单样式 */
+        .layui-nav-child {
+            margin-left: 20px; /* 缩进效果 */
+            padding: 0;
+        }
+
+            .layui-nav-child > dd {
+                position: relative; /* 相对定位，为三级菜单的绝对定位提供参考 */
+            }
+
+                .layui-nav-child > dd > a {
+                    padding: 5px 15px;
+                    display: block;
+                    cursor: pointer;
+                }
+
+            /* 三级菜单样式 */
+            .layui-nav-child dl {
+                position: absolute;
+                top: 0; /* 对齐父级 */
+                left: 100%; /* 从右侧显示 */
+                width: 150px; /* 三级菜单宽度 */
+                margin: 0;
+                padding: 0;
+                display: none; /* 默认隐藏 */
+                background-color:white;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+
+                .layui-nav-child dl dd > a {
+                    padding: 5px 15px;
+                    display: block;
+                    cursor: pointer;
+                }
+
+            /* 显示三级菜单：鼠标悬停 */
+            .layui-nav-child > dd:hover > dl {
+                display: block;
+            }
+    </style>
 </head>
 
 <body class="layui-layout-body">
@@ -60,30 +110,30 @@
                                 }
                                 else
                                 {
-            <li class="layui-nav-item">
-                @if (cl == "报警管理")
-                {
-                    <a class="" href="javascript:;">@cl<span class="layui-badge" id="alarmActionNum1" hidden>0</span></a>
-                }
-                else
-                {
-                    <a class="" href="javascript:;">@cl</a>
-                }
-                <dl class="layui-nav-child">
-                    @foreach (var module in modulesInClass)
-                    {
-                        if (module.NAME == "报警处理")
-                        {
-                            <dd><a href="@module.LINKURL">@module.NAME<span class="layui-badge" id="alarmActionNum2" hidden>0</span></a></dd>
-                        }
-                        else
-                        {
-                            <dd><a href="@module.LINKURL">@module.NAME</a></dd>
-                        }
+                                    <li class="layui-nav-item">
+                                        @if (cl == "报警管理")
+                                        {
+                                            <a class="" href="javascript:;">@cl<span class="layui-badge" id="alarmActionNum1" hidden>0</span></a>
+                                        }
+                                        else
+                                        {
+                                            <a class="" href="javascript:;">@cl</a>
+                                        }
+                                        <dl class="layui-nav-child">
+                                            @foreach (var module in modulesInClass)
+                                            {
+                                                if (module.NAME == "报警处理")
+                                                {
+                                                    <dd><a href="@module.LINKURL">@module.NAME<span class="layui-badge" id="alarmActionNum2" hidden>0</span></a></dd>
+                                                }
+                                                else
+                                                {
+                                                    <dd><a href="@module.LINKURL">@module.NAME</a></dd>
+                                                }
 
-                    }
-                </dl>
-            </li>
+                                            }
+                                        </dl>
+                                    </li>
                                 }
                             }
                         }
@@ -91,7 +141,29 @@
 
                 }
                 <li class="layui-nav-item"><a href="/VersionAudit/Index">待签<span class="layui-badge" id="auditnum">0</span></a></li>
+                @*<li class="layui-nav-item">
+                    <a href="javascript:;">Production</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:;">二级菜单1-1</a></dd>
+                        <dd>
+                            <a href="javascript:;">二级菜单1-2</a> <dl>
+                                <dd><a href="javascript:;">三级菜单1-3-1</a></dd>
+                                <dd><a href="javascript:;">三级菜单1-3-2</a></dd>
+                            </dl>
+                        </dd>
+                        <dd>
+                            <a href="javascript:;">二级菜单1-3</a>
+                            <dl>
+                                <dd><a href="javascript:;">三级菜单1-3-1</a></dd>
+                                <dd><a href="javascript:;">三级菜单1-3-2</a></dd>
+                            </dl>
+                        </dd>
+                    </dl>
+                </li>*@
+
             </ul>
+
+
 
             <ul class="layui-nav layui-layout-right">
                 <li class="layui-nav-item">
@@ -170,7 +242,8 @@
                 }
             });
 
-            if (@(modules.Exists(it => it.LINKURL == "\\AlarmConfig\\AlarmHandle")?"true":"false"))
+            if (@(modules != null && modules.Exists(it => it.LINKURL == "\\AlarmConfig\\AlarmHandle") ? "true" : "false"
+))
             {
                 $.ajax({
                     url: '/AlarmConfig/GetAlarmActions',
@@ -195,7 +268,7 @@
                 });
             }
 
-           
+
         });
     </script>
 </body>

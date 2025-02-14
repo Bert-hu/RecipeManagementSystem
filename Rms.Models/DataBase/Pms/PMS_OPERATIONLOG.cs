@@ -38,7 +38,8 @@ namespace Rms.Models.DataBase.Pms
         /// Desc:
         /// Default:
         /// Nullable:True
-        /// </summary>           
+        /// </summary> 
+        [SugarColumn(IsNullable = true)]
         public string MESSAGE { get; set; }
 
         /// <summary>
