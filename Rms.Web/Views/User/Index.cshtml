@@ -64,7 +64,7 @@
             let result1 = await $.ajax({
                 type: 'post',
                 dataType: 'json',
-                url: '/Role/Get',
+                url: '../Role/Get',
                 data: {
                     page: 1,
                     limit: 9999
@@ -82,7 +82,7 @@
             usertable = table.render({
                 elem: '#user'
                 , height: 'full-250'
-                , url: '/User/Get/' //数据接口
+                , url: '../User/Get/' //数据接口
                 , title: '用户'
                 , id: "user"
                 , page: true
@@ -132,7 +132,7 @@
                 layer.confirm('is not?', { icon: 3, title: '修改确认', content: data.value }, function (index) {
                     //do something
                     $.ajax({
-                        url: '/User/Edit',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                        url: '../User/Edit',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
                         data: {
                             "id": userid,
                             "value": data.value,
@@ -172,7 +172,7 @@
                         var filter = $("#searchfield").val();
                         console.log(filter);
                         table.reload('user', {
-                            url: '/User/Get',
+                            url: '../User/Get',
                             where: {
                                 filter: filter
                             }
@@ -188,7 +188,7 @@
                 layer.confirm('is not?', { icon: 3, title: '修改确认', content: obj.value }, function (index) {
                     //do something
                     $.ajax({
-                        url: '/User/Edit',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                        url: '../User/Edit',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
                         data: {
                             "id": obj.data.ID,
                             "value": obj.value,
@@ -256,7 +256,7 @@
 
         function AddUser(data) {
             $.ajax({
-                url: '/User/AddUser',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                url: '../User/AddUser',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
                 data: {
                     id: data.id,
                     name: data.name,

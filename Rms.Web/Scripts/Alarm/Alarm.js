@@ -55,7 +55,7 @@ layui.use(['layer', 'table', 'form', 'upload'], function () {
 
     var alarmtable = table.render({
         elem: '#alarmconfig'
-        , url: '/Alarm/GetAlarmConfig'
+        , url: '../Alarm/GetAlarmConfig'
         , height: 'full'
         , toolbar: '#toolbar'
         , defaultToolbar: []
@@ -127,7 +127,7 @@ layui.use(['layer', 'table', 'form', 'upload'], function () {
                 var filter = $("#searchfield").val();
 
                 table.reload('alarmconfig', {
-                    url: '/Alarm/GetAlarmConfig',
+                    url: './Alarm/GetAlarmConfig',
                     where: {
                         filter: filter
                     }
@@ -146,7 +146,7 @@ layui.use(['layer', 'table', 'form', 'upload'], function () {
         layer.confirm('确认修改字段' + field + '为' + value + '?', { icon: 3, title: '提示' }, function (index) {
 
             $.ajax({
-                url: '/Alarm/Edit',
+                url: './Alarm/Edit',
                 data: {
                     "id": data.ALARM_CODE,
                     "value": value,
@@ -178,7 +178,7 @@ layui.use(['layer', 'table', 'form', 'upload'], function () {
         var params = data.field;
 
         $.ajax({
-            url: '/Alarm/Add',
+            url: './Alarm/Add',
             data: {
                 "data":params
             },
@@ -208,7 +208,7 @@ layui.use(['layer', 'table', 'form', 'upload'], function () {
 function ImportExcle(persons) {
     if (persons.length > 0) {
         $.ajax({
-            url: '/Alarm/Importdata',
+            url: './Alarm/Importdata',
             data: {
                 "data": persons
             },

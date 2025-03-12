@@ -142,7 +142,7 @@
         function ShowVersionTable(id) {
             versiontable = table.render({
                 elem: '#versiontable'
-                , url: '/VersionManage/GetVersions'
+                , url: '../VersionManage/GetVersions'
                 , toolbar: '#toolbar'
                 , id: "versiontable"
                 , limit: 1000
@@ -211,7 +211,7 @@
                 let result1 = await $.ajax({
                     type: 'post',
                     dataType: 'json',
-                    url: '/Home/GetProjects',
+                    url: '../Home/GetProjects',
                     data: {
                         page: 1,
                         limit: 9999
@@ -254,7 +254,7 @@
                     case 'add':
                         if (confirm('确定新增版本？')) {
                             $.ajax({
-                                url: '/VersionManage/AddNewVersion',
+                                url: '../VersionManage/AddNewVersion',
                                 data: {
                                     projectid: versiontable.config.currentprojectid,
                                 },
@@ -298,7 +298,7 @@
             $.ajax({
                 type: 'post',
                 dataType: 'json',
-                url: '/VersionManage/SaveForm',
+                url: '../VersionManage/SaveForm',
                 data: formdata,
                 success: function (data) {
                     layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: data.result ? 1 : 4 });
@@ -316,7 +316,7 @@
                 $.ajax({
                     type: 'post',
                     dataType: 'json',
-                    url: '/VersionManage/SubmitForm',
+                    url: '../VersionManage/SubmitForm',
                     data: formdata,
                     success: function (data) {
                         layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: data.result ? 1 : 4 });
@@ -334,7 +334,7 @@
             currentversionid = versionid;
 
             $.ajax({
-                url: '/VersionManage/GetVersionInfo',
+                url: '../VersionManage/GetVersionInfo',
                 data: {
                     versionid: versionid,
                 },
@@ -413,7 +413,7 @@
 
                     var filetable = table.render({
                         elem: '#filetable'
-                        , url: '/VersionManage/GetFileTable'
+                        , url: '../VersionManage/GetFileTable'
                         //, toolbar: true
                         , id: "filetable"
                         , limit: 1000
@@ -456,7 +456,7 @@
                         $.ajax({
                             type: 'post',
                             dataType: 'json',
-                            url: '/VersionManage/DeleteFile',
+                            url: '../VersionManage/DeleteFile',
                             data: {
                                 fileid: fileid,
                             },
@@ -475,7 +475,7 @@
 
             var processrecordtable = table.render({
                 elem: '#processrecordtable'
-                , url: '/VersionManage/GetProcessRecord'
+                , url: '../VersionManage/GetProcessRecord'
                 //, toolbar: true
                 , id: "processrecordtable"
                 , limit: 1000

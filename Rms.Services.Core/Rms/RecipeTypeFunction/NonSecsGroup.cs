@@ -31,6 +31,11 @@ namespace Rms.Services.Core.Rms.RecipeTypeFunction
             rabbitMq = _rabbitMq;
         }
 
+        public (bool result, string message) DeleteMachineRecipe(string EquipmentId, string RecipeName)
+        {
+            throw new NotImplementedException();
+        }
+
         public (bool result, string message) DeleteAllMachineRecipes(string EquipmentId)
         {
             throw new NotImplementedException();

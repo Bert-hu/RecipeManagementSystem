@@ -79,7 +79,7 @@
 
         var versiontable = table.render({
             elem: '#versiontable'
-            , url: '/VersionAudit/GetCurrentAuditVersions'
+            , url: '../VersionAudit/GetCurrentAuditVersions'
             , id: "versiontable"
             , limit: 1000
             , limits: [1000]
@@ -106,7 +106,7 @@
             console.log(currentversionid);
             console.log("show" + versionid);
             $.ajax({
-                url: '/VersionAudit/GetVersionInfo',
+                url: '../VersionAudit/GetVersionInfo',
                 data: {
                     versionid: versionid,
                 },
@@ -139,7 +139,7 @@
                     //文件table
                     var filetable = table.render({
                         elem: '#filetable'
-                        , url: '/Recipe/GetFileTable'
+                        , url: '../Recipe/GetFileTable'
                         //, toolbar: true
                         , id: "filetable"
                         , limit: 1000
@@ -174,7 +174,7 @@
                             $.ajax({
                                 type: 'post',
                                 dataType: 'json',
-                                url: '/VersionAudit/RejectVersion',
+                                url: '../VersionAudit/RejectVersion',
                                 data: {
                                     versionid: formdata.ID,
                                     remark: value,
@@ -204,7 +204,7 @@
                             $.ajax({
                                 type: 'post',
                                 dataType: 'json',
-                                url: '/VersionAudit/ApproveVersion',
+                                url: '../VersionAudit/ApproveVersion',
                                 data: {
                                     versionid: formdata.ID,
                                     remark: value,
@@ -236,7 +236,7 @@
             });
             var processrecordtable = table.render({
                 elem: '#processrecordtable'
-                , url: '/Recipe/GetProcessRecord'
+                , url: '../Recipe/GetProcessRecord'
                 //, toolbar: true
                 , id: "processrecordtable"
                 , limit: 1000

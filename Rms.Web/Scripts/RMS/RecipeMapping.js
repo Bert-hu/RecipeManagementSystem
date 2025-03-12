@@ -52,7 +52,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
     function ShowRecipeGroupTable() {
         window.recipegrouptable = table.render({
             elem: '#rcpgrouptable'
-            , url: '/RecipeMapping/GetRecipeGroups'
+            , url: '../RecipeMapping/GetRecipeGroups'
             , toolbar: '#addnewgroup'
             , id: "rcpgrouptable"            
             , limit: 1000
@@ -72,7 +72,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
         console.log(selectedline);
         window.rcptable = table.render({
             elem: '#equipmenttable'
-            , url: '/RecipeMapping/GetEquipments'
+            , url: '../RecipeMapping/GetEquipments'
             //, toolbar: '#addnewrcp'
             , id: "equipmenttable"
             , limit: 1000
@@ -111,7 +111,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             let result1 = await $.ajax({
                 type: 'post',
                 dataType: 'json',
-                url:'/Equipment/GetProcesses',//'/RecipeMapping/GetLines',
+                url:'../Equipment/GetProcesses',//'../RecipeMapping/GetLines',
                 data: {
        
                 },
@@ -164,7 +164,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                     var recipeid = jdata.selectData[0].ID;
 
                     $.ajax({
-                        url: '/RecipeMapping/SetRecipeBinding',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                        url: '../RecipeMapping/SetRecipeBinding',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
                         data: {
                             RECIPE_ID: recipeid,
                             EQUIPMENT_ID: selectdata.EQUIPMENT_ID,
@@ -226,7 +226,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
                 $.ajax({
                     type: 'post',
                     dataType: 'json',
-                    url: '/RecipeMapping/AddRecipeGroup',
+                    url: '../RecipeMapping/AddRecipeGroup',
                     data: {
                         recipegroupname: value
                     },

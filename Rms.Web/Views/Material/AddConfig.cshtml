@@ -72,7 +72,7 @@
             console.log(configId);
             if (configId != '') {
                 console.log(configId);
-                $.post('/Material/GetMaterialDicConfigId', { configId: configId }, function (res) {
+                $.post('../Material/GetMaterialDicConfigId', { configId: configId }, function (res) {
                     // 处理响应数据
                     console.log(res);
                     form.val('configForm', {
@@ -90,7 +90,7 @@
 
 
 
-                $.post('/Material/AddOrUpdateConfig', { config: data.field, equipmentTypeId: equipmentTypeId, configId:configId }, function (res) {
+                $.post('../Material/AddOrUpdateConfig', { config: data.field, equipmentTypeId: equipmentTypeId, configId:configId }, function (res) {
                     // 处理响应数据
                     console.log(res)
                     if (res.result) {

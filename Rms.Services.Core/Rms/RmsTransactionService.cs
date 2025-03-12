@@ -21,13 +21,20 @@ namespace Rms.Services.Core.Rms
             this.sqlSugarClient = _sqlSugarClient;
             rabbitMq = _rabbitMq;
         }
-   
+
 
         internal (bool result, string message, List<string>? eppd) GetEppd(RMS_EQUIPMENT eqp)
         {
             var typeinstance = GetInstanceWithEuipmentId(eqp);
             if (typeinstance == null) return (false, "Recipe type do not support!", null);
             else return typeinstance.GetEppd(eqp.ID);
+        }
+
+        internal (bool result, string message) DeleteMachineRecipe(RMS_EQUIPMENT eqp, string RecipeName)
+        {
+            var typeinstance = GetInstanceWithEuipmentId(eqp);
+            if (typeinstance == null) return (false, "Recipe type do not support!");
+            else return typeinstance.DeleteMachineRecipe(eqp.ID, RecipeName);
         }
 
         internal (bool result, string message) DeleteAllMachineRecipes(RMS_EQUIPMENT eqp)

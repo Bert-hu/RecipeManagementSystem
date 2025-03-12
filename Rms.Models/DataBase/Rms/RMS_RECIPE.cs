@@ -30,8 +30,8 @@ namespace Rms.Models.DataBase.Rms
         // public DateTime? CREATETIME { get; set; } = DateTime.Now;
         // public string LASTEDITOR { get; set; } = "Default";
         // public DateTime? LASTEDITTIME { get; set; } = DateTime.Now;
-
-        //public string RECIPE_GROUP_ID { get; set; }
+        [SugarColumn(IsNullable = true)]
+        public string RECIPE_GROUP_ID { get; set; }
 
 
     }

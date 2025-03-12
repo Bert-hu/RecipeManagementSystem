@@ -1,4 +1,4 @@
-
+Ôªø
 @{
     Layout = null;
 }
@@ -26,19 +26,19 @@
         <div class="layui-form-item">
             <label class="layui-form-label">Name</label>
             <div class="layui-input-block">
-                <input type="text" name="NAME" required placeholder="«Î ‰»Î≈‰÷√√˚" autocomplete="off" class="layui-input">
+                <input type="text" name="NAME" required placeholder="ËØ∑ËæìÂÖ•ÈÖçÁΩÆÂêç" autocomplete="off" class="layui-input">
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">Alarm Code</label>
             <div class="layui-input-block">
-                <input type="text" name="ALID" required lay-verify="required" placeholder="«Î ‰»ÎAlarm Code" autocomplete="off" class="layui-input">
+                <input type="text" name="ALID" required lay-verify="required" placeholder="ËØ∑ËæìÂÖ•Alarm Code" autocomplete="off" class="layui-input">
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">Alarm Text</label>
             <div class="layui-input-block">
-                <input type="text" name="ALTX" required lay-verify="required" placeholder="«Î ‰»ÎAlarm TEXT" autocomplete="off" class="layui-input">
+                <input type="text" name="ALTX" required lay-verify="required" placeholder="ËØ∑ËæìÂÖ•Alarm TEXT" autocomplete="off" class="layui-input">
             </div>
         </div>
         <div class="layui-form-item">
@@ -56,30 +56,30 @@
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label"> «∑Ò∆Ù”√</label>
+            <label class="layui-form-label">ÊòØÂê¶ÂêØÁî®</label>
             <div class="layui-input-block">
-                <input type="radio" name="ISVALID" value="true" title=" «">
-                <input type="radio" name="ISVALID" value="false" title="∑Ò" checked>
+                <input type="radio" name="ISVALID" value="true" title="ÊòØ">
+                <input type="radio" name="ISVALID" value="false" title="Âê¶" checked>
             </div>
         </div>
         @*<div class="layui-form-item">
-                <label class="layui-form-label">∆Ù”√</label>
+                <label class="layui-form-label">ÂêØÁî®</label>
                 <div class="layui-input-block">
                     <input type="checkbox" name="ISVALID" lay-skin="switch" lay-text="true|false" value="1" checked>
                 </div>
             </div>*@
         @*<div class="layui-form-item">
-                <label class="layui-form-label">µ•—°øÚ</label>
+                <label class="layui-form-label">ÂçïÈÄâÊ°Ü</label>
                 <div class="layui-input-block">
-                    <input type="radio" name="sex" value="ƒ–" title="ƒ–">
-                    <input type="radio" name="sex" value="≈Æ" title="≈Æ" checked>
+                    <input type="radio" name="sex" value="Áî∑" title="Áî∑">
+                    <input type="radio" name="sex" value="Â•≥" title="Â•≥" checked>
                 </div>
             </div>*@
 
         <div class="layui-form-item">
             <div class="layui-input-block">
-                <button class="layui-btn" lay-submit lay-filter="configFormSubmit">¡¢º¥Ã·Ωª</button>
-                <button type="reset" class="layui-btn layui-btn-primary">÷ÿ÷√</button>
+                <button class="layui-btn" lay-submit lay-filter="configFormSubmit">Á´ãÂç≥Êèê‰∫§</button>
+                <button type="reset" class="layui-btn layui-btn-primary">ÈáçÁΩÆ</button>
             </div>
         </div>
     </form>
@@ -98,8 +98,8 @@
             console.log(configId);
             if (configId != '') {
                 console.log(configId);
-                $.post('/AlarmConfig/GetAlarmConfigById', { configId: configId }, function (res) {
-                    // ¥¶¿ÌœÏ”¶ ˝æ›
+                $.post('../AlarmConfig/GetAlarmConfigById', { configId: configId }, function (res) {
+                    // Â§ÑÁêÜÂìçÂ∫îÊï∞ÊçÆ
                     console.log(res);
                     form.val('configForm', {
                         "NAME": res.NAME,
@@ -118,8 +118,8 @@
 
 
 
-                $.post('/AlarmConfig/AddConfigItem', { config: data.field, equipmentTypeId: equipmentTypeId, configId:configId }, function (res) {
-                    // ¥¶¿ÌœÏ”¶ ˝æ›
+                $.post('../AlarmConfig/AddConfigItem', { config: data.field, equipmentTypeId: equipmentTypeId, configId:configId }, function (res) {
+                    // Â§ÑÁêÜÂìçÂ∫îÊï∞ÊçÆ
                     console.log(res)
                     if (res.result) {
                         var index = window.parent.layer.getFrameIndex(window.name)

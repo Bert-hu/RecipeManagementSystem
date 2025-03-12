@@ -229,7 +229,7 @@
                 let result1 = await $.ajax({
                     type: 'post',
                     dataType: 'json',
-                    url: '/WaferGrindingLamination/GetEquipments',
+                    url: '../WaferGrindingLamination/GetEquipments',
                     data: {
 
                     },
@@ -291,7 +291,7 @@
                 console.log(eqid);
             }
             $.ajax({
-                url: '/CommonProduction/GetEquipmentInfo',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                url: '../CommonProduction/GetEquipmentInfo',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
                 data: {
                     equipmentid: eqid
                 },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
@@ -311,7 +311,7 @@
 
      window.materialToolingTable = table.render({
          elem: '#materialToolingTable'
-         , url: '/CommonProduction/GetMaterialTooling'
+         , url: '../CommonProduction/GetMaterialTooling'
          , id: "materialToolingTable"
          , page: false
          , limit: 1000
@@ -387,7 +387,7 @@
          function UpdateMaterialTooling(newvalue) {
 
                      $.ajax({
-                         url: '/CommonProduction/UpdateMaterialTooling',
+                         url: '../CommonProduction/UpdateMaterialTooling',
                          data: {
                              "MMCID": obj.data.MMCID,
                              "MID": obj.data.MID,
@@ -430,7 +430,7 @@
             if (eqid === undefined) eqid = equipmentSel.getValue()[0].value;
 
             $.ajax({
-                url: '/CommonProduction/GetNewLog', // 替换成您的日志API的实际URL
+                url: '../CommonProduction/GetNewLog', // 替换成您的日志API的实际URL
                 type: 'POST',
                 data: {
                     equipmentid: eqid,
@@ -477,7 +477,7 @@
                 $.ajax({
                     type: 'post',
                     dataType: 'json',
-                    url: '/WaferGrindingLamination/DownloadRecipeByLot',
+                    url: '../WaferGrindingLamination/DownloadRecipeByLot',
                     data: {
                         eqid: equipmentSel.getValue()[0].value,
                         lotid: value
@@ -529,7 +529,7 @@
         //        $.ajax({
         //            type: 'post',
         //            dataType: 'json',
-        //            url: '/WaferGrindingLamination/LotStart',
+        //            url: '../WaferGrindingLamination/LotStart',
         //            data: {
         //                equipmentid: equipmentSel.getValue()[0].value,
         //                lotid: value
@@ -575,7 +575,7 @@
                 $.ajax({
                     type: 'post',
                     dataType: 'json',
-                    url: '/WaferGrindingLamination/LotEnd',
+                    url: '../WaferGrindingLamination/LotEnd',
                     data: {
                         equipmentid: equipmentSel.getValue()[0].value,
                         lotid: value,
@@ -621,7 +621,7 @@
                 $.ajax({
                     type: 'post',
                     dataType: 'json',
-                    url: '/CommonProduction/CheckMaterialTooling',
+                    url: '../CommonProduction/CheckMaterialTooling',
                     data: {
                         equipmentid: equipmentSel.getValue()[0].value,
                         lotid: value,

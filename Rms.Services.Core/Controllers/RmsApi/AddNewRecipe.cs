@@ -14,13 +14,16 @@ namespace Rms.Services.Core.Controllers
             try
             {
 
-
                 var eqp = db.Queryable<RMS_EQUIPMENT>().In(req.EquipmentId).First();
                 if (eqp == null)
                 {
                     res.Message = $"Euipment '{req.EquipmentId}' not exists!";
                     return Json(res);
                 }
+                //TODO:Golden Recipe-先判断是否从设备
+
+
+
                 //检查同名recipe
                 var recipe = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == req.EquipmentId && it.NAME == req.RecipeName)?.First();
                 if (recipe != null)//检查是否存在同名

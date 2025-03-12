@@ -75,7 +75,7 @@
 
         table.render({
             elem: '#mapTable',
-            url: './GetMaps', // 此处为静态模拟数据，实际使用时需换成真实接口
+            url: '../StripMap/GetMaps', // 此处为静态模拟数据，实际使用时需换成真实接口
             page: true,
             limit: 20,
             toolbar:true,
@@ -101,7 +101,7 @@
             if (layEvent === 'load') { //查看
 
                 layer.confirm('确认加载新Map？将失去所有修改', { icon: 3, title: '确认' }, function (index) {
-                    $.post('./GetMapData', { ID: data.ID }, function (res) {
+                    $.post('../StripMap/GetMapData', { ID: data.ID }, function (res) {
                         if (!res.result) {
                             const colorMap = new Map([
                                 [0, '#fee08b'],
@@ -121,7 +121,7 @@
         // 渲染
         upload.render({
             elem: '#uploadMapFile',
-            url: './UploadMap', // 实际使用时改成您自己的上传接口即可。
+            url: '../StripMap/UploadMap', // 实际使用时改成您自己的上传接口即可。
             accept: 'file',
             done: function (res) {
 
@@ -492,14 +492,14 @@
 
         document.getElementById('downloadNewMap').addEventListener('click', function () {
             // 发送 POST 请求到后端
-            $.post('./SaveMapData', {
+            $.post('../StripMap/SaveMapData', {
                 ID: currentMapObj.ID,
                 data: currentMapData.value // 发送的参数
             }, function (response, status, xhr) {
                 // 检查响应状态
                 table.reload("mapTable");
                 // 下载
-                $.post('./DownloadUpdatedMap', {
+                $.post('../StripMap/DownloadUpdatedMap', {
                     data: currentMapData.value,
                     name: currentMapObj.NAME
                 }, function (response, status, xhr) {
@@ -542,7 +542,7 @@
 
         document.getElementById('saveMap').addEventListener('click', function () {
             // 发送 POST 请求到后端
-            $.post('./SaveMapData', {
+            $.post('../SaveMapData', {
                 ID: currentMapObj.ID,
                 data: currentMapData.value // 发送的参数
             }, function (response, status, xhr) {

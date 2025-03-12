@@ -15,7 +15,7 @@
         table.render({
             elem: '#role'
             , height: 'full-250'
-            , url: '/Role/Get/' //数据接口
+            , url: '../Role/Get/' //数据接口
             , title: '角色'
             , id: "role"
             , page: true
@@ -53,7 +53,7 @@
                         var moduleids = jdata.roles.map(obj => obj.ID);
                         console.log(moduleids);
                         $.ajax({
-                            url: '/Role/SetModuleRole',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                            url: '../Role/SetModuleRole',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
                             data: {
                                 roleid: selectdata.ID,
                                 moduleids: moduleids
@@ -115,7 +115,7 @@
         });
         function AddRole(data) {
             $.ajax({
-                url: '/Role/AddRole',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                url: '../Role/AddRole',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
                 data: {
                     data
                 },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)

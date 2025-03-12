@@ -59,7 +59,7 @@ namespace Rms.Web.Controllers
             {
                 ContentResult Content = new ContentResult
                 {
-                    Content = "<script type='text/javascript'>top.location = '/Account/login';</script>"
+                    Content = "<script type='text/javascript'>top.location = '../Account/login';</script>"
                 };
                 filterContext.Result = Content;
                 return;
@@ -69,7 +69,7 @@ namespace Rms.Web.Controllers
             {
                 ContentResult Content = new ContentResult
                 {
-                    Content = "<script type='text/javascript'>top.location = '/Account/NoPermission';</script>"
+                    Content = "<script type='text/javascript'>top.location = '../Account/NoPermission';</script>"
                 };
                 filterContext.Result = Content;
                 return;

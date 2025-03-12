@@ -18,7 +18,7 @@ layui.use(['jquery','layer', 'table', 'form', 'upload', 'element'], function () 
         table.render({
             elem: '#eqprecipe'
             , height: 'full-100'
-            , url: '/Recipe/GetRecipeFromEQP' //数据接口
+            , url: '../Recipe/GetRecipeFromEQP' //数据接口
             , title: 'Please select the Recipe'
             , id: "recipe"
             , parseData: function (res) {
@@ -66,7 +66,7 @@ layui.use(['jquery','layer', 'table', 'form', 'upload', 'element'], function () 
             $.ajax({
                 type: 'post',
                 dataType: 'json',
-                url: '/Recipe/SaveForm',
+                url: '../Recipe/SaveForm',
                 data: formdata,
                 success: function (data) {
                     layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: data.result ? 1 : 4 });
@@ -86,7 +86,7 @@ layui.use(['jquery','layer', 'table', 'form', 'upload', 'element'], function () 
             $.ajax({
                 type: 'post',
                 dataType: 'json',
-                url: '/Recipe/UploadRcpFromEQP',
+                url: '../Recipe/UploadRcpFromEQP',
                 data: {
                     versionid: vid,
                     rcpname: rcpname
@@ -116,7 +116,7 @@ layui.use(['jquery','layer', 'table', 'form', 'upload', 'element'], function () 
                 $.ajax({
                     type: 'post',
                     dataType: 'json',
-                    url: '/Recipe/SubmitForm',
+                    url: '../Recipe/SubmitForm',
                     data: formdata,
                     success: function (data) {
                         layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + data.message + '</em>', { icon: data.result ? 1 : 4 });

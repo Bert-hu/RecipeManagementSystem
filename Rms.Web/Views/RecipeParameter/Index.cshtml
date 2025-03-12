@@ -155,7 +155,7 @@
                 let result1 = await $.ajax({
                     type: 'post',
                     dataType: 'json',
-                    url: '/Equipment/GetProcesses',
+                    url: '../Equipment/GetProcesses',
                     data: {
                     },
                     success: function (data) {
@@ -190,7 +190,7 @@
                 let result1 = await $.ajax({
                     type: 'post',
                     dataType: 'json',
-                    url: '/Equipment/GetEQPs',
+                    url: '../Equipment/GetEQPs',
                     data: {
                         page: 1,
                         limit: 9999,
@@ -231,7 +231,7 @@
         function ShowRCPTable(id) {
             window.rcptable = table.render({
                 elem: '#rcptable'
-                , url: '/Recipe/GetRecipe'
+                , url: '../Recipe/GetRecipe'
                 , toolbar: '#addnewrcp'
                 , id: "rcptable"
                 , limit: 1000
@@ -343,7 +343,7 @@
             table.render({
                 elem: '#recipeversion'
                 , height: 'full-250'
-                , url: '/RecipeVersion/GetRcpParams/' //数据接口
+                , url: '../RecipeVersion/GetRcpParams/' //数据接口
                 , title: 'Recipe Version Table'
                 , id: "recipeversion"
                 , cols: [[ //表头
@@ -409,7 +409,7 @@
             paramtable = table.render({
                 elem: '#recipeparams'
                 , height: 'full-250'
-                , url: '/RecipeParameter/GetRcpParams/' //数据接口
+                , url: '../RecipeParameter/GetRcpParams/' //数据接口
                 , title: '参数配置表'
                 , page: true //开启分页
                 // , toolbar: 'default' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
@@ -451,7 +451,7 @@
 
                 if (event === 'delete') {
                     $.ajax({
-                        url: '/RecipeParameter/DeleteScope',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                        url: '../RecipeParameter/DeleteScope',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
                         data: {
                             "data": selectdata,
                         },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
@@ -492,7 +492,7 @@
                 layer.confirm('is not?', { icon: 3, title: '修改确认', content: obj.value }, function (index) {
                     //do something
                     $.ajax({
-                        url: '/RecipeParameter/EditScope',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                        url: '../RecipeParameter/EditScope',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
                         data: {
                             "ID": obj.data.ID,
                             "value": obj.value,
@@ -551,7 +551,7 @@
                 title: 'Set Recipe Parameters'
                 , type: 2
                 , btn: ['确定', '取消']
-                , content: '/RecipeParameter/SetParams?RecipeID=' + data
+                , content: '../RecipeParameter/SetParams?RecipeID=' + data
                 , area: ['40%', '50%']
                 , success: function (layero, index) {
                     //向layer页面传值，传值主要代码
@@ -587,7 +587,7 @@
         function AddNewScope(data) {
             console.log(data);
             $.ajax({
-                url: '/RecipeParameter/AddNewScope',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                url: '../RecipeParameter/AddNewScope',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
                 data: {
                     data
                 },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
@@ -646,8 +646,8 @@
                 where: {//这里传参 向后台
                     "eqpid": $("#eqp").val(),
                 }
-                //, url: '/RecipeVersion/GetSpecialRcpList/' //数据接口
-                , url: '/RecipeVersion/GetRecipeList/' //数据接口
+                //, url: '../RecipeVersion/GetSpecialRcpList/' //数据接口
+                , url: '../RecipeVersion/GetRecipeList/' //数据接口
                 , method: 'post'
             });
         }

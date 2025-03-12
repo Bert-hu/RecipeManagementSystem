@@ -247,7 +247,8 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\SwaggerConfig.cs" />
-    <Compile Include="Controllers\Production\DpsProductionController.cs" />
+    <Compile Include="Controllers\Production\ZJ\Dps\DpsProductionController.cs" />
+    <Compile Include="Controllers\Production\ZJ\PD5\ZJPD5Controller.cs" />
     <Compile Include="Controllers\StripMap\StripMapController.cs" />
     <Compile Include="Controllers\Ams\AlarmConfigController.cs" />
     <Compile Include="Controllers\Ems\EquipmentTypeController.cs" />
@@ -341,10 +342,6 @@
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
-    <Content Include="Scripts\AlarmConfig\AddConfig.js" />
-    <Content Include="Scripts\AlarmConfig\AlarmHandle.js" />
-    <Content Include="Scripts\AlarmConfig\index.js" />
-    <Content Include="Scripts\AlarmConfig\AlarmRecords.js" />
     <Content Include="Scripts\Alarm\Alarm.js" />
     <Content Include="Scripts\Alarm\xlsx.core.min.js" />
     <Content Include="Scripts\bootstrap.js" />
@@ -384,9 +381,9 @@
     <Content Include="Scripts\ECharts\echarts.min.js" />
     <Content Include="Scripts\ECharts\theme-macarons.js" />
     <Content Include="Scripts\ECharts\theme-vintage.js" />
-    <Content Include="Scripts\Ems\EquipmentType.js" />
     <Content Include="Scripts\Image\Image.js" />
     <None Include="Properties\PublishProfiles\HPH.pubxml" />
+    <None Include="Properties\PublishProfiles\ZJ.EAP02.pubxml" />
     <None Include="Scripts\jquery-3.7.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.1.js" />
     <Content Include="Scripts\jquery-3.7.1.min.js" />
@@ -532,8 +529,6 @@
     <Content Include="Scripts\layui\lay\modules\util.js" />
     <Content Include="Scripts\layui\tableEdit.js" />
     <Content Include="Scripts\layui\xm-select.js" />
-    <Content Include="Scripts\Marking\markingfields.js" />
-    <Content Include="Scripts\Marking\markingmanage.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Scripts\partices\app.js" />
     <Content Include="Scripts\partices\particles.js" />
@@ -552,7 +547,6 @@
     <Content Include="Scripts\RMS\RecipeChange.js" />
     <Content Include="Scripts\RMS\RecipeIndex.css" />
     <Content Include="Scripts\RMS\RecipeMapping.js" />
-    <Content Include="Scripts\Ems\Equipment.js" />
     <Content Include="Scripts\RMS\RecipeVersion.js" />
     <Content Include="Scripts\Robot\Robot.js" />
     <Content Include="Scripts\vue.js" />
@@ -629,11 +623,14 @@
     <Content Include="Views\RecipeParameter\ParamsDictionary.cshtml" />
     <Content Include="Views\RecipeParameter\SetDictionary.cshtml" />
     <Content Include="Views\StripMap\Index.cshtml" />
-    <Content Include="Views\DpsProduction\Index.cshtml" />
+    <Content Include="Views\Production\DPS\Index.cshtml" />
     <Content Include="Views\RecipeMapping\AliasMapping.cshtml" />
+    <Content Include="Views\Production\PD5\Mounter.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Scripts\Marking\" />
+    <Folder Include="Views\DpsProduction\" />
     <Folder Include="Views\Process\" />
   </ItemGroup>
   <ItemGroup>
@@ -681,7 +678,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>50802</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:44309/</IISUrl>
+          <IISUrl>http://localhost:44310/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

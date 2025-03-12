@@ -260,7 +260,7 @@ namespace Rms.Web.Controllers.Rms
             var db = DbFactory.GetSqlSugarClient();
 
             var version = db.Queryable<RMS_RECIPE_VERSION>().In(versionid).First();
-            var sql = $"SELECT ID,NAME,VERSION_ID,CREATOR,CREATE_TIME FROM RMS_RECIPE_DATA WHERE ID = '{version.RECIPE_DATA_ID}'";
+            var sql = $"SELECT ID,NAME,CREATOR,CREATE_TIME FROM RMS_RECIPE_DATA WHERE ID = '{version.RECIPE_DATA_ID}'";
             var data = version.RECIPE_DATA_ID == null ? null : db.SqlQueryable<RMS_RECIPE_DATA>(sql).ToList();
             return Json(new { data, code = 0, count = 1 }, JsonRequestBehavior.AllowGet);
 
@@ -581,7 +581,7 @@ namespace Rms.Web.Controllers.Rms
             var recipe = db.Queryable<RMS_RECIPE>().In(reciepId).First();
 
             string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/CompareRecipeBody";
-            var body = JsonConvert.SerializeObject(new DownloadEffectiveRecipeToMachineRequest { EquipmentId = recipe.EQUIPMENT_ID, RecipeName = recipe.NAME });
+            var body = JsonConvert.SerializeObject(new CompareRecipeBodyRequest { EquipmentId = recipe.EQUIPMENT_ID, RecipeName = recipe.NAME });
 
             var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(apiURL, body);
             if (string.IsNullOrEmpty(apiresult))

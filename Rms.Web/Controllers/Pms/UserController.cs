@@ -64,18 +64,28 @@ namespace Rms.Web.Controllers
 
         public JsonResult AddUser(string id, string name, string role)
         {
-            var db = DbFactory.GetSqlSugarClient();
-            db.Insertable<PMS_USER>(new PMS_USER
-            {
-                ID = id,
-                USERNAME = id,
-                TRUENAME = name,
-                PASSWORD = EncrypHelper.Encrypt32(id),
-                ROLEID = role,
-                LOCALUSER = true
-            }).ExecuteCommand();
 
-            return Json(new { result = true, message = "添加成功" });
+
+            try
+            {
+                var db = DbFactory.GetSqlSugarClient();
+                db.Insertable<PMS_USER>(new PMS_USER
+                {
+                    ID = id,
+                    USERNAME = id,
+                    TRUENAME = name,
+                    PASSWORD = EncrypHelper.Encrypt32(id),
+                    ROLEID = role,
+                    LOCALUSER = true
+                }).ExecuteCommand();
+
+                return Json(new { result = true, message = "添加成功" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new ResponseResult { result = false, message = ex.Message });
+            }
+
         }
     }
 }

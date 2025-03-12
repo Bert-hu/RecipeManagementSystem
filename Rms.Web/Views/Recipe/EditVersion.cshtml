@@ -37,7 +37,7 @@
             var $ = layui.jquery;
 
             $.ajax({
-                    url: '/Recipe/GetVersionSml',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                    url: '../Recipe/GetVersionSml',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
                     data: {
                         RecipeVersionId:  '@ViewBag.RecipeVersionId'
                     },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)

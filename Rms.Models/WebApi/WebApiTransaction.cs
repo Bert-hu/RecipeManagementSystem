@@ -138,7 +138,14 @@ namespace Rms.Models.WebApi
     {
         public string RecipeName { get; set; }
     }
-
+    public class DeleteMachineRecipeRequest
+    {
+        public string EquipmentId { get; set; }
+        public string RecipeName { get; set; }
+    }
+    public class DeleteMachineRecipeResponse : ResponseMessage
+    {
+    }
     public class DeleteAllRecipesRequest
     {
         public string EquipmentId { get; set; }
@@ -241,4 +248,19 @@ namespace Rms.Models.WebApi
         public string EquipmentTypeId { get; set; }
         public string RecipeName { get; set; }
     }
+
+    public class ReloadRecipeBodyToEffectiveVersionRequest
+    {
+        public string TrueName { get; set; }
+        public string EquipmentId { get; set; }
+        public string RecipeName { get; set; }
+        public bool DeleteAfterReload { get; set; } = false;
+
+    }
+
+    public class ReloadRecipeBodyToEffectiveVersionResponse : ResponseMessage
+    {
+
+    }
+
 }

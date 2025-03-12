@@ -16,7 +16,7 @@
         table.render({
             elem: '#module'
             , height: 'full-250'
-            , url: '/Module/Get/' //数据接口
+            , url: '../Module/Get/' //数据接口
             , title: '模块'
             , id: "module"
             , toolbar
@@ -71,7 +71,7 @@
 
         function AddModule(data) {
             $.ajax({
-                url: '/Module/AddModule',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                url: '../Module/AddModule',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
                 data: {
                     data
                 },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)

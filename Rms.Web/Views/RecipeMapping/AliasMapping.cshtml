@@ -13,49 +13,38 @@
     }
 </style>
 <script src="~/Scripts/layui/xm-select.js"></script>
-<script src="~/Scripts/layui/layui.table.formdate.js"></script>
+@*<script src="~/Scripts/layui/layui.table.formdate.js"></script>*@
 
 
 <div class="layui-row layui-col-space10" style=" margin-bottom: 50px">
-    <div class="layui-col-md3">
-
-        <table class="layui-hide" id="rcpgrouptable" lay-filter="rcpgrouptable"></table>
-    </div>
-    <div class="layui-col-md9">
-
-
-        <form class="layui-form layui-form-pane" action="">
-            <div class="layui-form-item layui-row">
-                <div class="layui-inline">
-                    <div class="layui-input-inline">
-                        <div id="equipmentTypes" class="xm-select-demo"></div>
-                    </div>
-
-                </div>
-
-            </div>
-        </form>
-
-        <table class="layui-hide" id="equipmenttable" lay-filter="equipmenttable"></table>
-    </div>
-
+    <div id="equipmentTypes" class="xm-select-demo"></div>
+    <table class="layui-hide" id="recipeAliasTable" lay-filter="recipeAliasTable"></table>
 </div>
 
 
 <script type="text/html" id="addnewgroup">
     <div>
         <div class="layui-btn-container" style="float:left;display:inline">
-            <button class="layui-btn layui-btn-sm" lay-event="add">添加/Add Model Name</button>
-
+            <button class="layui-btn layui-btn-sm" lay-event="modify">Modify</button>
+            <button class="layui-btn layui-btn-sm" lay-event="delete">Delete</button>
         </div>
 
     </div>
 </script>
 
+<script type="text/html" id="equipmentTypeHeaderToolbar">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="add">Add</button>
+    </div>
+</script>
 
 
-<script type="text/html" id="equipmenttoolbar">
-    <a class="layui-btn layui-btn layui-btn-xs" lay-event="modify">更改/Change</a>
+
+<script type="text/html" id="equipmentTypeToolbar">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="modify">Modify</button>
+        <button class="layui-btn layui-btn-sm" lay-event="delete">Delete</button>
+    </div>
 </script>
 
 <script>
@@ -70,22 +59,21 @@
 
         var equipmentTypeSel = xmSelect.render({
             el: '#equipmentTypes',
-            //initValue: [0],
             radio: true,
-            repeat: true,
             clickClose: true,
-            model: {
-                icon: 'hidden',
-                label: {
-                    type: 'text'
-                }
-            },
+            filterable: true,
+            //model: {
+            //    icon: 'hidden',
+            //    label: {
+            //        type: 'text'
+            //    }
+            //},
             tips: '请选择设备',
             block: {
                 //最大显示数量, 0:不限制
                 showCount: 0,
                 //是否显示删除图标
-                showIcon: false,
+                showIcon: true,
             },
             on: function (data) {
                 //arr:  当前多选已选中的数据
@@ -95,9 +83,8 @@
                 //isAdd, 此次操作是新增还是删除
                 var isAdd = data.isAdd;
 
-
-                //ShowEquipmentTypeMapping();
-
+                currentType = arr[0].value;
+                ShowRecipeAliasTable();
             },
 
         })
@@ -112,38 +99,56 @@
                 let result1 = await $.ajax({
                     type: 'post',
                     dataType: 'json',
-                    url: '/RecipeMapping/GetEquipmentType',//'/RecipeMapping/GetLines',
+                    url: '../RecipeMapping/GetEquipmentType',//'../RecipeMapping/GetLines',
                     data: {
 
                     },
                     success: function (data) {
-                        console.log(data);
+               
                         var seldata = data.map((item, index) => ({
-                            name: item,
+                            name: item.PROCESS + '---' + item.VENDOR + '---' + item.NAME,
                             value: item,
                             selected: index === 0
                         }));
 
-
                         equipmentTypeSel.update({
-                            data: seldata,
+                            data: seldata
                         });
+                        equipmentTypeSel.setValue([seldata[0]]);
+
                         currentType = data[0];
+                        ShowRecipeAliasTable();
                     },
                     error: function () {
                     }
                 });
-
-
-
-
             } catch (error) {
                 //处理错误
             }
         }
 
 
+        function ShowRecipeAliasTable() {
+            window.recipegrouptable = table.render({
+                elem: '#recipeAliasTable'
+                , url: '../RecipeMapping/GetRecipeAlias'
+                , toolbar: '#equipmentTypeHeaderToolbar'
+                , id: "recipeAliasTable"
+                , limit: 1000
+                , limits: [1000]
+                , height: 'full-235'
+                , cols: [[
+                    { field: 'RECIPE_NAME', width: '25%', title: 'Recipe Name', sort: true },
+                    { field: 'RECIPE_ALIAS', width: '60%', title: 'Recipe Alias', sort: true },
+                    { fixed: 'right', width: '15%', align: 'center', toolbar: '#equipmentTypeToolbar' }
+                ]],
+                where: {
+                    equipmentType: currentType.ID
+                }
 
+            });
+
+        }
 
 
 

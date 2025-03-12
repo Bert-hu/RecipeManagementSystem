@@ -19,6 +19,31 @@ namespace Rms.Services.Core.Rms.RecipeTypeFunction
             db = _db;
             rabbitMq = _rabbitMq;
         }
+
+        public (bool result, string message) DeleteMachineRecipe(string EquipmentId, string RecipeName)
+        {
+            try
+            {
+                var eqp = db.Queryable<RMS_EQUIPMENT>().InSingle(EquipmentId);
+                var username = eqp.USERNAME;
+                var password = eqp.PASSWORD;
+                var recipepath = eqp.RECIPE_PATH;
+                NetworkCredential networkCredential = new NetworkCredential(username, password);
+                DirectoryInfo directoryInfo = new DirectoryInfo(recipepath);
+                string recipeFullPath = Path.Combine(recipepath, RecipeName);
+                FileInfo fileInfo = new FileInfo(recipeFullPath);
+                if (fileInfo.Exists)
+                { 
+                   File.Delete(recipeFullPath);                
+                }
+                return (true, $"");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.Message, ex);
+                return (false, $"Error: {ex.Message}");
+            }
+        }
         public (bool result, string message) DeleteAllMachineRecipes(string EquipmentId)
         {
             throw new NotImplementedException();
@@ -107,17 +132,29 @@ namespace Rms.Services.Core.Rms.RecipeTypeFunction
                 string recipeFullPath = Path.Combine(recipepath, RecipeName);
                 if (directoryInfo.Exists)
                 {
-                    var body = CompressFile(recipeFullPath);
-
-                    return (true, "", body);
+                    if (File.Exists(recipeFullPath))
+                    {
+                        var body = CompressFile(recipeFullPath);
+                        return (true, "", body);
+                    }
+                    else
+                    {
+                        return (false, "The file does not exist", null);
+                    }
                 }
                 else
                 {
                     using (new NetworkConnection(recipepath, networkCredential))
                     {
-                        var body = CompressFile(recipeFullPath);
-
-                        return (true, "", body);
+                        if (File.Exists(recipeFullPath))
+                        {
+                            var body = CompressFile(recipeFullPath);
+                            return (true, "", body);
+                        }
+                        else
+                        {
+                            return (false, "The file does not exist", null);
+                        }
                     }
                 }
             }

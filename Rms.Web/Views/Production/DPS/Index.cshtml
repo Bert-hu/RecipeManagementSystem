@@ -81,26 +81,49 @@
                 <div class="layui-card">
                     <div class="layui-card-header">功能</div>
                     <div class="layui-card-body ">
-                        <div class="layui-btn-container">
-                            <button type="button" class="layui-btn" id="downloadbylotbtn">
-                                <i class="layui-icon layui-icon-upload layui-font-12"></i>By lot下载机种
-                            </button>
+
+                        <div class="layui-panel">
+                            <div style="padding: 12px;">
+                                <div class="layui-btn-container">
+                                    <button type="button" class="layui-btn" id="downloadbylotbtn">
+                                        <i class="layui-icon layui-icon-upload layui-font-12"></i>By lot下载机种
+                                    </button>
+                                </div>
+                            </div>
                         </div>
+
                         @*<div class="layui-btn-container">
-                            <button type="button" class="layui-btn layui-btn-normal" id="portalotstart">
-                                <i class="layui-icon layui-icon-play layui-font-12"></i>A Port LotStart
-                            </button>
+            <button type="button" class="layui-btn layui-btn-normal" id="portalotstart">
+                <i class="layui-icon layui-icon-play layui-font-12"></i>A Port LotStart
+            </button>
+        </div>
+        <div class="layui-btn-container">
+            <button type="button" class="layui-btn layui-btn-normal" id="portblotstart">
+                <i class="layui-icon layui-icon-play layui-font-12"></i>B Port LotStart
+            </button>
+        </div>*@
+                        <div class="layui-panel">
+                            <div style="padding: 12px;">
+                                <div class="layui-btn-container">
+                                    <button type="button" class="layui-btn layui-bg-blue" id="lotin" style="background-color:chartreuse">
+                                        <i class="layui-icon layui-icon-release layui-font-12"></i>LotIn
+                                    </button>
+                                    <button type="button" class="layui-btn" id="lotout" style="background-color:chartreuse">
+                                        <i class="layui-icon layui-icon-release layui-font-12"></i>LotOut
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="layui-btn-container">
-                            <button type="button" class="layui-btn layui-btn-normal" id="portblotstart">
-                                <i class="layui-icon layui-icon-play layui-font-12"></i>B Port LotStart
-                            </button>
+                        @*<div class="layui-panel">
+                            <div style="padding: 12px;">
+                                <div class="layui-btn-container">
+                                    <button type="button" class="layui-btn" id="lotend" style="background-color:chartreuse">
+                                        <i class="layui-icon layui-icon-release layui-font-12"></i>LotEnd
+                                    </button>
+                                </div>
+                            </div>
                         </div>*@
-                        <div class="layui-btn-container">
-                            <button type="button" class="layui-btn" id="lotend" style="background-color:chartreuse">
-                                <i class="layui-icon layui-icon-release layui-font-12"></i>LotEnd
-                            </button>
-                        </div>
+
                     </div>
                 </div>
             </div>
@@ -237,7 +260,7 @@
                 let result1 = await $.ajax({
                     type: 'post',
                     dataType: 'json',
-                    url: '/DpsProduction/GetEquipments',
+                    url: '../DpsProduction/GetEquipments',
                     data: {
 
                     },
@@ -305,7 +328,7 @@
                 //console.log(eqid);
             }
             $.ajax({
-                url: '/CommonProduction/GetEquipmentInfo',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                url: '../CommonProduction/GetEquipmentInfo',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
                 data: {
                     equipmentid: eqid
                 },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
@@ -330,7 +353,7 @@
 
             window.materialToolingTable = table.render({
                 elem: '#materialToolingTable'
-                , url: '/CommonProduction/GetMaterialTooling'
+                , url: '../CommonProduction/GetMaterialTooling'
                 , id: "materialToolingTable"
                 , page: false
                 , limit: 1000
@@ -406,7 +429,7 @@
                 function UpdateMaterialTooling(newvalue) {
 
                             $.ajax({
-                                url: '/CommonProduction/UpdateMaterialTooling',
+                                url: '../CommonProduction/UpdateMaterialTooling',
                                 data: {
                                     "MMCID": obj.data.MMCID,
                                     "MID": obj.data.MID,
@@ -452,7 +475,7 @@
             if (eqid === undefined) eqid = equipmentSel.getValue()[0].value;
 
             $.ajax({
-                url: '/CommonProduction/GetNewLog', // 替换成您的日志API的实际URL
+                url: '../CommonProduction/GetNewLog', // 替换成您的日志API的实际URL
                 type: 'POST',
                 data: {
                     equipmentid: eqid,
@@ -499,7 +522,7 @@
                 $.ajax({
                     type: 'post',
                     dataType: 'json',
-                    url: '/CommonProduction/DownloadRecipeByLot',
+                    url: '../CommonProduction/DownloadRecipeByLot',
                     data: {
                         eqid: equipmentSel.getValue()[0].value,
                         lotid: value
@@ -553,7 +576,7 @@
                 $.ajax({
                     type: 'post',
                     dataType: 'json',
-                    url: '/DpsProduction/PortLotStart',
+                    url: '../DpsProduction/PortLotStart',
                     data: {
                         equipmentid: equipmentSel.getValue()[0].value,
                         lotid: value,
@@ -588,11 +611,11 @@
             });
         }
 
-        $("#lotend").click(function () {
+        $("#lotin").click(function () {
             layer.prompt({
                 formType: 2,
 
-                title: 'Lot End:请扫入Lot ID',
+                title: 'Lot In:请扫入Lot ID',
                 area: ['300px', '35px'] //自定义文本域宽高
             }, function (value, index, elem) {
                 layer.close(index);
@@ -600,7 +623,7 @@
                 $.ajax({
                     type: 'post',
                     dataType: 'json',
-                    url: '/DpsProduction/LotEnd',
+                    url: '../DpsProduction/LotIn',
                     data: {
                         equipmentid: equipmentSel.getValue()[0].value,
                         lotid: value,
@@ -613,7 +636,97 @@
                         }, 10);
                         if (data.Result) {
                             layer.open({
-                                title: '设备启动成功'
+                                title: 'Lot In成功'
+                                , content: data.Message
+                            });
+
+                        } else {
+                            layer.open({
+                                title: '失败'
+                                , content: data.Message
+                            });
+                        }
+                    },
+                    error: function (err) {
+                        layer.close(loadingIndex);
+                        console.log(err)
+                    }
+                });
+
+            });
+        });
+
+        $("#lotout").click(function () {
+            layer.prompt({
+                formType: 2,
+
+                title: 'Lot Out:请扫入Lot ID',
+                area: ['300px', '35px'] //自定义文本域宽高
+            }, function (value, index, elem) {
+                layer.close(index);
+                var loadingIndex = layer.load();
+                $.ajax({
+                    type: 'post',
+                    dataType: 'json',
+                    url: '../DpsProduction/LotOut',
+                    data: {
+                        equipmentid: equipmentSel.getValue()[0].value,
+                        lotid: value,
+                    },
+                    success: function (data) {
+                        setTimeout(function () {
+                            loadLogs();
+                            LoadEquipmentInfo();
+                            layer.close(loadingIndex);
+                        }, 10);
+                        if (data.Result) {
+                            layer.open({
+                                title: 'Lot In成功'
+                                , content: data.Message
+                            });
+
+                        } else {
+                            layer.open({
+                                title: '失败'
+                                , content: data.Message
+                            });
+                        }
+                    },
+                    error: function (err) {
+                        layer.close(loadingIndex);
+                        console.log(err)
+                    }
+                });
+
+            });
+        });
+
+        $("#lotend").click(function () {
+            layer.prompt({
+                formType: 2,
+
+                title: 'Lot End:请扫入Lot ID',
+                area: ['300px', '35px'] //自定义文本域宽高
+            }, function (value, index, elem) {
+                layer.close(index);
+                var loadingIndex = layer.load();
+                $.ajax({
+                    type: 'post',
+                    dataType: 'json',
+                    url: '../DpsProduction/LotEnd',
+                    data: {
+                        equipmentid: equipmentSel.getValue()[0].value,
+                        lotid: value,
+                    },
+                    success: function (data) {
+                        setTimeout(function () {
+                            loadLogs();
+                            LoadEquipmentInfo();
+                            layer.close(loadingIndex);
+                        }, 10);
+                        if (data.Result) {
+                            layer.open({
+                                title: 'Lot Out成功'
                                 , content: data.Message
                             });
 
@@ -638,7 +751,7 @@
             layer.prompt({
                 formType: 2,
 
-                title: 'Lot End:请扫入Lot ID',
+                title: 'Check:请扫入Lot ID',
                 area: ['300px', '35px'] //自定义文本域宽高
             }, function (value, index, elem) {
                 layer.close(index);
@@ -646,7 +759,7 @@
                 $.ajax({
                     type: 'post',
                     dataType: 'json',
-                    url: '/CommonProduction/CheckMaterialTooling',
+                    url: '../CommonProduction/CheckMaterialTooling',
                     data: {
                         equipmentid: equipmentSel.getValue()[0].value,
                         lotid: value,

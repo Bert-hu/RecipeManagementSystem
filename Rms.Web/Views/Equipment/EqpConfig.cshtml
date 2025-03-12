@@ -134,7 +134,7 @@
                 , form = layui.form
                 ;
 
-            $.post('/Equipment/GetRoleEquipmentTypes', { }, function (res) {
+            $.post('../Equipment/GetRoleEquipmentTypes', { }, function (res) {
                 // Handle response data
                 $('#equipmentType').html('');
                 $('#equipmentType').append(new Option('Select directly or search', ''));
@@ -146,7 +146,7 @@
 
             if (equipmentId != '') {
                 document.getElementById("eqid").disabled = true;
-                $.post('/Equipment/GetEquipmentConfig', { equipmentId: equipmentId }, function (res) {
+                $.post('../Equipment/GetEquipmentConfig', { equipmentId: equipmentId }, function (res) {
                     // Handle response data
                     form.val('configForm', {
                         "ID": res.ID,
@@ -168,7 +168,7 @@
                         $('.shared-folder-items').hide();
                     }
 
-                    $.post('/Equipment/GetEquipmentConfigs', { equipmentTypeId: res.TYPE }, function (eqps) {
+                    $.post('../Equipment/GetEquipmentConfigs', { equipmentTypeId: res.TYPE }, function (eqps) {
                         // Handle response data
                         table.reload('equipmenttable', { data: eqps });
 
@@ -178,7 +178,7 @@
             }
             window.eqptable = table.render({
                 elem: '#equipmenttable'
-                //, url: '/Equipment/GetEquipmentConfigs'
+                //, url: '../Equipment/GetEquipmentConfigs'
                 //, toolbar: '#eqpToolbar'
                 , id: "equipmenttable"
                 , data:[]
@@ -200,7 +200,7 @@
 
             form.on('submit(configFormSubmit)', function (data) {
 
-                $.post('/Equipment/AddOrUpdateEquipment', { config: data.field }, function (res) {
+                $.post('../Equipment/AddOrUpdateEquipment', { config: data.field }, function (res) {
                     // Handle response data
                     console.log(res)
                     if (res.result) {
@@ -221,7 +221,7 @@
                 var value = data.value; // Get the selected value
                 var othis = data.othis; // Get the jQuery object of the replaced select element
 
-                $.post('/Equipment/GetEquipmentConfigs', { equipmentTypeId: data.value }, function (res) {
+                $.post('../Equipment/GetEquipmentConfigs', { equipmentTypeId: data.value }, function (res) {
                     // Handle response data
                     table.reload('equipmenttable', { data: res });
                 });
@@ -246,7 +246,7 @@
 
             layui.$('#test-conn').on('click', function () {
                 var data = form.val('configForm');
-                $.post('/Equipment/TestSharedFolder', { directoryPath: data.RECIPE_PATH, username: data.USERNAME, password:data.PASSWORD }, function (res) {
+                $.post('../Equipment/TestSharedFolder', { directoryPath: data.RECIPE_PATH, username: data.USERNAME, password:data.PASSWORD }, function (res) {
                     // Handle response data
                     var icon = res.result ? 1 : 2;
                     layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + res.message + '</em>', { icon: icon });

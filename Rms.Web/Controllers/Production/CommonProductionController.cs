@@ -19,6 +19,7 @@ using Rms.Models.DataBase.Mms;
 using Rms.Web.ViewModels;
 using OfficeOpenXml.ConditionalFormatting;
 using System.Diagnostics;
+using SqlSugar;
 
 namespace Rms.Web.Controllers.Production
 {
@@ -26,6 +27,7 @@ namespace Rms.Web.Controllers.Production
     {
         protected new PMS_USER User => Session["user_account"] as PMS_USER;
 
+        protected SqlSugarClient db = DbFactory.GetSqlSugarClient();
 
         protected override void OnActionExecuting(ActionExecutingContext filterContext)
         {
@@ -82,7 +84,7 @@ WHERE RE.ID = '{0}'", equipmentid);
             var sql = string.Format(@"SELECT * FROM RMS_PRODUCTIONLOG
 WHERE 1=1
 {0}
-AND EQUIPMENT_ID = '{1}'
+AND EQUIPMENT_ID like '{1}%'
 AND CREATE_TIME>SYSDATE-7
 ORDER BY CREATE_TIME", string.IsNullOrEmpty(logid) ? "" : $"AND CREATE_TIME>(SELECT CREATE_TIME FROM RMS_PRODUCTIONLOG WHERE ID = '{logid}')"
 , equipmentid);
@@ -108,7 +110,6 @@ ORDER BY CREATE_TIME", string.IsNullOrEmpty(logid) ? "" : $"AND CREATE_TIME>(SEL
                .ToDictionary(keyValueArray => keyValueArray[0], keyValueArray => keyValueArray[1]);
                     string rcpgroupname = sfispara["MODEL_NAME"];
 
-                    var db = DbFactory.GetSqlSugarClient();
 
 
                     string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/downloadeffectiverecipebyrecipegroup";

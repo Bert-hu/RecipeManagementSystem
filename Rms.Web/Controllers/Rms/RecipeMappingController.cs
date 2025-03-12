@@ -178,5 +178,13 @@ ORDER BY equipment.ORDERSORT", line, recipegroup_id);
 
             return Json(eqTypes, JsonRequestBehavior.AllowGet);
         }
+
+        public JsonResult GetRecipeAlias(int page, int limit, string equipmentType)
+        {
+            var data = db.Queryable<RMS_RECIPE_NAME_ALIAS>().Where(it => it.EQUIPMENT_TYPE_ID == equipmentType).ToList();
+            var totalnum = data.Count();
+            return Json(new { data = data, code = 0, count = totalnum }, JsonRequestBehavior.AllowGet);
+
+        }
     }
 }

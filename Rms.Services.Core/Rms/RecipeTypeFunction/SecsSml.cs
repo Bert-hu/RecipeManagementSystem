@@ -18,7 +18,10 @@ namespace Rms.Services.Core.Rms.RecipeTypeFunction
         {
         }
 
-
+        public (bool result, string message) DeleteMachineRecipe(string EquipmentId, string RecipeName)
+        {
+            throw new NotImplementedException();
+        }
         public new (bool result, string message) DownloadRecipeToMachine(string EquipmentId, string RecipeVersionId)
         {
             try

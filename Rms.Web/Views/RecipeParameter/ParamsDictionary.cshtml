@@ -47,7 +47,7 @@
             elem: '#paramslist'
             , height: 'auto'
             //, data: childObjArray
-            , url: '/RecipeParameter/GetParamsDictionary/' //数据接口
+            , url: '../RecipeParameter/GetParamsDictionary/' //数据接口
             , title: '不同参数'
             , page: true //开启分页
             // , toolbar: 'default' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
@@ -114,7 +114,7 @@
                         layer.msg('请填写完整! Please fill the form!');
                     } else {
                         $.ajax({
-                            url: '/RecipeParameter/AddNewParamsDictionary',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                            url: '../RecipeParameter/AddNewParamsDictionary',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
                             data: {
                                 data
                             },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
@@ -146,7 +146,7 @@
             var selectdata = obj.data //获得当前行数据
                 , layEvent = obj.event; //获得 lay-event 对应的值
             $.ajax({
-                url: '/RecipeParameter/DeleteDictionaryItem',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                url: '../RecipeParameter/DeleteDictionaryItem',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
                 data: {
                     "data": selectdata,
                 },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
@@ -224,7 +224,7 @@
             }).join('&');
             console.log(formData)
             $.ajax({
-                url: '/RecipeParameter/AddNewParamsDictionaryList', // 后端接口
+                url: '../RecipeParameter/AddNewParamsDictionaryList', // 后端接口
                 method: 'POST',
                 contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
                 data: formData, // 提交新增数据
@@ -233,7 +233,7 @@
                     
                     addedRows = []; // 清空新增数据
                     table.reload('paramslist', {
-                        url: '/RecipeParameter/GetParamsDictionary/',
+                        url: '../RecipeParameter/GetParamsDictionary/',
                         data: currentData,
                         where: {
                             "EQID": EQID

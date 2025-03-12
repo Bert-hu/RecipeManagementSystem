@@ -140,7 +140,7 @@
                     }
 
                 }
-                <li class="layui-nav-item"><a href="/VersionAudit/Index">待签<span class="layui-badge" id="auditnum">0</span></a></li>
+                <li class="layui-nav-item"><a href="../VersionAudit/Index">待签<span class="layui-badge" id="auditnum">0</span></a></li>
                 @*<li class="layui-nav-item">
                     <a href="javascript:;">Production</a>
                     <dl class="layui-nav-child">
@@ -177,7 +177,7 @@
                         @*<dd><a href="">基本资料</a></dd>*@
                         <dd><a href="">@name</a></dd>
                         <dd><a href="">@role</a></dd>
-                        <dd><a href="\Account\ChangePassword">修改密码</a></dd>
+                        <dd><a href="..\Account\ChangePassword">修改密码</a></dd>
                     </dl>
                 </li>
                 <li class="layui-nav-item"><a href="javascript:LogOut();">Log out</a></li>
@@ -207,16 +207,16 @@
     <script>
         function LogOut() {
             $.ajax({
-                url: '/Account/LogOut',
+                url: '../Account/LogOut',
                 type: 'POST',
                 contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
                 async: false,
                 success: function (data) {
-                    window.location.href = '/Account/Login';
+                    window.location.href = '../Account/Login';
 
                 },
                 error: function (message) {
-                    window.location.href = '/Account/Login';
+                    window.location.href = '../Account/Login';
                 }
             });
 
@@ -230,7 +230,7 @@
             $.ajax({
                 type: 'post',
                 dataType: 'json',
-                url: '/VersionAudit/GetCurrentAuditVersions',
+                url: '../VersionAudit/GetCurrentAuditVersions',
                 data: {
                     page: 1,
                     limit: 99999
@@ -246,7 +246,7 @@
 ))
             {
                 $.ajax({
-                    url: '/AlarmConfig/GetAlarmActions',
+                    url: '../AlarmConfig/GetAlarmActions',
                     type: 'POST',
                     contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
                     async: false,

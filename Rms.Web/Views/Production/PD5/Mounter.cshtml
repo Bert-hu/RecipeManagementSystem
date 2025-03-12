@@ -1,0 +1,319 @@
+﻿
+@{
+    //var user = (Rms.Models.DataBase.Pms.PMS_USER)Session["user_account"];
+}
+<style>
+    .scrollable-div {
+        max-height: 80vh;
+        overflow-y: auto; /* 或者使用 overflow-y: auto; */
+    }
+
+
+    .layui-card-body {
+        height: 60vh; /* 45px is the combined height of other elements */
+        overflow-y: auto; /*Add vertical scrolling if content exceeds the screen height */
+    }
+</style>
+<script src="~/Scripts/layui/xm-select.js"></script>
+<script src="~/Scripts/layui/layui.table.formdate.js"></script>
+@*<script src="~/Scripts/Production/DpsProduction/Index.js"></script>*@
+<script src="~/Scripts/layui_NEW/layui.js"></script>
+<div class="layui-card-header" style="font-weight: bold; font-size:25px">PD5</div>
+<form class="layui-form layui-form-pane" action="">
+    <div class="layui-form-item layui-row">
+        <div class="layui-row">
+
+        </div>
+    </div>
+
+    <div class="layui-row layui-col-space10" @*style=" margin-bottom: 50px"*@>
+        <div class="layui-col-md9">
+            <div class="layui-input-inline" style="width: 80%; margin-left: 1%">
+                <div id="equipments" class="xm-select-demo"></div>
+            </div>
+        </div>
+        <div class="layui-col-md3">
+            <div class="layui-btn-container">
+                <button type="button" class="layui-btn" lay-on="ppSelect">切换</button>
+                <button type="button" class="layui-btn" lay-on="scanBarcode">扫码</button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="layui-row layui-col-space10" @*style=" margin-bottom: 50px"*@>
+        <div class="layui-col-md6">
+            <input type="text" lay-affix="search" lay-filter="search" lay-options="{split: true}" placeholder="Search Recipe" class="layui-input" id="searchInput">
+
+            <table id="serverRecipe" lay-filter="serverRecipe"></table>
+        </div>
+        <div class="layui-col-md6 scrollable-div">
+
+            <table class="layui-hide" id="machineRecipe" lay-filter="machineRecipe"></table>
+        </div>
+
+    </div>
+</form>
+
+<script type="text/html" id="toolbarServerRecipe">
+
+</script>
+
+<script>
+    layui.use(['layer', 'table', 'form', 'upload', 'element', 'jquery', 'flow'], function () {
+        var layer = layui.layer
+            , table = layui.table
+            , form = layui.form
+            , upload = layui.upload
+            , element = layui.element
+            , $ = layui.jquery
+            , flow = layui.flow
+            , util = layui.util;
+
+        var equipmentSel = xmSelect.render({
+            el: '#equipments',
+            //initValue: [0],
+            filterable: true,
+            radio: true,
+            repeat: true,
+            clickClose: true,
+            model: {
+                icon: 'hidden',
+                label: {
+                    type: 'text'
+                }
+            },
+            tips: '请选择设备',
+            block: {
+                //最大显示数量, 0:不限制
+                showCount: 0,
+                //是否显示删除图标
+                showIcon: false,
+            },
+            on: function (data) {
+                //arr:  当前多选已选中的数据
+                var arr = data.arr;
+                //change, 此次选择变化的数据,数组
+                var change = data.change;
+                //isAdd, 此次操作是新增还是删除
+                var isAdd = data.isAdd;
+
+                var loadingIndex = layer.load();
+
+                //CleanLogField();
+
+                setTimeout(function () {
+                    currentEquipmentId = arr[0].value.ID;
+                    LoadServerRecipeTable();
+                    LoadMachineRecipeTable();
+                    layer.close(loadingIndex);
+                }, 10);
+            },
+
+        })
+
+        var currentEquipmentId;
+
+        Initialization();
+
+        async function Initialization() {
+            try {
+                let result1 = await $.ajax({
+                    type: 'post',
+                    dataType: 'json',
+                    url: '../ZJPD5/GetEquipments',
+                    data: {
+
+                    },
+                    success: function (data) {
+                        var seldata = data.map((item, index) => ({
+                            name: item.ID + '---' + item.LINE + '---' + item.NAME,
+                            value: item,
+                            selected: index === 0
+                        }));
+
+                        equipmentSel.update({
+                            data: seldata,
+                        });
+
+                        equipmentSel.setValue([seldata[0]]
+                        );
+
+                        currentEquipmentId = seldata[0].value.ID;
+                        LoadServerRecipeTable();
+                        LoadMachineRecipeTable();
+
+                    },
+                    error: function () {
+                    }
+                });
+            } catch (error) {
+                //处理错误
+            }
+        }
+
+        function LoadServerRecipeTable() {
+            // 创建渲染实例
+            table.render({
+                elem: '#serverRecipe',
+                url: '../ZJPD5/GetServerRecipeList', // 此处为静态模拟数据，实际使用时需换成真实接口
+                //toolbar: '#toolbarServerRecipe',
+                //defaultToolbar: ['filter'],
+                height: 'full-300', // 最大高度减去其他容器已占有的高度差
+                css: [ // 重设当前表格样式
+                    '.layui-table-tool-temp{padding-right: 145px;}'
+                ].join(''),
+                cellMinWidth: 80,
+                page: true,
+                limit: 100,
+                limits: [100],
+                where: {
+                    equipmentId: currentEquipmentId
+                },
+                cols: [[
+                    { type: 'radio', fixed: 'left' },
+                    { field: 'RECIPE_NAME', title: 'Name' },
+                    { fixed: 'right', title: '操作', width: 134, minWidth: 125, templet: '#toolDemo' }
+                ]],
+                done: function () {
+                    var id = this.id;
+                    // 下拉按钮测试
+
+                }
+            });
+        }
+
+        function LoadMachineRecipeTable() {
+            table.render({
+                elem: '#machineRecipe',
+                url: '../ZJPD5/GetMachineRecipeList', // 此处为静态模拟数据，实际使用时需换成真实接口
+                //toolbar: '#toolbarServerRecipe',
+                defaultToolbar: ['filter'],
+                height: 'full-300', // 最大高度减去其他容器已占有的高度差
+                css: [ // 重设当前表格样式
+                    '.layui-table-tool-temp{padding-right: 145px;}'
+                ].join(''),
+                cellMinWidth: 80,
+                page: true,
+                limit: 100,
+                limits: [100],
+                where: {
+                    equipmentId: currentEquipmentId
+                },
+                cols: [[
+                    { type: 'radio', fixed: 'left' },
+                    { field: 'NAME', title: 'Name' },
+                    { fixed: 'right', title: '操作', width: 134, minWidth: 125, templet: '#toolDemo' }
+                ]],
+                done: function () {
+                    var id = this.id;
+                    // 下拉按钮测试
+
+                }
+            });
+
+        }
+
+        form.on('input-affix(search)', function (data) {
+            var elem = data.elem; // 获取输入框 DOM 对象
+            var value = elem.value; // Value of the input box
+            table.reload('serverRecipe', {
+                page: {
+                    curr: 1 // 重新从第 1 页开始
+                },
+                where: {
+                    equipmentId: currentEquipmentId,
+                    searchRecipe: value
+                }
+            });
+        });
+
+        $('#searchInput').on('keydown', function (event) {
+            if (event.key === 'Enter') {
+                // Prevent default behavior (e.g., form submission)
+                event.preventDefault();
+                // Get the value from the input box
+                const searchValue = $(this).val();
+                // Execute your search logic here
+                table.reload('serverRecipe', {
+                    page: {
+                        curr: 1 // 重新从第 1 页开始
+                    },
+                    where: {
+                        equipmentId: currentEquipmentId,
+                        searchRecipe: searchValue
+                    }
+                });
+            }
+        });
+
+        util.on({
+            ppSelect: function () {
+                //console.log(this); // 当前触发事件的 DOM 元素
+                var selectServerRecipe = table.checkStatus('serverRecipe');
+                var selectMachineRecipe = table.checkStatus('machineRecipe');
+
+
+                //如果没有选中
+                if (selectServerRecipe.data[0] == undefined) {
+                    layer.msg('请先选择ServerRecipe');
+                    return;
+                }
+                var serverRecipeName = selectServerRecipe.data[0].RECIPE_NAME;
+                var serverRecipeId = selectServerRecipe.data[0].RECIPE_ID;
+                var machineRecipeName = selectMachineRecipe.data[0]?.NAME;
+
+
+                var askMessage = '是否下载' + serverRecipeName + (selectMachineRecipe.data[0] != undefined ? (',并且上传' + machineRecipeName) : '');
+
+
+                layer.confirm(askMessage, {
+                    btn: ['确定', '关闭'] //按钮
+                }, function () {
+                    $.post('../ZJPD5/ppSelect', { equipmentId: currentEquipmentId, serverRecipeId: serverRecipeId, machineRecipeName: machineRecipeName }, function (data) {
+                        LoadMachineRecipeTable();
+                        layer.open({ content: data.Message });
+
+                    });
+                }, function () {
+                });
+
+
+
+            },
+            scanBarcode: function () {
+                layer.prompt({ title: '请扫入SN' }, function (value, index, elem) {
+                    if (value === '') return elem.focus();
+                    //layer.msg('获得：' + util.escape(value)); // 显示 value
+
+                    $.post('../ZJPD5/ScanBarCode', { sn: value }, function (data) {
+                        if (data.Result) {
+                            /* layer.open({ content: JSON.parse(data) });*/
+                            console.log(data);
+
+                            //更新searchInput的值
+                            $('#searchInput').val(data.ModelName);
+                            table.reload('serverRecipe', {
+                                page: {
+                                    curr: 1 // 重新从第 1 页开始
+                                },
+                                where: {
+                                    equipmentId: currentEquipmentId,
+                                    searchRecipe: data.ModelName
+                                }
+                            });
+
+                        } else {
+                            layer.open({ content: data.Message });
+                        }
+                    });
+                    // 关闭 prompt
+                    layer.close(index);
+                });
+
+            }
+        });
+    });
+</script>

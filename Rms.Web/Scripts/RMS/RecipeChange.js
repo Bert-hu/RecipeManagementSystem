@@ -42,7 +42,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
     function ShowVersionTable(id) {
         versiontable = table.render({
             elem: '#versiontable'
-            , url: '/Recipe/GetVersions'
+            , url: '../Recipe/GetVersions'
             , toolbar: '#addnewversion'
             , id: "versiontable"
             , limit: 1000
@@ -103,7 +103,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
     function ShowTable(id) {
         rcptable = table.render({
             elem: '#changetable'
-            , url: '/RecipeChange/GetRecipeChangeRecords'
+            , url: '../RecipeChange/GetRecipeChangeRecords'
             , toolbar: '#addnewrcp'
             , id: "changetable"
             , limit: 1000
@@ -142,7 +142,7 @@ layui.use(['layer', 'table', 'form', 'upload', 'element'], function () {
             let result1 = await $.ajax({
                 type: 'post',
                 dataType: 'json',
-                url: '/Equipment/GetEQPs',
+                url: '../Equipment/GetEQPs',
                 data: {
                     page: 1,
                     limit: 9999

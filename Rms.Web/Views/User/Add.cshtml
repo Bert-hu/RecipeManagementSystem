@@ -18,7 +18,7 @@
     <div class="layui-form-item">
         <label class="layui-form-label">姓名</label>
         <div class="layui-input-block">
-            <input id="name" class="layui-input" lay-filter="name">
+            <input id="name" class="layui-input" placeholder="请输入姓名" lay-filter="name">
         </div>
     </div>
     <div class="layui-form-item">
@@ -36,27 +36,27 @@
 <script>
     layui.use(['jquery'], function () {
         var $ = layui.jquery;
-        getData();
-        async function getData() {
-            var options = [];
-            let result1 = await $.ajax({
-                type: 'post',
-                dataType: 'json',
-                url: '/Role/Get',
-                data: {
-                    page: 1,
-                    limit: 9999
-                },
-                success: function (data) {
-                    console.log(data.data);
-                    options = data.data.map(({ ID: field, NAME: text }) => ({ field, text }));
-                    console.log(options);
-                },
-                error: function () {
-                }
-            });
+        //getData();
+        //async function getData() {
+        //    var options = [];
+        //    let result1 = await $.ajax({
+        //        type: 'post',
+        //        dataType: 'json',
+        //        url: '../Role/Get',
+        //        data: {
+        //            page: 1,
+        //            limit: 9999
+        //        },
+        //        success: function (data) {
+        //            console.log(data.data);
+        //            options = data.data.map(({ ID: field, NAME: text }) => ({ field, text }));
+        //            console.log(options);
+        //        },
+        //        error: function () {
+        //        }
+        //    });
 
-        }
+        //}
         //回传给母页面的数据
         var retdata = {};
 

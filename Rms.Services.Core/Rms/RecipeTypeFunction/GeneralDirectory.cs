@@ -18,6 +18,11 @@ namespace Rms.Services.Core.Rms.RecipeTypeFunction
             db = _db;
             rabbitMq = _rabbitMq;
         }
+
+        public (bool result, string message) DeleteMachineRecipe(string EquipmentId, string RecipeName)
+        {
+            throw new NotImplementedException();
+        }
         public (bool result, string message) DeleteAllMachineRecipes(string EquipmentId)
         {
             throw new NotImplementedException();
@@ -104,17 +109,29 @@ namespace Rms.Services.Core.Rms.RecipeTypeFunction
                 string recipeFullPath = Path.Combine(recipepath, RecipeName);
                 if (directoryInfo.Exists)
                 {
-                    var body = CompressDirectory(recipeFullPath);
-
-                    return (true, "", body);
+                    if (Directory.Exists(recipeFullPath))
+                    {
+                        var body = CompressDirectory(recipeFullPath);
+                        return (true, "", body);
+                    }
+                    else
+                    {
+                        return (false, $"Directory '{recipeFullPath}' not exist", null);
+                    }
                 }
                 else
                 {
                     using (new NetworkConnection(recipepath, networkCredential))
                     {
-                        var body = CompressDirectory(recipeFullPath);
-
-                        return (true, "", body);
+                        if (Directory.Exists(recipeFullPath))
+                        {
+                            var body = CompressDirectory(recipeFullPath);
+                            return (true, "", body);
+                        }
+                        else
+                        {
+                            return (false, $"Directory '{recipeFullPath}' not exist", null);
+                        }
                     }
                 }
             }

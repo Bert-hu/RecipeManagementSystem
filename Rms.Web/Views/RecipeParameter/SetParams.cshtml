@@ -84,7 +84,7 @@
         <div class="layui-form-item">
             <label class="layui-form-label" style="width:40%;">枚举值/Enum</label>
             <div class="layui-input-block" style="margin-left:40%;">
-                <input type="text" id="enumvalue" class="layui-input" lay-filter="enumvalue" placeholder="请以‘/’隔开，Please separate by '/'; eg.90/100/110">
+                <input type="text" id="enumvalue" class="layui-input" lay-filter="enumvalue" placeholder="请以‘/’隔开，Please separate by '../'; eg.90/100/110">
             </div>
 
         </div>
@@ -125,7 +125,7 @@
         function GetParams() {
             //执行重载
             $.ajax({
-                url: '/RecipeParameter/GetParamsList',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                url: '../RecipeParameter/GetParamsList',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
                 data: {
                     "paramFilter": RecipeID
                     //"recipeTypeFilter": $("#recipeTypeFilter").val(),

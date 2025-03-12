@@ -15,6 +15,8 @@ namespace Rms.Services.Core.Controllers
         {
             var res = new CompareRecipeBodyResponse();
 
+            //TODO:Golden Recipe-先判断是否从设备
+
             var recipe = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == req.EquipmentId && it.NAME == req.RecipeName).First();
             if (recipe == null)
             {

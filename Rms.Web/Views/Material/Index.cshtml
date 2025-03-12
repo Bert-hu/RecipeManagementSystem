@@ -102,7 +102,7 @@
         function ShowEquipmentTypeTable(process) {
             table.render({
                 elem: '#equipmentTypeTable'
-                , url: '/Material/GetEquipmentType'
+                , url: '../Material/GetEquipmentType'
                 , id: "equipmentTypeTable"
                 , limit: 1000
                 , limits: [1000]
@@ -123,7 +123,7 @@
         function ShowMaterialTable(equipmentTypeId) {
             window.configTable = table.render({
                 elem: '#configTable'
-                , url: '/Material/GetMaterialDicConfig'
+                , url: '../Material/GetMaterialDicConfig'
                 , toolbar: '#configHeaderToolBar'
                 , id: "configTable"
                 , limit: 1000
@@ -166,7 +166,7 @@
                 let result1 = await $.ajax({
                     type: 'post',
                     dataType: 'json',
-                    url: '/Material/GetProcesses',
+                    url: '../Material/GetProcesses',
                     data: {
 
                     },
@@ -202,7 +202,7 @@
             console.log(selectdata);
             if (event === 'delete') {
                 layer.confirm('Delete Config?', { icon: 3 }, function () {
-                    $.post('/Material/DeleteConfig', { configId: selectdata.ID }, function (res) {
+                    $.post('../Material/DeleteConfig', { configId: selectdata.ID }, function (res) {
                         // 处理响应数据
                         console.log(res);
                         if (res.result) {
@@ -252,7 +252,7 @@
                         var groupids = jdata.roles.map(obj => obj.ID);
                         console.log(groupids);
                         $.ajax({
-                            url: '/Material/SetGroups',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                            url: '../Material/SetGroups',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
                             data: {
                                 ConfigId: selectdata.ID,
                                 GroupIds: groupids
