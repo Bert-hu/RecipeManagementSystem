@@ -156,6 +156,8 @@ ORDER BY RET.ORDERSORT,RE.ORDERSORT";
               .ToDictionary(keyValueArray => keyValueArray[0], keyValueArray => keyValueArray[1]);
                         string modelName = sfisParameters["MODEL_NAME"];
 
+
+
                         var db = DbFactory.GetSqlSugarClient();
                         var sql = string.Format(@"SELECT  
     RE.ID AS EQID, 
@@ -194,23 +196,47 @@ ORDER BY ORDER_SORT", equipmentid);
                         {
                             if (sfis_step1_res.ToUpper().StartsWith("OK"))//SFIS获取LOT INFO成功
                             {
-                                string sfis_step2_req = $"{baymaxEquipmentId},{lotid},2,{empno},JORDAN,,OK,";
-                                string sfis_step2_res = string.Empty;
-                                if (SendMessageToSfis(sfis_step2_req, ref sfis_step2_res, ref errmsg))
+                                var recipe = GetRecipeWithGroupName(equipmentid, modelName, out string msg);
+                                if (recipe == null)//recipegroup mapping recipe 失败
                                 {
-                                    if (sfis_step2_res.ToUpper().StartsWith("OK"))//SFIS获取LOT INFO成功
-                                    {
-                                        repmsg += " LotIn OK";
-                                        result = true;
-                                    }
-                                    else//SFIS获取LOT INFO失败
-                                    {
-                                        repmsg += $"Sfis reply FAIL:{sfis_step2_req},{sfis_step2_res}";
-                                    }
+                                    repmsg += msg;
                                 }
                                 else
                                 {
-                                    repmsg += $"Can not connect to SFIS";
+                                    var eqp = db.Queryable<RMS_EQUIPMENT>().In(equipmentid).First();
+                                    if (eqp.LASTRUN_RECIPE_ID != recipe.ID)
+                                    {
+                                        repmsg += ",当前Recipe和上次不同，请重新下载";
+                                    }
+                                    else if (eqp.LASTRUN_RECIPE_TIME < DateTime.Now.AddHours(-2))
+                                    {
+                                        repmsg += ",当前Recipe 2小时未运行，请重新下载";
+                                    }
+                                    else
+                                    {
+                                        string sfis_step2_req = $"{baymaxEquipmentId},{lotid},2,{empno},JORDAN,,OK,";
+                                        string sfis_step2_res = string.Empty;
+                                        if (SendMessageToSfis(sfis_step2_req, ref sfis_step2_res, ref errmsg))
+                                        {
+                                            if (sfis_step2_res.ToUpper().StartsWith("OK"))//SFIS获取LOT INFO成功
+                                            {
+                                                repmsg += " LotIn OK";
+                                                result = true;
+                                                eqp.CURRENT_PRODUCT = lotid;
+                                                eqp.LASTRUN_RECIPE_ID = recipe.ID;
+                                                eqp.LASTRUN_RECIPE_TIME = DateTime.Now;
+                                                db.Updateable<RMS_EQUIPMENT>(eqp).UpdateColumns(it => new { it.CURRENT_PRODUCT, it.LASTRUN_RECIPE_ID, it.LASTRUN_RECIPE_TIME });
+                                            }
+                                            else//SFIS获取LOT INFO失败
+                                            {
+                                                repmsg += $"Sfis reply FAIL:{sfis_step2_req},{sfis_step2_res}";
+                                            }
+                                        }
+                                        else
+                                        {
+                                            repmsg += $"Can not connect to SFIS";
+                                        }
+                                    }
                                 }
                             }
                             else//SFIS获取LOT INFO失败
@@ -265,6 +291,11 @@ ORDER BY ORDER_SORT", equipmentid);
                     {
                         repmsg += " LotOut OK";
                         result = true;
+
+                        var eqp = db.Queryable<RMS_EQUIPMENT>().In(equipmentid).First();
+                        eqp.CURRENT_PRODUCT = lotid;
+                        eqp.LASTRUN_RECIPE_TIME = DateTime.Now;
+                        db.Updateable<RMS_EQUIPMENT>(eqp).UpdateColumns(it => new { it.CURRENT_PRODUCT, it.LASTRUN_RECIPE_TIME });
                     }
                     else//SFIS获取LOT INFO失败
                     {

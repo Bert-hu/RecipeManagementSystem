@@ -39,19 +39,28 @@ namespace Rms.Services.Core.Controllers
             var recipe = db.Queryable<RMS_RECIPE>().In(binding.RECIPE_ID).First();
             var recipe_version = db.Queryable<RMS_RECIPE_VERSION>().In(recipe.VERSION_EFFECTIVE_ID).First();
 
-            if (recipe_version.RECIPE_DATA_ID == null)
-            {
-                res.Result = false;
-                res.Message = "RMS ERROR! Effective version do not have recipe content!";
-                return Json(res);
-            }
+
 
             if (eqtype.DELETEBEFOREDOWNLOAD)
             {
                 var delteres = rmsTransactionService.DeleteAllMachineRecipes(eqp);//暂时不处理删除的答复
             }
-
-            (bool downloadResult, string downloadMessage) = rmsTransactionService.DownloadRecipeToMachine(eqp, recipe.VERSION_EFFECTIVE_ID);
+            bool downloadResult = false;
+            string downloadMessage = string.Empty;
+            if (eqp.RECIPE_TYPE.ToUpper() != "ONLYNAME")
+            {
+                if (recipe_version.RECIPE_DATA_ID == null)
+                {
+                    res.Result = false;
+                    res.Message = "RMS ERROR! Effective version do not have recipe content!";
+                    return Json(res);
+                }
+                (downloadResult, downloadMessage) = rmsTransactionService.DownloadRecipeToMachine(eqp, recipe.VERSION_EFFECTIVE_ID);
+            }
+            else
+            {
+                downloadResult = true;
+            }
 
             if (downloadResult)
             {

@@ -48,7 +48,7 @@ namespace Rms.Web.Controllers.Production
             var db = DbFactory.GetSqlSugarClient();
 
             var sql = string.Format(@"SELECT 
-RE.ID,RE.NAME,RE.LASTRUN_RECIPE_ID,RR.NAME RECIPE_NAME,RRG.NAME RECIPE_GROUP,RE.LASTRUN_RECIPE_TIME DATETIME
+RE.ID,RE.NAME,RE.LASTRUN_RECIPE_ID,RR.NAME RECIPE_NAME,RRG.NAME RECIPE_GROUP,RE.LASTRUN_RECIPE_TIME DATETIME,RE.CURRENT_PRODUCT CURRENT_PRODUCT
 FROM RMS_EQUIPMENT RE
 LEFT JOIN RMS_RECIPE RR
 ON RE.LASTRUN_RECIPE_ID = RR.ID
@@ -73,6 +73,7 @@ WHERE RE.ID = '{0}'", equipmentid);
             public string NAME { get; set; }
             public string RECIPE_GROUP { get; set; }
             public string RECIPE_NAME { get; set; }
+            public string CURRENT_PRODUCT { get; set; }
             public DateTime DATETIME { get; set; }
             public string DATETIMESTR { get { return DATETIME.ToString(); } }
             public string STATUS { get; set; }
