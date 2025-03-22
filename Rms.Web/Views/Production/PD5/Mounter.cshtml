@@ -291,17 +291,23 @@
                     $.post('../ZJPD5/ScanBarCode', { sn: value }, function (data) {
                         if (data.Result) {
                             /* layer.open({ content: JSON.parse(data) });*/
-                            console.log(data);
+                            //console.log(data);
+                            var searchVal = data.ModelName;
+                            if (data.GroupName === 'LASER') {
+                                searchVal = searchVal + "B";
+                            } else {
+                                searchVal = searchVal + "T";
+                            }
 
                             //更新searchInput的值
-                            $('#searchInput').val(data.ModelName);
+                            $('#searchInput').val(searchVal);
                             table.reload('serverRecipe', {
                                 page: {
                                     curr: 1 // 重新从第 1 页开始
                                 },
                                 where: {
                                     equipmentId: currentEquipmentId,
-                                    searchRecipe: data.ModelName
+                                    searchRecipe: searchVal
                                 }
                             });
 

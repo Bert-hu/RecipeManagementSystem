@@ -47,6 +47,12 @@
     </div>
 </script>
 
+
+<script type="text/html" id="equipmentTypeToolbar">
+    <table class="layui-hide" id="recipeAliasList" lay-filter="recipeAliasList"></table>
+
+</script>
+
 <script>
     layui.use(['layer', 'table', 'form', 'upload', 'element', 'jquery', 'flow'], function () {
         var layer = layui.layer
@@ -151,7 +157,50 @@
         }
 
 
+        table.on('tool(recipeAliasTable)', function (obj) {
+            var event = obj.event, //当前单元格事件属性值
+                selectdata = obj.data;
+            console.log(selectdata);
+            if (event === 'delete') {
+                layer.confirm('Delete Config?', { icon: 3 }, function () {
+                    //$.post('../AlarmConfig/DeleteConfig', { configId: selectdata.ID }, function (res) {
+                    //    // 处理响应数据
+                    //    console.log(res);
+                    //    if (res.result) {
+                    //        window.configTable.reload();
+                    //        layer.msg("OK", { icon: 1 });
+                    //    } else {
+                    //        layer.msg(res.message);
+                    //    }
+                    //});
 
+                }, function () {
+                });
+
+            }
+            else if (event === 'edit') {
+                //layer.open({
+                //    type: 2,
+                //    content: 'AddConfig?equipmentTypeId=' + selectdata.EQUIPMENT_TYPE_ID + '&configId=' + selectdata.ID,
+                //    title: 'Edit Config',
+                //    area: ['60%', '45%'],
+                //    success: function (layero, index) {
+                //        ////向layer页面传值，传值主要代码
+                //        //var body = layer.getChildFrame('body', index);
+                //        ////将弹窗页面中属性名id="xxxx"的标签赋值
+                //        //body.find("[id='equipmentTypeId']").val(equipmentTypeId);
+                //        //把equipmentTypeId传递给子页面
+                //        var iframeWindow = layero.find('iframe')[0].contentWindow;
+
+                //        // 直接赋值给子页面的变量
+                //        //iframeWindow.equipmentTypeId = equipmentTypeId;
+                //        //iframeWindow.configId = selectdata.ID;
+                //    }
+                //}, function (value, index, elem) {
+
+                //});
+            }
+        })
 
 
 

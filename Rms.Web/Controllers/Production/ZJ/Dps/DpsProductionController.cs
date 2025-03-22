@@ -1,6 +1,9 @@
-﻿using Rms.Models.DataBase.Rms;
+﻿using Newtonsoft.Json;
+using Rms.Models.DataBase.Rms;
 using Rms.Models.RabbitMq;
+using Rms.Models.WebApi;
 using Rms.Utils;
+using Rms.Web.Utils;
 using Rms.Web.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -222,10 +225,11 @@ ORDER BY ORDER_SORT", equipmentid);
                                             {
                                                 repmsg += " LotIn OK";
                                                 result = true;
+                                                eqp.CURRENT_MODEL_NAME = modelName;
                                                 eqp.CURRENT_PRODUCT = lotid;
                                                 eqp.LASTRUN_RECIPE_ID = recipe.ID;
                                                 eqp.LASTRUN_RECIPE_TIME = DateTime.Now;
-                                                db.Updateable<RMS_EQUIPMENT>(eqp).UpdateColumns(it => new { it.CURRENT_PRODUCT, it.LASTRUN_RECIPE_ID, it.LASTRUN_RECIPE_TIME });
+                                                db.Updateable<RMS_EQUIPMENT>(eqp).UpdateColumns(it => new {it.CURRENT_MODEL_NAME, it.CURRENT_PRODUCT, it.LASTRUN_RECIPE_ID, it.LASTRUN_RECIPE_TIME }).ExecuteCommand();
                                             }
                                             else//SFIS获取LOT INFO失败
                                             {
@@ -293,9 +297,10 @@ ORDER BY ORDER_SORT", equipmentid);
                         result = true;
 
                         var eqp = db.Queryable<RMS_EQUIPMENT>().In(equipmentid).First();
-                        eqp.CURRENT_PRODUCT = lotid;
+                        eqp.CURRENT_PRODUCT = null;
+                        eqp.CURRENT_MODEL_NAME = null;
                         eqp.LASTRUN_RECIPE_TIME = DateTime.Now;
-                        db.Updateable<RMS_EQUIPMENT>(eqp).UpdateColumns(it => new { it.CURRENT_PRODUCT, it.LASTRUN_RECIPE_TIME });
+                        db.Updateable<RMS_EQUIPMENT>(eqp).UpdateColumns(it => new { it.CURRENT_PRODUCT,it.CURRENT_MODEL_NAME, it.LASTRUN_RECIPE_TIME }).ExecuteCommand();
                     }
                     else//SFIS获取LOT INFO失败
                     {
@@ -318,5 +323,32 @@ ORDER BY ORDER_SORT", equipmentid);
             return Json(new { Result = result, Message = repmsg }, JsonRequestBehavior.AllowGet);
         }
 
+
+        public JsonResult DownloadMapByLot(string eqid, string lotid)
+        {
+            try
+            {
+                string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/downloadmapbylot";
+                var body = JsonConvert.SerializeObject(new DownloadMapByLotRequest { EquipmentId = eqid, LotId = lotid });
+                var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(apiURL, body);
+                if (apiresult != null)
+                {
+                    var reply = JsonConvert.DeserializeObject<DownloadMapByLotResponse>(apiresult);
+                    AddProductionLog(eqid, "DownloadMap", reply.Result.ToString(), $"Lot:{lotid},Message: {reply.Message}");
+                    return Json(new { Result = reply.Result, Message = $"{reply.Message}" });
+                }
+                else
+                {
+                    AddProductionLog(eqid, "DownloadMap", "False", $"Lot:{lotid},Message: Api fail :{apiURL}");
+                    return Json(new { Result = false, Message = $"Lot:{lotid},Message: Api fail :{apiURL}" });
+                }
+
+            }
+            catch (Exception ex)
+            {
+                AddProductionLog(eqid, "DownloadMap", "False", $"Lot:{lotid},error:{ex.Message}");
+                return Json(new { Result = false, Message = $"{ex.Message}" });
+            }
+        }
     }
 }

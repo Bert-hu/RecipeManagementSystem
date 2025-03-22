@@ -249,6 +249,7 @@
     <Compile Include="App_Start\SwaggerConfig.cs" />
     <Compile Include="Controllers\Production\ZJ\Dps\DpsProductionController.cs" />
     <Compile Include="Controllers\Production\ZJ\PD5\ZJPD5Controller.cs" />
+    <Compile Include="Controllers\Production\ZJ\SMT\SmtController.cs" />
     <Compile Include="Controllers\StripMap\StripMapController.cs" />
     <Compile Include="Controllers\Ams\AlarmConfigController.cs" />
     <Compile Include="Controllers\Ems\EquipmentTypeController.cs" />
@@ -338,6 +339,10 @@
     <Content Include="Content\images\main_middle.png" />
     <Content Include="Content\images\stripes.png" />
     <Content Include="Content\login.css" />
+    <Content Include="Content\images\SMT\AOISPI.jpg" />
+    <Content Include="Content\images\SMT\Mounter.jpg" />
+    <Content Include="Content\images\SMT\Printer.jpg" />
+    <Content Include="Content\images\SMT\Reflow.jpg" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
@@ -626,6 +631,7 @@
     <Content Include="Views\Production\DPS\Index.cshtml" />
     <Content Include="Views\RecipeMapping\AliasMapping.cshtml" />
     <Content Include="Views\Production\PD5\Mounter.cshtml" />
+    <Content Include="Views\Production\SMT\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

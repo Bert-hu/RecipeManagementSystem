@@ -32,6 +32,8 @@ namespace Rms.Models.DataBase.Rms
         [SugarColumn(IsNullable = true)]
         public string CURRENT_PRODUCT { get; set; }
         [SugarColumn(IsNullable = true)]
+        public string CURRENT_MODEL_NAME { get; set; }
+        [SugarColumn(IsNullable = true)]
         public string RECIPE_PATH { get; set; }
         [SugarColumn(IsNullable = true)]
         public string USERNAME { get; set; }

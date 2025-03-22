@@ -1,0 +1,137 @@
+﻿
+@{
+    //var user = (Rms.Models.DataBase.Pms.PMS_USER)Session["user_account"];
+    //Layout = null;
+}
+<style>
+    .printerImg {
+        padding: 10px;
+        /*background-image: src('~/Content/images/AOISPI.jpg');*/
+        color: #fff;
+        width: 8vw;
+        height: auto;
+        text-align: center;
+    }
+
+    .aoiSpiImg {
+        padding: 10px;
+        color: #fff;
+        width: 6vw;
+        height: auto;
+        text-align: center;
+    }
+
+    .mounterImg {
+        padding: 10px;
+        color: #fff;
+        width: 8vw;
+        height: auto;
+        text-align: center;
+    }
+
+    .reflowImg {
+        padding: 10px;
+        margin-left: 2vw;
+        color: #fff;
+        width: 20vw;
+        height: auto;
+        text-align: center;
+    }
+</style>
+<div class="layui-row">
+    <div class="layui-col-md1">
+        <div class="aoi"></div>
+    </div>
+    <div class="layui-col-md1">
+        <img src="~/Content/images/SMT/Printer.jpg" class="printerImg" />
+    </div>
+    <div class="layui-col-md1">
+        <img src="~/Content/images/SMT/AOISPI.jpg" class="aoiSpiImg" />
+    </div>
+    <div class="layui-col-md1">
+        <img src="~/Content/images/SMT/AOISPI.jpg" class="aoiSpiImg" />
+    </div>
+    <div class="layui-col-md1">
+        <img src="~/Content/images/SMT/Mounter.jpg" class="mounterImg" />
+    </div>
+    <div class="layui-col-md1">
+        <img src="~/Content/images/SMT/Mounter.jpg" class="mounterImg" />
+    </div>
+    <div class="layui-col-md1">
+        <img src="~/Content/images/SMT/Mounter.jpg" class="mounterImg" />
+    </div>
+    <div class="layui-col-md1">
+        <img src="~/Content/images/SMT/Mounter.jpg" class="mounterImg" />
+    </div>
+    <div class="layui-col-md1">
+        <img src="~/Content/images/SMT/Mounter.jpg" class="mounterImg" />
+    </div>
+    <div class="layui-col-md3">
+        <img src="~/Content/images/SMT/Reflow.jpg" class="reflowImg" />
+    </div>
+    <div class="layui-col-md1">
+        <img src="~/Content/images/SMT/AOISPI.jpg" class="aoiSpiImg" />
+    </div>
+
+</div>
+
+<script>
+       layui.use(['layer', 'table', 'form', 'upload', 'element', 'jquery', 'flow'], function () {
+       var layer = layui.layer
+           , table = layui.table
+           , form = layui.form
+           , upload = layui.upload
+           , element = layui.element
+           , $ = layui.jquery
+           , flow = layui.flow;
+
+
+
+       Initialization();
+
+       async function Initialization() {
+           try {
+               //let result1 = await $.ajax({
+               //    type: 'post',
+               //    dataType: 'json',
+               //    url: '../DpsProduction/GetEquipments',
+               //    data: {
+
+               //    },
+               //    success: function (data) {
+               //    },
+               //    error: function () {
+               //    }
+               //});
+
+           } catch (error) {
+               //处理错误
+           }
+       }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+     
+
+      
+
+   
+
+
+
+   });
+
+</script>
