@@ -1,19 +1,10 @@
-﻿using Rms.Models.DataBase.Rms;
+﻿using Rms.Models.DataBase.Pms;
+using Rms.Models.DataBase.Rms;
 using Rms.Utils;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
+using Rms.Web.Utils;
 using System.Linq;
-using System.Net.Sockets;
-using System.Net;
 using System.Text;
-using System.Web;
 using System.Web.Mvc;
-using System.Xml.Linq;
-using Rms.Models.DataBase.Pms;
-using System.Web.UI;
-using System.Windows.Media.Media3D;
-using System.Security.Cryptography;
 
 namespace Rms.Web.Controllers.Rms
 {
@@ -153,6 +144,53 @@ ORDER BY equipment.ORDERSORT", line, recipegroup_id);
             {
                 db.Insertable<RMS_RECIPE_GROUP_MAPPING>(new RMS_RECIPE_GROUP_MAPPING { RECIPE_ID = RECIPE_ID, RECIPE_GROUP_ID = RECIPE_GROUP_ID }).ExecuteCommand();
             }
+
+            //send mail
+            var eqp = db.Queryable<RMS_EQUIPMENT>().Where(it => it.ID == EQUIPMENT_ID).First();
+            var eqpType = db.Queryable<RMS_EQUIPMENT_TYPE>().Where(it => it.ID == eqp.TYPE).First();
+            var roles = eqpType.FLOWROLEIDS;
+            var users = db.Queryable<PMS_USER>().Where(it => roles.Contains(it.ROLEID)).ToList();
+            var mailAddrs = users.Select(it => it.EMAIL).Where(it => !string.IsNullOrEmpty(it)).ToList();
+
+            var recipeGroup = db.Queryable<RMS_RECIPE_GROUP>().Where(it => it.ID == RECIPE_GROUP_ID).First();
+            var recipe = db.Queryable<RMS_RECIPE>().Where(it => it.ID == RECIPE_ID).First();
+            var subject = $"[{eqpType.NAME}]{eqp.NAME} Recipe Binding";
+
+            StringBuilder tableBuilder = new StringBuilder();
+            tableBuilder.Append($"<p>{EQUIPMENT_ID} recipe 绑定已修改");
+            tableBuilder.Append("<table class=\"styled-table\">");
+            tableBuilder.Append("<tr><th>EQID</th><th>Recipe Group</th><th>Recipe Name</th><th>User Name</th></tr>");
+            tableBuilder.Append($"<tr><td>{eqp.NAME}</td><td>{recipeGroup.NAME}</td><td>{recipeGroup.NAME}</td><td>{User?.TRUENAME}</td></tr>");
+
+            tableBuilder.Append("</table>");
+            string tableStyle = @"
+    <style>
+        .styled-table {
+            border-collapse: collapse;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            min-width: 100%;
+            width: auto;
+            white-space: nowrap;
+            background-color: #fff;
+            color: #000;
+            border: 1px solid #ccc;
+        }
+        .styled-table td, .styled-table th {
+            padding: 12px 15px;
+            border-right: 1px solid #ccc;
+            text-align: left;
+        }
+        .styled-table th {
+            background-color: #eee;
+            color: #000;
+            border: 1px solid #ccc;
+            font-weight: bold;
+        }
+    </style>
+";
+            string content = tableStyle + tableBuilder.ToString();
+            MailHelper.SendMail(mailAddrs.ToArray(), "Laser Power OOC", content);
 
             return Json(new { result = true, message = "更新成功" });
 
