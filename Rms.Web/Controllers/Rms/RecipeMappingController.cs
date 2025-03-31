@@ -191,7 +191,6 @@ ORDER BY equipment.ORDERSORT", line, recipegroup_id);
 ";
             string content = tableStyle + tableBuilder.ToString();
             MailHelper.SendMail(mailAddrs.ToArray(), subject, content);
-
             return Json(new { result = true, message = "更新成功" });
 
         }
