@@ -154,13 +154,13 @@ ORDER BY equipment.ORDERSORT", line, recipegroup_id);
 
             var recipeGroup = db.Queryable<RMS_RECIPE_GROUP>().Where(it => it.ID == RECIPE_GROUP_ID).First();
             var recipe = db.Queryable<RMS_RECIPE>().Where(it => it.ID == RECIPE_ID).First();
-            var subject = $"[{eqpType.NAME}]{eqp.NAME} Recipe Binding";
+            var subject = $"Recipe Binding Modify Notification";
 
             StringBuilder tableBuilder = new StringBuilder();
             tableBuilder.Append($"<p>{EQUIPMENT_ID} recipe 绑定已修改");
             tableBuilder.Append("<table class=\"styled-table\">");
             tableBuilder.Append("<tr><th>EQID</th><th>Recipe Group</th><th>Recipe Name</th><th>User Name</th></tr>");
-            tableBuilder.Append($"<tr><td>{eqp.NAME}</td><td>{recipeGroup.NAME}</td><td>{recipeGroup.NAME}</td><td>{User?.TRUENAME}</td></tr>");
+            tableBuilder.Append($"<tr><td>{eqp.NAME}</td><td>{recipeGroup.NAME}</td><td>{recipe.NAME}</td><td>{User?.TRUENAME}</td></tr>");
 
             tableBuilder.Append("</table>");
             string tableStyle = @"
@@ -190,7 +190,7 @@ ORDER BY equipment.ORDERSORT", line, recipegroup_id);
     </style>
 ";
             string content = tableStyle + tableBuilder.ToString();
-            MailHelper.SendMail(mailAddrs.ToArray(), "Laser Power OOC", content);
+            MailHelper.SendMail(mailAddrs.ToArray(), subject, content);
 
             return Json(new { result = true, message = "更新成功" });
 
