@@ -17,7 +17,11 @@ namespace Rms.Services.Core.Controllers
 {
     public partial class ApiController : Controller
     {
-
+        /// <summary>
+        /// 根据recipe alias获取对应equipment tpye的recipe name
+        /// </summary>
+        /// <param name="req"></param>
+        /// <returns></returns>
         [HttpPost]
         public JsonResult GetRecipeName(GetRecipeNameRequest req)
         {
@@ -28,8 +32,6 @@ namespace Rms.Services.Core.Controllers
                 var configs = db.Queryable<RMS_RECIPE_NAME_ALIAS>().Where(it => it.EQUIPMENT_TYPE_ID == req.EquipmentTypeId).ToList();
 
                 config = configs.FirstOrDefault(it => it.EQUIPMENT_TYPE_ID == req.EquipmentTypeId && it.RECIPE_ALIAS.Contains(req.RecipeNameAlias));
-
-
 
                 if (config != null)
                 {

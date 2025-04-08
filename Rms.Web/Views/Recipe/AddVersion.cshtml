@@ -21,15 +21,32 @@
     </ul>
     <div class="layui-tab-content" style="height: 100px;">
         <div class="layui-tab-item layui-show">
-            <form class="layui-form  layui-form-pane" action="" lay-filter="versioninfo" id="versioninfo" style="display:none">
-
+            <form class="layui-form" action="" lay-filter="versioninfo" id="versioninfo" style="display:none">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">EQID</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="EQID" autocomplete="off" class="layui-input" disabled>
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label">Golden EQID</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="GOLDEN_EQID" autocomplete="off" class="layui-input" disabled>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="layui-form-item">
-                    <input type="text" name="ID" autocomplete="off" class="layui-input" style="display:none">
+          
+                </div>
+
+                <div class="layui-form-item">
+                    @*<input type="text" name="ID" autocomplete="off" class="layui-input" style="display:none">*@
                     <div class="layui-inline">
                         <label class="layui-form-label">Version ID</label>
                         <div class="layui-input-block">
-                            <input id='rcpversionID' type="text" name="NAME" autocomplete="off" class="layui-input" disabled>
+                            <input type="text" name="ID" autocomplete="off" class="layui-input" disabled>
                         </div>
                     </div>
                 </div>
@@ -109,6 +126,7 @@
         });
 
         var vid = window.parent.data.id;
+        var currenteqid = window.parent.currenteqid;
         var rcpname;
         var filetable;
         console.log(window.parent.versiontable)
@@ -130,8 +148,10 @@
                     var fff = document.getElementById("versioninfo");
                     fff.style.display = "block";
                     form.val('versioninfo', {
+                        "EQID": currenteqid,
+                        "GOLDEN_EQID": data.goldeneqid,
                         "ID": data.versioninfo.ID,
-                        "NAME": data.versioninfo.NAME,
+                        //"NAME": data.versioninfo.NAME,
                         "REMARK": data.versioninfo.REMARK // "name": "value"
 
                     });
@@ -154,45 +174,7 @@
                     // 重新渲染 layui 表单
                     layui.form.render();
 
-                    //var uploadInst = upload.render({
-                    //    elem: '#test1'
-                    //    , accept: 'file'
-                    //    , url: 'UploadRcpFromEQP' //此处用的是第三方的 http 请求演示，实际使用时改成您自己的上传接口即可。
-                    //    , data: {
-                    //        versionid: vid
-                    //        //rcpname: data.projectinfo.NAME
-                    //    }
-                    //    , before: function (obj) {
-                    //        //预读本地文件示例，不支持ie8
-                    //        //obj.preview(function (index, file, result) {
-                    //        //    $('#demo1').attr('src', result); //图片链接（base64）
-                    //        //});
 
-                    //        element.progress('demo', '0%'); //进度条复位
-                    //        window.parent.layer.msg('上传中', { icon: 16, time: 0 });
-                    //    }
-                    //    , done: function (res) {
-                    //        window.parent.layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + res.message + '</em>', { icon: res.result ? 1 : 4 });
-
-                    //        $('#demoText').html(''); //置空上传失败的状态
-                    //    }
-                    //    , error: function () {
-                    //        //演示失败状态，并实现重传
-                    //        var demoText = $('#demoText');
-                    //        demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
-                    //        demoText.find('.demo-reload').on('click', function () {
-                    //            uploadInst.upload();
-                    //        });
-                    //    }
-                    //    //进度条
-                    //    , progress: function (n, elem, e) {
-                    //        element.progress('demo', n + '%'); //可配合 layui 进度条元素使用
-                    //        if (n == 100) {
-                    //            //layer.msg('上传完毕', { icon: 1 });
-                    //            filetable.reload();
-                    //        }
-                    //    }
-                    //});
 
                     filetable = table.render({
                         elem: '#filetable'
@@ -394,8 +376,9 @@
                     dataType: 'json',
                     url: '../Recipe/UploadRcpFromEQP',
                     data: {
-                        versionid: vid,
-                        rcpname: rcpname
+                        versionid: vid,//可能是golden machine的recipe version
+                        rcpname: rcpname,
+                        eqpid: currenteqid
                     },
                     success: function (data) {
                         console.log(data.res.Message)
@@ -441,7 +424,7 @@
                                 });
                             }
 
-                    
+
                         } else {
                             filetable.reload();
                             layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + 'Error:' + data.res.Message + '</em>');

@@ -8,6 +8,11 @@ namespace Rms.Services.Core.Controllers
 {
     public partial class ApiController : Controller
     {
+        /// <summary>
+        /// 删除Recipe
+        /// </summary>
+        /// <param name="req"></param>
+        /// <returns></returns>
         [HttpPost]
         public JsonResult DeleteMachineRecipe(DeleteMachineRecipeRequest req)
         {

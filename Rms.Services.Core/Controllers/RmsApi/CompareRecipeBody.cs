@@ -10,14 +10,32 @@ namespace Rms.Services.Core.Controllers
 {
     public partial class ApiController : Controller
     {
+        /// <summary>
+        /// 比较Recipe Body,支持Golden Recipe Type
+        /// </summary>
+        /// <param name="req"></param>
+        /// <returns></returns>
         [HttpPost]
         public JsonResult CompareRecipeBody(CompareRecipeBodyRequest req)
         {
             var res = new CompareRecipeBodyResponse();
 
-            //TODO:Golden Recipe-先判断是否从设备
+            var eqp = db.Queryable<RMS_EQUIPMENT>().In(req.EquipmentId).First();
+            if (eqp == null)
+            {
+                res.Message = $"Euipment '{req.EquipmentId}' not exists!";
+                return Json(res);
+            }
 
-            var recipe = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == req.EquipmentId && it.NAME == req.RecipeName).First();
+            var eqpType = db.Queryable<RMS_EQUIPMENT_TYPE>().In(eqp.TYPE).First();
+            RMS_EQUIPMENT goldenEqp = eqp;//默认为自己
+
+            if (!string.IsNullOrEmpty(eqpType.GOLDEN_EQID) && eqpType.GOLDEN_RECIPE_TYPE)
+            {
+                goldenEqp = db.Queryable<RMS_EQUIPMENT>().In(goldenEqp.FATHER_EQID).First();
+            }
+
+            var recipe = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == goldenEqp.ID && it.NAME == req.RecipeName).First();
             if (recipe == null)
             {
                 res.Result = false;
@@ -25,30 +43,9 @@ namespace Rms.Services.Core.Controllers
                 return Json(res);
             }
             var recipe_version = db.Queryable<RMS_RECIPE_VERSION>().In(recipe.VERSION_EFFECTIVE_ID).First();
-            var eqp = db.Queryable<RMS_EQUIPMENT>().In(recipe.EQUIPMENT_ID).First();
 
             (res.Result, res.Message) = rmsTransactionService.CompareRecipe(eqp, recipe_version.ID);
             return Json(res);
-        }
-        //用于比较文件
-        bool CompareZipFiles(string machinefile, FileStream serverstream)
-        {
-            using (FileStream machinestream = new FileStream(machinefile, FileMode.Open, FileAccess.Read))
-            {
-                byte[] hash1 = ComputeHash(machinestream);
-                byte[] hash2 = ComputeHash(serverstream);
-
-                return StructuralComparisons.StructuralEqualityComparer.Equals(hash1, hash2);
-            }
-        }
-
-        byte[] ComputeHash(Stream stream)
-        {
-            using (var hashAlgorithm = SHA256.Create())
-            using (var bufferedStream = new BufferedStream(stream, 1024 * 1024))
-            {
-                return hashAlgorithm.ComputeHash(bufferedStream);
-            }
         }
     }
 }

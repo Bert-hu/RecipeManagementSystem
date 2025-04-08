@@ -6,14 +6,17 @@ namespace Rms.Services.Core.Controllers
 {
     public partial class ApiController : Controller
     {
-
+        /// <summary>
+        /// 重新加载Recipe Body，req中EquipmentId为空时从EquipmentId对应的设备获取，req中EquipmentId不为空时从指定设备获取
+        /// </summary>
+        /// <param name="req"></param>
+        /// <returns></returns>
         [HttpPost]
         public JsonResult ReloadRecipeBody(ReloadRecipeBodyRequest req)
         {
             var res = new ReloadRecipeBodyResponse();
             var recipeVersion = db.Queryable<RMS_RECIPE_VERSION>().In(req.VersionId).First();
             var recipe = db.Queryable<RMS_RECIPE>().In(recipeVersion.RECIPE_ID).First();
-            var eqp = db.Queryable<RMS_EQUIPMENT>().In(recipe.EQUIPMENT_ID).First();
             if (recipe.VERSION_LATEST_ID != req.VersionId)
             {
                 res.Message = "Only the latest version can reload body!";
@@ -23,6 +26,19 @@ namespace Rms.Services.Core.Controllers
             {
                 res.Message = "Only the unsubmitted recipe version can reload body!";
                 return Json(res);
+            }
+
+
+
+            RMS_EQUIPMENT eqp;
+
+            if (string.IsNullOrEmpty(req.EquipmentId))//老方法从recipe获取eqp
+            {
+                eqp = db.Queryable<RMS_EQUIPMENT>().In(recipe.EQUIPMENT_ID).First();
+            }
+            else//新的请求会加上EquipmentId, 适应Golden Recipe Type
+            {
+                eqp = db.Queryable<RMS_EQUIPMENT>().In(req.EquipmentId).First();
             }
 
             (bool result, string message, byte[]? body) = rmsTransactionService.UploadRecipeToServer(eqp, req.RecipeName);

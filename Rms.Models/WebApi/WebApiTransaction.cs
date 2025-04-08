@@ -48,7 +48,8 @@ namespace Rms.Models.WebApi
     public class ReloadRecipeBodyRequest
     {
         public string TrueName { get; set; } //上传人
-        public string RecipeName { get; set; } //用于检查设备回复的Name是否一致
+        public string EquipmentId { get; set; }
+        public string RecipeName { get; set; } //用于检查设备回复的Name是否一致, golden recipe 只看name，不看VersionId
         public string VersionId { get; set; }
     }
 

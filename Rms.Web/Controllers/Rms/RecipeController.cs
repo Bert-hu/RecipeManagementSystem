@@ -155,7 +155,12 @@ namespace Rms.Web.Controllers.Rms
             var db = DbFactory.GetSqlSugarClient();
             var versioninfo = db.Queryable<RMS_RECIPE_VERSION>().In(versionid).First();
             var projectinfo = db.Queryable<RMS_RECIPE>().In(versioninfo.RECIPE_ID).First();
-            return Json(new { projectinfo, versioninfo }, JsonRequestBehavior.AllowGet);
+
+            var recipe = db.Queryable<RMS_RECIPE>().In(versioninfo.RECIPE_ID).First();
+            var eqp = db.Queryable<RMS_EQUIPMENT>().In(recipe.EQUIPMENT_ID).First();
+            var type = db.Queryable<RMS_EQUIPMENT_TYPE>().In(eqp.TYPE).First();
+            var goldeneqid = type.GOLDEN_EQID;
+            return Json(new { projectinfo, versioninfo, goldeneqid }, JsonRequestBehavior.AllowGet);
         }
 
         public class VersionForm
@@ -272,6 +277,26 @@ namespace Rms.Web.Controllers.Rms
             string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/reloadrecipebody";
             //string url = $"http://192.168.53.210:8085" + "/api/reloadrecipebody";
             var body = JsonConvert.SerializeObject(new ReloadRecipeBodyRequest { TrueName = User.TRUENAME, VersionId = versionid, RecipeName = rcpname });
+
+            var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(apiURL, body);
+            var res = JsonConvert.DeserializeObject<ReloadRecipeBodyResponse>(apiresult);
+            //GetFileTable(1, 1, versionid);
+            return Json(new { res });
+        }
+
+        /// <summary>
+        /// 支持golden recipe，versionid是golden machine的recipe version， 要从当前eqpid上传body到golden machine的版本
+        /// </summary>
+        /// <param name="versionid"></param>
+        /// <param name="rcpname"></param>
+        /// <param name="eqpid"></param>
+        /// <returns></returns>
+        public JsonResult UploadRcpFromEQP(string versionid, string rcpname,string eqpid)
+        {
+            //var vid = versionid;
+            string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/reloadrecipebody";
+            //string url = $"http://192.168.53.210:8085" + "/api/reloadrecipebody";
+            var body = JsonConvert.SerializeObject(new ReloadRecipeBodyRequest { TrueName = User.TRUENAME, VersionId = versionid, RecipeName = rcpname, EquipmentId = eqpid });
 
             var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(apiURL, body);
             var res = JsonConvert.DeserializeObject<ReloadRecipeBodyResponse>(apiresult);

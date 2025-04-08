@@ -18,6 +18,11 @@ namespace Rms.Services.Core.Controllers
 {
     public partial class ApiController : Controller
     {
+        /// <summary>
+        /// 向设备发送Pp-Select指令
+        /// </summary>
+        /// <param name="req"></param>
+        /// <returns></returns>
         [HttpPost]
         public JsonResult PpSelect(PpSelectRequest req)
         {

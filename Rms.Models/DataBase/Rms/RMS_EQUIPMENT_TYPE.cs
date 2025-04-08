@@ -22,5 +22,8 @@ namespace Rms.Models.DataBase.Rms
         [SugarColumn(IsJson = true)]
         public List<string> FLOWROLEIDS { get; set; }
         public bool DELETEBEFOREDOWNLOAD { get; set; }
+        public bool GOLDEN_RECIPE_TYPE { get; set; } = false;
+        [SugarColumn(IsNullable =true)]
+        public string GOLDEN_EQID { get; set; }
     }
 }

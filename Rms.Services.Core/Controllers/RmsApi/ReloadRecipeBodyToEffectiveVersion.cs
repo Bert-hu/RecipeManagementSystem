@@ -18,6 +18,11 @@ namespace Rms.Services.Core.Controllers
 {
     public partial class ApiController : Controller
     {
+        /// <summary>
+        /// PD5当前专用功能，用户不升版更新recipe body，暂不支持golden recipe type
+        /// </summary>
+        /// <param name="req"></param>
+        /// <returns></returns>
         [HttpPost]
         public JsonResult ReloadRecipeBodyToEffectiveVersion(ReloadRecipeBodyToEffectiveVersionRequest req)
         {
@@ -37,8 +42,8 @@ namespace Rms.Services.Core.Controllers
                 else
                 {
                     var recipeVersion = db.Queryable<RMS_RECIPE_VERSION>().InSingle(recipe.VERSION_EFFECTIVE_ID);
-                    RmsTransactionService service = new RmsTransactionService(db, rabbitMq);
-                    (bool result, string message, byte[]? body) = service.UploadRecipeToServer(eqp, RecipeName);
+                    //RmsTransactionService service = new RmsTransactionService(db, rabbitMq);
+                    (bool result, string message, byte[]? body) = rmsTransactionService.UploadRecipeToServer(eqp, RecipeName);
                     if (result)
                     {
                         db.Ado.BeginTran();
@@ -61,7 +66,7 @@ namespace Rms.Services.Core.Controllers
                             db.Ado.CommitTran();
                             if (req.DeleteAfterReload)
                             {
-                                service.DeleteMachineRecipe(eqp, req.RecipeName);
+                                rmsTransactionService.DeleteMachineRecipe(eqp, req.RecipeName);
                             }
                             res.Result = true;
                         }

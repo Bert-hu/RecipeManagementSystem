@@ -7,12 +7,30 @@ namespace Rms.Services.Core.Controllers
 {
     public partial class ApiController : Controller
     {
+        /// <summary>
+        /// 按RecipeGroup下载Effective Recipe，支持Golden Recipe Type
+        /// </summary>
+        /// <param name="req"></param>
+        /// <returns></returns>
         [HttpPost]
         public JsonResult DownloadEffectiveRecipeByRecipeGroup(DownloadEffectiveRecipeByRecipeGroupRequest req)
         {
             var res = new DownloadEffectiveRecipeByRecipeGroupResponse();
             var eqp = db.Queryable<RMS_EQUIPMENT>().In(req.EquipmentId).First();
-            var eqtype = db.Queryable<RMS_EQUIPMENT_TYPE>().In(eqp.TYPE).First();
+            if (eqp == null)
+            {
+                res.Message = $"Euipment '{req.EquipmentId}' not exists!";
+                return Json(res);
+            }
+
+            var eqpType = db.Queryable<RMS_EQUIPMENT_TYPE>().In(eqp.TYPE).First();
+            RMS_EQUIPMENT goldenEqp = eqp;//默认为自己
+
+            if (!string.IsNullOrEmpty(eqpType.GOLDEN_EQID) && eqpType.GOLDEN_RECIPE_TYPE)
+            {
+                goldenEqp = db.Queryable<RMS_EQUIPMENT>().In(goldenEqp.FATHER_EQID).First();
+            }
+
             var recipegroup = db.Queryable<RMS_RECIPE_GROUP>().First(it => it.NAME == req.RecipeGroupName);
             if (recipegroup == null)
             {
@@ -21,15 +39,10 @@ namespace Rms.Services.Core.Controllers
                 res.Message = $"Unable to find recipe bound to '{req.RecipeGroupName}'";
                 return Json(res);
             }
-            if (eqp == null)
-            {
-                res.Result = false;
-                res.Message = "Equipment does not exist in RMS";
-                return Json(res);
-            }
-            var data = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == req.EquipmentId).ToList();
-            var eqrecipeids = data.Select(it => it.ID).ToList();
-            var binding = db.Queryable<RMS_RECIPE_GROUP_MAPPING>().Where(it => it.RECIPE_GROUP_ID == recipegroup.ID && eqrecipeids.Contains(it.RECIPE_ID)).First();
+
+            var allRecipes = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == goldenEqp.ID).ToList();
+            var allRecipeIds = allRecipes.Select(it => it.ID).ToList();
+            var binding = db.Queryable<RMS_RECIPE_GROUP_MAPPING>().Where(it => it.RECIPE_GROUP_ID == recipegroup.ID && allRecipeIds.Contains(it.RECIPE_ID)).First();
             if (binding == null)
             {
                 res.Result = false;
@@ -41,7 +54,7 @@ namespace Rms.Services.Core.Controllers
 
 
 
-            if (eqtype.DELETEBEFOREDOWNLOAD)
+            if (eqpType.DELETEBEFOREDOWNLOAD)
             {
                 var delteres = rmsTransactionService.DeleteAllMachineRecipes(eqp);//暂时不处理删除的答复
             }

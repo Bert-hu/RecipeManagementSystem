@@ -211,7 +211,7 @@
                 , done: function (data) {
                     newversionlock = data.newversionlock;
                     var that = $("#rcptable").siblings();
-                    console.log(data);
+                    //console.log(data);
                     data.data.forEach(function (item, index) {
                         var tr = that.find(".layui-table-box tbody tr[data-index='" + index + "']");
 
@@ -633,7 +633,9 @@
         window.data;
         function ShowVersionDetail(versionid) {
             currentversionid = versionid;
-            window.data = { "id": versionid }
+            window.data = {
+                "id": versionid
+            }
 
             layer.open({
                 title: 'Recipe Version Upgrade'

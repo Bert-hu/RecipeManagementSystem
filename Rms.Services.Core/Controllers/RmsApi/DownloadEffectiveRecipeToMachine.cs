@@ -6,23 +6,35 @@ namespace Rms.Services.Core.Controllers
 {
     public partial class ApiController : Controller
     {
+        /// <summary>
+        /// 按Recipe Name下载Recipe到Machine，支持Golden Recipe Type
+        /// </summary>
+        /// <param name="req"></param>
+        /// <returns></returns>
         [HttpPost]
         public JsonResult DownloadEffectiveRecipeToMachine(DownloadEffectiveRecipeToMachineRequest req)
         {
             var res = new DownloadEffectiveRecipeToMachineResponse();
             var eqp = db.Queryable<RMS_EQUIPMENT>().In(req.EquipmentId).First();
-            var eqtype = db.Queryable<RMS_EQUIPMENT_TYPE>().In(eqp.TYPE).First();
             if (eqp == null)
             {
-                res.Result = false;
-                res.Message = "Equipment does not exist in RMS";
+                res.Message = $"Euipment '{req.EquipmentId}' not exists!";
                 return Json(res);
             }
-            var recipe = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == req.EquipmentId && it.NAME == req.RecipeName).First();
+
+            var eqpType = db.Queryable<RMS_EQUIPMENT_TYPE>().In(eqp.TYPE).First();
+            RMS_EQUIPMENT goldenEqp = eqp;//默认为自己
+
+            if (!string.IsNullOrEmpty(eqpType.GOLDEN_EQID) && eqpType.GOLDEN_RECIPE_TYPE)
+            {
+                goldenEqp = db.Queryable<RMS_EQUIPMENT>().In(goldenEqp.FATHER_EQID).First();
+            }
+
+            var recipe = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == goldenEqp.ID && it.NAME == req.RecipeName).First();
             if (recipe == null)
             {
                 res.Result = false;
-                res.Message = "Recipe does not exist in RMS";
+                res.Message = $"{goldenEqp.ID} Recipe '{req.RecipeName}' does not exist in RMS";
                 return Json(res);
             }
             var recipeVersion = db.Queryable<RMS_RECIPE_VERSION>().In(recipe.VERSION_EFFECTIVE_ID).First();
@@ -32,7 +44,7 @@ namespace Rms.Services.Core.Controllers
                 res.Message = "RMS ERROR! Effective version does not have recipe content!";
                 return Json(res);
             }
-            if (eqtype.DELETEBEFOREDOWNLOAD)
+            if (eqpType.DELETEBEFOREDOWNLOAD)
             {
                 var delteres = rmsTransactionService.DeleteAllMachineRecipes(eqp);//暂时不处理删除的答复
             }

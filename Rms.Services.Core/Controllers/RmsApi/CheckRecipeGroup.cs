@@ -7,6 +7,11 @@ namespace Rms.Services.Core.Controllers
 {
     public partial class ApiController : Controller
     {
+        /// <summary>
+        /// 获取recipe group绑定的recipe，检查和更新最后运行的recipe，支持Golden Recipe Type
+        /// </summary>
+        /// <param name="req"></param>
+        /// <returns></returns>
         [HttpPost]
         public JsonResult CheckRecipeGroup(CheckRecipeGroupRequest req)
         {
@@ -26,9 +31,17 @@ namespace Rms.Services.Core.Controllers
                 res.Message = "Equipment does not exist in RMS";
                 return Json(res);
             }
-            var data = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == req.EquipmentId).ToList();
-            var eqrecipeids = data.Select(it => it.ID).ToList();
-            var binding = db.Queryable<RMS_RECIPE_GROUP_MAPPING>().Where(it => it.RECIPE_GROUP_ID == recipegroup.ID && eqrecipeids.Contains(it.RECIPE_ID)).First();
+            var eqpType = db.Queryable<RMS_EQUIPMENT_TYPE>().In(eqp.TYPE).First();
+            RMS_EQUIPMENT goldenEqp = eqp;//默认为自己
+
+            if (!string.IsNullOrEmpty(eqpType.GOLDEN_EQID) && eqpType.GOLDEN_RECIPE_TYPE)
+            {
+                goldenEqp = db.Queryable<RMS_EQUIPMENT>().In(goldenEqp.FATHER_EQID).First();
+            }
+
+            var allRecipes = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == goldenEqp.ID).ToList();//获取设备所有recipe
+            var allRecipeIds = allRecipes.Select(it => it.ID).ToList();
+            var binding = db.Queryable<RMS_RECIPE_GROUP_MAPPING>().Where(it => it.RECIPE_GROUP_ID == recipegroup.ID && allRecipeIds.Contains(it.RECIPE_ID)).First();
             if (binding == null)
             {
                 res.Result = false;
