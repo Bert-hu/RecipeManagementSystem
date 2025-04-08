@@ -43,6 +43,6 @@ namespace Rms.Models.DataBase.Rms
         public string LOCKED_MESSAGE { get; set; } = string.Empty;
         [SugarColumn(IsNullable = true)]
 
-        public string FATHER_EQID { get; set; }//只适用于Golden Machine， Golden Recipe的RecipeTypeFunction
+        public string FATHER_EQID { get; set; }//只适用于Golden Machine， Golden Recipe的RecipeTypeFunction？
     }
 }
