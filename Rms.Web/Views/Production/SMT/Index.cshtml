@@ -3,135 +3,411 @@
     //var user = (Rms.Models.DataBase.Pms.PMS_USER)Session["user_account"];
     //Layout = null;
 }
+<script src="~/Scripts/layui_NEW/layui.js"></script>
 <style>
-    .printerImg {
-        padding: 10px;
-        /*background-image: src('~/Content/images/AOISPI.jpg');*/
+    .image-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .image-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 0 1vw;
         color: #fff;
+    }
+
+    .printerImg {
         width: 8vw;
         height: auto;
-        text-align: center;
+        padding-top: 10px;
+        padding-right: 5px;
     }
 
     .aoiSpiImg {
-        padding: 10px;
-        color: #fff;
         width: 6vw;
         height: auto;
-        text-align: center;
+        padding: 10px;
+    }
+
+    .mounter-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: calc(5 * 7vw );
     }
 
     .mounterImg {
-        padding: 10px;
-        color: #fff;
-        width: 8vw;
+        width: 5vw;
         height: auto;
-        text-align: center;
+        padding: 6px;
     }
 
     .reflowImg {
-        padding: 10px;
-        margin-left: 2vw;
-        color: #fff;
-        width: 20vw;
+        width: 16vw;
         height: auto;
+        padding: 10px;
+    }
+
+    .image-text {
         text-align: center;
+        color: black;
     }
 </style>
-<div class="layui-row">
-    <div class="layui-col-md1">
-        <div class="aoi"></div>
-    </div>
-    <div class="layui-col-md1">
-        <img src="~/Content/images/SMT/Printer.jpg" class="printerImg" />
-    </div>
-    <div class="layui-col-md1">
-        <img src="~/Content/images/SMT/AOISPI.jpg" class="aoiSpiImg" />
-    </div>
-    <div class="layui-col-md1">
-        <img src="~/Content/images/SMT/AOISPI.jpg" class="aoiSpiImg" />
-    </div>
-    <div class="layui-col-md1">
-        <img src="~/Content/images/SMT/Mounter.jpg" class="mounterImg" />
-    </div>
-    <div class="layui-col-md1">
-        <img src="~/Content/images/SMT/Mounter.jpg" class="mounterImg" />
-    </div>
-    <div class="layui-col-md1">
-        <img src="~/Content/images/SMT/Mounter.jpg" class="mounterImg" />
-    </div>
-    <div class="layui-col-md1">
-        <img src="~/Content/images/SMT/Mounter.jpg" class="mounterImg" />
-    </div>
-    <div class="layui-col-md1">
-        <img src="~/Content/images/SMT/Mounter.jpg" class="mounterImg" />
-    </div>
-    <div class="layui-col-md3">
-        <img src="~/Content/images/SMT/Reflow.jpg" class="reflowImg" />
-    </div>
-    <div class="layui-col-md1">
-        <img src="~/Content/images/SMT/AOISPI.jpg" class="aoiSpiImg" />
+
+<form class="layui-form layui-form-pane" action="">
+    <div class="layui-form-item">
+        <div class="layui-row">
+            <div class="layui-input-inline" style="width:15%">
+                <select name="process" id="process" lay-filter="process" lay-verify="required">
+                    <option value="">请选择Line</option>
+                </select>
+            </div>
+        </div>
     </div>
 
+</form>
+<div class="image-container">
+    <div class="image-wrapper">
+        <img src="~/Content/images/SMT/Printer.jpg" class="printerImg" lay-on="e_printer" />
+        <p class="image-text" id="eqid_printer">Printer</p>
+    </div>
+    <div class="image-wrapper">
+        <img src="~/Content/images/SMT/AOISPI.jpg" class="aoiSpiImg" lay-on="e_spi" />
+        <p class="image-text" id="eqid_spi">SPI</p>
+    </div>
+    <div class="image-wrapper">
+        <div class="mounter-container">
+            <img src="~/Content/images/SMT/Mounter.jpg" class="mounterImg" lay-on="e_mounter_H1" /><p class="image-text" id="eqid_mounter_H1">H1</p>
+            <img src="~/Content/images/SMT/Mounter.jpg" class="mounterImg" lay-on="e_mounter_H2" /><p class="image-text" id="eqid_mounter_H2">H2</p>
+            <img src="~/Content/images/SMT/Mounter.jpg" class="mounterImg" lay-on="e_mounter_H3" /><p class="image-text" id="eqid_mounter_H3">H3</p>
+            <img src="~/Content/images/SMT/Mounter.jpg" class="mounterImg" lay-on="e_mounter_H4" /><p class="image-text" id="eqid_mounter_H4">H4</p>
+            <img src="~/Content/images/SMT/Mounter.jpg" class="mounterImg" lay-on="e_mounter_H5" /><p class="image-text" id="eqid_mounter_H5">H5</p>
+            <img src="~/Content/images/SMT/Mounter.jpg" class="mounterImg" lay-on="e_mounter_H6" /><p class="image-text" id="eqid_mounter_H6">H6</p>
+            <img src="~/Content/images/SMT/Mounter.jpg" class="mounterImg" lay-on="e_mounter_H7" /><p class="image-text" id="eqid_mounter_H7">H7</p>
+            <img src="~/Content/images/SMT/Mounter.jpg" class="mounterImg" lay-on="e_mounter_H8" /><p class="image-text" id="eqid_mounter_H8">H8</p>
+            <img src="~/Content/images/SMT/Mounter.jpg" class="mounterImg" lay-on="e_mounter_H9" /><p class="image-text" id="eqid_mounter_H9">H9</p>
+        </div>
+    </div>
+    <div class="image-wrapper">
+        <img src="~/Content/images/SMT/AOISPI.jpg" class="aoiSpiImg" lay-on="e_aoi_f" />
+        <p class="image-text" id="eqid_aoi_f">AOI-F</p>
+    </div>
+    <div class="image-wrapper">
+        <img src="~/Content/images/SMT/Reflow.jpg" class="reflowImg" lay-on="e_reflow" />
+        <p class="image-text" id="eqid_reflow">Reflow</p>
+    </div>
+    <div class="image-wrapper">
+        <img src="~/Content/images/SMT/AOISPI.jpg" class="aoiSpiImg" lay-on="e_aoi_b" />
+        <p class="image-text" id="eqid_aoi_b">AOI-B</p>
+    </div>
 </div>
 
+<div class="layui-panel" style="height:50vh">
+    <div style="padding: 32px;">
+        <div class="layui-row">
+            <div class="layui-col-md6">
+                <form class="layui-form" lay-filter="eqinfo">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">Station</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="station" autocomplete="off" placeholder="请选择设备" class="layui-input" disabled>
+                        </div>
+                        <label class="layui-form-label">EQID</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="eqid" id="eqid" autocomplete="off" placeholder="请选择设备" class="layui-input" disabled>
+                        </div>
+                        <div class="layui-btn-container">
+                            <button type="button" class="layui-btn" id="ppSelectBySn">扫SN切换程式</button>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+
+
+                    </div>
+                </form>
+            </div>
+            <div class="layui-col-md6">
+                <div class="layui-card">
+                    <div class="layui-card-header">历史记录</div>
+                    <div class="layui-card-body" id="logCardContainer">
+                        <div id="logContainer" style="overflow-y: scroll auto;font-size:13px"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 <script>
-       layui.use(['layer', 'table', 'form', 'upload', 'element', 'jquery', 'flow'], function () {
-       var layer = layui.layer
-           , table = layui.table
-           , form = layui.form
-           , upload = layui.upload
-           , element = layui.element
-           , $ = layui.jquery
-           , flow = layui.flow;
+    layui.use(['layer', 'table', 'form', 'upload', 'element', 'jquery', 'flow', 'util'], function () {
+        var layer = layui.layer
+            , table = layui.table
+            , form = layui.form
+            , upload = layui.upload
+            , element = layui.element
+            , $ = layui.jquery
+            , flow = layui.flow
+            , util = layui.util;
 
 
 
-       Initialization();
+        Initialization();
+        var lineData;
+        async function Initialization() {
+            try {
+                let result1 = await $.ajax({
+                    type: 'post',
+                    dataType: 'json',
+                    url: '../Smt/GetLines',
+                    data: {},
+                    success: function (data) {
+                        lineData = data[0];
+                        UpdateLine(lineData);
+                        var select = document.getElementById('process');
+                        // 清空原有选项（除了默认的“请选择Line”选项）
+                        while (select.options.length > 1) {
+                            select.remove(1);
+                        }
 
-       async function Initialization() {
-           try {
-               //let result1 = await $.ajax({
-               //    type: 'post',
-               //    dataType: 'json',
-               //    url: '../DpsProduction/GetEquipments',
-               //    data: {
+                        data.forEach(function (item) {
+                            var option = document.createElement('option');
+                            option.value = item.Line;
+                            option.text = item.Line;
+                            select.appendChild(option);
+                        });
 
-               //    },
-               //    success: function (data) {
-               //    },
-               //    error: function () {
-               //    }
-               //});
+                        // 默认选择第一项（不包括默认的“请选择Line”选项）
+                        if (select.options.length > 1) {
+                            select.selectedIndex = 1;
+                        }
 
-           } catch (error) {
-               //处理错误
-           }
-       }
-
-
-
-
-
-
-
-
-
-
+                        // 更新表单渲染
+                        form.render('select');
+                        console.log(data);
+                        // 监听select的change事件，使用layui的form.on方法
+                        form.on('select(process)', function (selData) {
+                            const selectedLine = selData.value;
+                            const selectedData = data.find(item => item.Line === selectedLine);
+                            lineData = selectedData;
+                            UpdateLine(lineData);
+                        });
+                    },
+                    error: function () {
+                        console.error('获取Line信息失败');
+                    }
+                });
 
 
+            } catch (error) {
+                //处理错误
+            }
+        }
+
+        function UpdateLine(lineData) {
+            if (lineData) {
+                const imageTextElements = $('.image-text');
+                imageTextElements.each(function () {
+                    const id = $(this).attr('id');
+                    switch (id) {
+                        case 'eqid_printer':
+                            if (lineData.Printer) {
+                                $(this).text(lineData.Printer);
+                            }
+                            break;
+                        case 'eqid_spi':
+                            if (lineData.Spi) {
+                                $(this).text(lineData.Spi);
+                            }
+                            break;
+                        case 'eqid_aoi_f':
+                            if (lineData.Aoi_F) {
+                                $(this).text(lineData.Aoi_F);
+                            }
+                            break;
+                        case 'eqid_reflow':
+                            if (lineData.Reflow) {
+                                $(this).text(lineData.Reflow);
+                            }
+                            break;
+                        case 'eqid_aoi_b':
+                            if (lineData.Aoi_B) {
+                                $(this).text(lineData.Aoi_B);
+                            }
+                            break;
+                        // 对于Mounter，这里简单处理为不更新，因为原数据中它是数组且无具体信息
+                        // 如果有具体逻辑可进一步完善
+                        default:
+                            break;
+                    }
+                });
+            }
+        }
+
+        util.on({
+            'e_printer': function () {
+                if (lineData && lineData.Printer) {
+                    UpdateCurrentMachine(lineData.Printer, "Printer");
+                }
+            },
+            'e_spi': function () {
+                if (lineData && lineData.Spi) {
+                    UpdateCurrentMachine(lineData.Spi, "SPI");
+                }
+            },
+            'e_mounter_H1': function () {
+                // 假设 mounter 设备对应的数据字段名为 Mounter 且是数组
+                if (lineData && lineData.Mounter && lineData.Mounter.length > 0) {
+                    UpdateCurrentMachine(lineData.Mounter[0], "贴片机1");
+                }
+            },
+            'e_mounter_H2': function () {
+                if (lineData && lineData.Mounter && lineData.Mounter.length > 1) {
+                    UpdateCurrentMachine(lineData.Mounter[1], "贴片机2");
+                }
+            },
+            'e_mounter_H3': function () {
+                if (lineData && lineData.Mounter && lineData.Mounter.length > 2) {
+                    UpdateCurrentMachine(lineData.Mounter[2], "贴片机3");
+                }
+            },
+            'e_mounter_H4': function () {
+                if (lineData && lineData.Mounter && lineData.Mounter.length > 3) {
+                    UpdateCurrentMachine(lineData.Mounter[3], "贴片机4");
+                }
+            },
+            'e_mounter_H5': function () {
+                if (lineData && lineData.Mounter && lineData.Mounter.length > 4) {
+                    UpdateCurrentMachine(lineData.Mounter[4], "贴片机5");
+                }
+            },
+            'e_mounter_H6': function () {
+                if (lineData && lineData.Mounter && lineData.Mounter.length > 5) {
+                    UpdateCurrentMachine(lineData.Mounter[5], "贴片机6");
+                }
+            },
+            'e_mounter_H7': function () {
+                if (lineData && lineData.Mounter && lineData.Mounter.length > 6) {
+                    UpdateCurrentMachine(lineData.Mounter[6], "贴片机7");
+                }
+            },
+            'e_mounter_H8': function () {
+                if (lineData && lineData.Mounter && lineData.Mounter.length > 7) {
+                    UpdateCurrentMachine(lineData.Mounter[7], "贴片机8");
+                }
+            },
+            'e_mounter_H9': function () {
+                if (lineData && lineData.Mounter && lineData.Mounter.length > 8) {
+                    UpdateCurrentMachine(lineData.Mounter[8], "贴片机9");
+                }
+            },
+            'e_aoi_f': function () {
+                if (lineData && lineData.Aoi_F) {
+                    UpdateCurrentMachine(lineData.Aoi_F, "AOI-F");
+                }
+            },
+            'e_reflow': function () {
+                if (lineData && lineData.Reflow) {
+                    UpdateCurrentMachine(lineData.Reflow, "Reflow");
+                }
+            },
+            'e_aoi_b': function () {
+                if (lineData && lineData.Aoi_B) {
+                    UpdateCurrentMachine(lineData.Aoi_B, "AOI-B");
+                }
+            }
+        });
+
+        function UpdateCurrentMachine(eqid, station) {
+            CleanLogField();
+            loadLogs(eqid);
+            layer.msg("切换到" + station + " : " + eqid);
+            form.val('eqinfo', {
+                "station": station,
+                "eqid": eqid
+            });
+
+        }
 
 
-    
+        $('#ppSelectBySn').on('click', function () {
+            var data = form.val('eqinfo');
+            var machineId = data.eqid;
+            if (machineId) {
+                layer.prompt({ title: machineId + '请扫入Panel SN切换机种', formType: 0 }, function (value, index, elem) {
+                    if (value === null || value === '') {
+                        layer.msg('请扫入SN');
+                        return elem.focus();
+                    }
+                    $.post('../Smt/PpSelectByPanelSn', { station: data.station, machineId: machineId, panelSn: value }, function (data) {
+                        layer.open({ content: data });
+                    });
+                    // 关闭 prompt
+                    layer.close(index);
+                });
+            }
+        });
 
-     
+        var logContainer = document.getElementById('logContainer');
+        var logCardContainer = document.getElementById('logCardContainer');
+        var currentlogid;
 
-      
+        function CleanLogField() {
+            currentlogid = null;
+            while (logContainer.firstChild) {
+                logContainer.removeChild(logContainer.firstChild);
+            }
+        }
+        var loadingLog = false;
+        function loadLogs(eqid) {     
+            if (!eqid) {
+                var eqinfo = form.val('eqinfo');
+                eqid = eqinfo.eqid;
+            }
+            console.log(eqid);
+            if (eqid && !loadingLog) {
+                loadingLog = true;
 
-   
+                $.ajax({
+                    url: '../CommonProduction/GetNewLog', // 替换成您的日志API的实际URL
+                    type: 'POST',
+                    data: {
+                        equipmentid: eqid,
+                        logid: currentlogid
+                    },
+                    success: function (data) {
+                        if (data.length > 0) {
+                            currentlogid = data[data.length - 1].ID;
+                            // 遍历数组并逐个将每个元素附加到日志容器中
+                            data.forEach(logEntry => {
+                                const logDiv = document.createElement('div');
+                                logDiv.textContent = logEntry.STRCREATE_TIME + " " + logEntry.ACTION + " " + logEntry.RESULT + " " + logEntry.MESSAGE;
+                                if (logEntry.RESULT.toUpperCase() != 'TRUE') {
+                                    logDiv.style.color = 'red';
+                                }
+                                logContainer.appendChild(logDiv);
+                            });
 
-
-
-   });
+                            // 滚动到底部以显示最新内容
+                            logCardContainer.scrollTop = logContainer.scrollHeight;
+                        }
+                        loadingLog = false;
+                    },
+                    error: function (error) {
+                        loadingLog = false;
+                        console.error('加载日志失败: ' + error);
+                    }
+                });
+            }
+           
+        }
+        // 定时加载新日志
+        setInterval(loadLogs, 3000);
+    });
 
 </script>

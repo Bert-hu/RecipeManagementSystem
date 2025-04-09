@@ -479,38 +479,44 @@
             }
         }
 
+        var loadingLog = false;
+
         function loadLogs(eqid) {
             if (eqid === undefined) eqid = equipmentSel.getValue()[0].value;
+            if (!loadingLog) {
+                loadingLog = true;
+                $.ajax({
+                    url: '../CommonProduction/GetNewLog', // 替换成您的日志API的实际URL
+                    type: 'POST',
+                    data: {
+                        equipmentid: eqid,
+                        logid: currentlogid
+                    },
+                    success: function (data) {
+                        if (data.length > 0) {
+                            currentlogid = data[data.length - 1].ID;
+                            // 遍历数组并逐个将每个元素附加到日志容器中
+                            data.forEach(logEntry => {
+                                const logDiv = document.createElement('div');
+                                logDiv.textContent = logEntry.STRCREATE_TIME + " " + logEntry.ACTION + " " + logEntry.RESULT + " " + logEntry.MESSAGE;
+                                if (logEntry.RESULT.toUpperCase() != 'TRUE') {
+                                    logDiv.style.color = 'red';
+                                }
+                                logContainer.appendChild(logDiv);
+                            });
 
-            $.ajax({
-                url: '../CommonProduction/GetNewLog', // 替换成您的日志API的实际URL
-                type: 'POST',
-                data: {
-                    equipmentid: eqid,
-                    logid: currentlogid
-                },
-                success: function (data) {
-                    if (data.length > 0) {
-                        currentlogid = data[data.length - 1].ID;
-                        // 遍历数组并逐个将每个元素附加到日志容器中
-                        data.forEach(logEntry => {
-                            const logDiv = document.createElement('div');
-                            logDiv.textContent = logEntry.STRCREATE_TIME + " " + logEntry.ACTION + " " + logEntry.RESULT + " " + logEntry.MESSAGE;
-                            if (logEntry.RESULT.toUpperCase() != 'TRUE') {
-                                logDiv.style.color = 'red';
-                            }
-                            logContainer.appendChild(logDiv);
-                        });
-
-                        // 滚动到底部以显示最新内容
-                        logCardContainer.scrollTop = logContainer.scrollHeight;
+                            // 滚动到底部以显示最新内容
+                            logCardContainer.scrollTop = logContainer.scrollHeight;
+                        }
+                        loadingLog = false;
+                    },
+                    error: function (error) {
+                        loadingLog = false;
+                        console.error('加载日志失败: ' + error);
                     }
-
-                },
-                error: function (error) {
-                    console.error('加载日志失败: ' + error);
-                }
-            });
+                });
+            }
+            
         }
         // 定时加载新日志
         setInterval(loadLogs, 10000);

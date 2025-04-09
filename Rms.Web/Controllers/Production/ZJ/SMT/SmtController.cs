@@ -23,9 +23,30 @@ namespace Rms.Web.Controllers.Production
     [Route("[controller]/[action]")]
     public class SmtController : CommonProductionController
     {
+        class LineMachines
+        {
+            public string Line { get; set; } = string.Empty;
+            public string Printer { get; set; } = string.Empty;
+            public string Spi { get; set; } = string.Empty;
+            public List<string> Mounter { get; set; } = new List<string>();
+            public string Aoi_F { get; set; } = string.Empty;
+            public string Reflow { get; set; } = string.Empty;
+            public string Aoi_B { get; set; } = string.Empty;
+
+        }
+        List<LineMachines> lineMachines = new List<LineMachines>
+        {
+             new LineMachines{Line = "Z42", Spi= "EQSPI00190",Aoi_B = "EQAOI00213",Reflow="EQP010"},
+             new LineMachines{Line = "Test", Spi= "Test",Aoi_B = "Test"},
+        };
         public ActionResult Index()
         {
             return View("~/Views/Production/SMT/Index.cshtml");
+        }
+
+        public JsonResult GetLines()
+        {
+            return Json(lineMachines);
         }
 
         public JsonResult GetEquipments()
@@ -65,42 +86,67 @@ ORDER BY RET.ORDERSORT,RE.ORDERSORT";
 
         }
 
-        public JsonResult PpSelect(string equipmentId, string serverRecipeId, string machineRecipeName)
+        public JsonResult PpSelectByPanelSn(string station, string machineId, string panelSn)
         {
             string message = string.Empty;
             bool result = false;
             try
             {
-                string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/DownloadEffectiveRecipeToMachine";
-                var recipe = db.Queryable<RMS_RECIPE>().In(serverRecipeId).First();
-                var body = JsonConvert.SerializeObject(new DownloadEffectiveRecipeToMachineRequest { TrueName = User.TRUENAME, EquipmentId = equipmentId, RecipeName = recipe.NAME });
-                var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(apiURL, body);
-                var rep = JsonConvert.DeserializeObject<DownloadEffectiveRecipeToMachineResponse>(apiresult);
-                if (rep.Result)
+                string sfis_step7_req = $"EQXXXXXX01,{panelSn},7,M001603,JORDAN,,OK,SN_MODEL_NAME_PROJECT_NAME_INFO=???";
+                string sfis_step7_res = string.Empty;
+                string errmsg = string.Empty;
+                if (SendMessageToSfis(sfis_step7_req, ref sfis_step7_res, ref errmsg))
                 {
-                    message += $"下载server程式{recipe.NAME}成功";
+                    Dictionary<string, string> sfisParameters = sfis_step7_res.Split(',')[1].Split(' ').Select(keyValueString => keyValueString.Split('='))
+              .Where(keyValueArray => keyValueArray.Length == 2)
+              .ToDictionary(keyValueArray => keyValueArray[0], keyValueArray => keyValueArray[1]);
+                    string modelName = sfisParameters["SN_MODEL_NAME_PROJECT_NAME_INFO"].TrimEnd(';').Split(':')[0];
+                    string projectName = sfisParameters["SN_MODEL_NAME_PROJECT_NAME_INFO"].TrimEnd(';').Split(':')[1];
+                    string groupName = sfisParameters["SN_MODEL_NAME_PROJECT_NAME_INFO"].TrimEnd(';').Split(':')[2];
 
-                    if (!string.IsNullOrEmpty(machineRecipeName))
+                    string getEPPDUrl = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/GetEppd";
+                    var getEppdResponseStr = HTTPClientHelper.HttpPostRequestAsync4Json(getEPPDUrl, JsonConvert.SerializeObject(new GetEppdRequest { EquipmentId = machineId }));
+                    var getEppdResponse = JsonConvert.DeserializeObject<GetEppdResponse>(getEppdResponseStr);
+                    if (getEppdResponse.Result)
                     {
-                        apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/ReloadRecipeBodyToEffectiveVersion";
-                        var body2 = JsonConvert.SerializeObject(new ReloadRecipeBodyToEffectiveVersionRequest { TrueName = User.TRUENAME, EquipmentId = equipmentId, RecipeName = machineRecipeName, DeleteAfterReload = true });
-                        var apiresult2 = HTTPClientHelper.HttpPostRequestAsync4Json(apiURL, body2);
-                        var rep2 = JsonConvert.DeserializeObject<ReloadRecipeBodyToEffectiveVersionResponse>(apiresult2);
-                        if (rep2.Result)
+                        var eppd = getEppdResponse.EPPD;
+
+                        var recipeName = GetRecipeNameByModelName(eppd, modelName);
+                        if (!string.IsNullOrEmpty(recipeName))
                         {
-                            message += $",上传更新server程式{machineRecipeName}成功";
-                            result = true;
+                            string ppselectUrl = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/PpSelect";
+                            var ppSelectResponseStr = HTTPClientHelper.HttpPostRequestAsync4Json(ppselectUrl, JsonConvert.SerializeObject(new PpSelectRequest { TrueName = User.TRUENAME, EquipmentId = machineId, RecipeName = recipeName }));
+                            var ppSelectResponse = JsonConvert.DeserializeObject<PpSelectResponse>(ppSelectResponseStr);
+                            if (ppSelectResponse.Result)
+                            {
+                                AddProductionLog(machineId, "PpSelectByPanelSn", "True" , $"{ machineId}发送切换到{recipeName}指令成功");
+                                return Json($"{machineId}发送切换到{recipeName}指令成功，请等待设备切换");
+                            }
+                            else
+                            {
+                                AddProductionLog(machineId, "PpSelectByPanelSn", "False", $"{machineId}发送切换到{recipeName}指令失败:{ppSelectResponse.Message}");
+                                return Json($"{machineId}发送切换到{recipeName}指令失败:{ppSelectResponse.Message}");
+                            }
                         }
                         else
                         {
-                            message += $",上传更新server程式{recipe.NAME}失败：{rep2.Message}";
+                            AddProductionLog(machineId, "PpSelectByPanelSn", "False", $"{machineId}中找不到与{modelName}匹配的程式");
+                            return Json($"{machineId}中找不到与{modelName}匹配的程式");
                         }
                     }
                     else
                     {
-                        message = $"下载server程式{recipe.NAME}失败：{rep.Message}";
+                        AddProductionLog(machineId, "PpSelectByPanelSn", "False", $"{machineId}获取设备程式清单失败");
+                        return Json($"{machineId}获取设备程式清单失败");
                     }
+
+
+
                 }
+
+
+
+
             }
             catch (Exception ex)
             {
@@ -110,38 +156,22 @@ ORDER BY RET.ORDERSORT,RE.ORDERSORT";
 
         }
 
-        public JsonResult ScanBarCode(string sn)
+        private string GetRecipeNameByModelName(List<string> EPPD, string modelName)
         {
-            string message = string.Empty;
-            bool result = false;
-
-            try
+            for (int length = 10; length >= 7; length--)
             {
-                string sfis_step7_req = $"EQXXXXXX01,{sn},7,M001603,JORDAN,,OK,SN_MODEL_NAME_PROJECT_NAME_INFO=??? ";
-                string sfis_step7_res = string.Empty;
-                string errmsg = string.Empty;
-                if (SendMessageToSfis(sfis_step7_req, ref sfis_step7_res, ref errmsg))
+                if (modelName.Length >= length)
                 {
-                    Dictionary<string, string> sfispara = sfis_step7_res.Split(',')[1].Split(' ').Select(keyValueString => keyValueString.Split('='))
-    .Where(keyValueArray => keyValueArray.Length == 2)
-.ToDictionary(keyValueArray => keyValueArray[0], keyValueArray => keyValueArray[1]);
-                    string modelName = sfispara["SN_MODEL_NAME_PROJECT_NAME_INFO"].TrimEnd(';').Split(':')[0];
-                    string projectName = sfispara["SN_MODEL_NAME_PROJECT_NAME_INFO"].TrimEnd(';').Split(':')[1];
-                    string groupName = sfispara["SN_MODEL_NAME_PROJECT_NAME_INFO"].TrimEnd(';').Split(':')[2];
-
-                    return Json(new { Result = true, ModelName = modelName, ProjectName = projectName, GroupName = groupName });
+                    string modelSubstring = modelName.Substring(0, length);
+                    string match = EPPD.FirstOrDefault(it => it.Length >= length && it.Substring(0, length) == modelSubstring);
+                    if (match != null)
+                    {
+                        return match;
+                    }
                 }
-                else
-                {
-                    message = $"获取SN信息失败";
-                }
-
             }
-            catch (Exception)
-            {
-
-            }
-            return Json(new { Result = result, Message = message });
+            return string.Empty;
         }
+
     }
 }

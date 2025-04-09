@@ -13,21 +13,25 @@
 </style>
 <script src="~/Scripts/layui/xm-select.js"></script>
 <script src="~/Scripts/layui/layui.table.formdate.js"></script>
+<script src="~/Scripts/layui_NEW/layui.js"></script>
+
 <form class="layui-form layui-form-pane" action="">
     <div class="layui-form-item layui-row">
         <div class="layui-row">
             <div class="layui-input-inline" style="width:15%">
                 <select name="process" id="process" lay-filter="process" lay-verify="required">
-
                 </select>
             </div>
-
+            <div class="layui-input-inline" style="width: 80%; margin-left: 1%">
+                <input type="text" lay-affix="search" lay-filter="search" lay-options="{split: true}" placeholder="Search…" class="layui-input" id="searchInput">
+            </div>
         </div>
     </div>
 </form>
 <script type="text/html" id="toolbar">
     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="permission">Access Permissions</a>
     <a class="layui-btn layui-btn-xs" lay-event="auditprocess">Approval Permissions</a>
+    <a class="layui-btn layui-btn-xs" lay-event="more">More</a>
 </script>
 <table class="layui-hide" id="equipmenttypetable" lay-filter="equipmenttypetable"></table>
 
@@ -40,7 +44,8 @@
             , table = layui.table
             , form = layui.form
             , upload = layui.upload
-            , element = layui.element;
+            , element = layui.element
+            , dropdown = layui.dropdown;
         var processselect = document.getElementById("process");
 
 
@@ -51,6 +56,34 @@
             ShowEquipmentTypeTable(window.currentProcess);
         });
 
+        form.on('input-affix(search)', function (data) {
+            var elem = data.elem; // Input box
+            var value = elem.value; // Value of the input box
+            if (!value) {
+                layer.msg('Please enter search content');
+                return elem.focus();
+            };
+            // Simulate search jump
+            table.reload('equipmenttypetable', {
+                where: {
+                    searchText: value
+                } // Search field
+            });
+        });
+        $('#searchInput').on('keydown', function (event) {
+            if (event.key === 'Enter') {
+                // Prevent default behavior (e.g., form submission)
+                event.preventDefault();
+                // Get the value from the input box
+                const searchValue = $(this).val();
+                // Execute your search logic here
+                table.reload('equipmenttypetable', {
+                    where: {
+                        searchText: searchValue
+                    } // Search field
+                });
+            }
+        });
         async function getProcess() {
             try {
                 let result1 = await $.ajax({
@@ -99,6 +132,7 @@
                 , url: '../EquipmentType/GetEquipmentTypes'
                 //, toolbar: '#addnewrcp'
                 , id: "equipmenttypetable"
+                , page: true
                 , limit: 1000
                 , limits: [1000]
                 , height: 'full-235'
@@ -110,10 +144,13 @@
                     , { field: 'TYPE', title: 'Type', edit: true }
                     , { field: 'DELETEBEFOREDOWNLOAD', title: 'Delete all recipe befor download', edit: true }
                     , { field: 'ORDERSORT', title: 'Order Sort', edit: true }
+                    , { field: 'GOLDEN_RECIPE_TYPE', title: 'Golden Recipe Type', edit: true }
+                    , { field: 'GOLDEN_EQID', title: 'Golden Machine', edit: true }
                     , { fixed: 'right', width: 400, align: 'center', toolbar: '#toolbar' }
                 ]]
                 , where: {
-                    processfilter: processfilter
+                    processfilter: processfilter,
+                    searchText: ''
                 }
 
                 , done: function (data) {
@@ -245,7 +282,76 @@
 
                 });
             }
+            else if (event === 'more') {
+                dropdown.render({
+                    elem: this, // 触发事件的 DOM 对象
+                    show: true, // 外部事件触发即显示
+                    data: [{
+                        title: 'Select Golden Machine',
+                        id: 'selectGoldenMachine'
+                    }, {
+                        title: '删除',
+                        id: 'del'
+                    }],
+                    click: function (menudata) {
+                        if (menudata.id === 'selectGoldenMachine') {
+                            console.log(selectdata);
+                            // layer.msg('查看操作，当前行 ID:' + selectdata.ID);
+                            layer.open({
+                                title: 'Select Golden Machine'
+                                , type: 2
+                                , btn: ['确定Confirm', '取消Cancel']
+                                , content: 'SelectMachine?EQUIPMENT_TYPE_ID=' + selectdata.ID 
+                                , area: ['40%', '85%']
+                                , success: function (layero, index) {
 
+                                }
+                                , yes: function (index) {
+                                    var res = window["layui-layer-iframe" + index].callback();
+                                    console.log(res);
+                                    var jdata = JSON.parse(res);
+                                    console.log(jdata);
+                                    var eqid = jdata.selectData[0].ID;
+
+                                    $.ajax({
+                                        url: '../EquipmentType/SetGoldenMachine',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                                        data: {
+                                            EQID: eqid,
+                                            EQUIPMENT_TYPE_ID: selectdata.ID
+                                        },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
+                                        type: 'POST',
+                                        contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
+                                        async: false,
+                                        success: function (data) {
+                                            layer.open({ content: data.message });
+                                            window.rcptable.reload();
+                                        },
+                                        error: function (message) {
+                                            alert('error!');
+                                        }
+                                    });
+                                    layer.close(index);
+
+
+                                }, btn2: function (index, layero) {
+                                    layer.msg('取消操作.Cancel.');
+                                }
+
+                            });
+
+
+
+
+                        } else if (menudata.id === 'del') {
+                            layer.msg('未实现');
+                        }
+                    },
+                    id: 'dropdown-table-tool',
+                    align: 'right', // 右对齐弹出
+                    style: 'box-shadow: 1px 1px 10px rgb(0 0 0 / 12%);' // 设置额外样式
+                });
+
+            }
         });
     });
 </script>

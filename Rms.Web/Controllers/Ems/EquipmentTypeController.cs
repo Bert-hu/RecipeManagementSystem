@@ -37,7 +37,7 @@ namespace Rms.Web.Controllers.Ems
             var processes = eqptypes.Select(it => it.PROCESS).Distinct().ToList();
             return Json(processes, JsonRequestBehavior.AllowGet);
         }
-        public JsonResult GetEquipmentTypes(int page, int limit, string processfilter = "")
+        public JsonResult GetEquipmentTypes(int page, int limit, string processfilter = "", string searchText = "")
         {
             var totalnum = 0;
             var eqptypes = db.Queryable<RMS_EQUIPMENT_TYPE>().ToList();
@@ -45,9 +45,15 @@ namespace Rms.Web.Controllers.Ems
             {
                 eqptypes = eqptypes.Where(it => it.PROCESS == processfilter).OrderBy(it => it.ORDERSORT).ToList();
             }
+
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                eqptypes = eqptypes.Where(it => (it.ID + it.NAME + it.PROCESS + it.VENDOR + it.TYPE + it.GOLDEN_EQID).ToUpper().Contains(searchText.ToUpper())).ToList();
+            }
+
             totalnum = eqptypes.Count;
             var pageeqptypes = eqptypes.Skip((page - 1) * limit).Take(limit);
-            return Json(new { data = pageeqptypes, code = 0, count = totalnum }, JsonRequestBehavior.AllowGet);
+            return Json(new { pageeqptypes, data = pageeqptypes, code = 0, count = totalnum }, JsonRequestBehavior.AllowGet);
         }
 
         public JsonResult Edit(string ID, string field, string value)
@@ -139,8 +145,39 @@ namespace Rms.Web.Controllers.Ems
         {
             var db = DbFactory.GetSqlSugarClient();
             var item = db.Queryable<RMS_EQUIPMENT_TYPE>().In(TypeId).First();
-            item.FLOWROLEIDS = RoleIds?.ToList()?? new List<string>();
+            item.FLOWROLEIDS = RoleIds?.ToList() ?? new List<string>();
             db.Updateable<RMS_EQUIPMENT_TYPE>(item).ExecuteCommand();
+            return Json(new { result = true, message = "更新成功" });
+        }
+
+        public ActionResult SelectMachine(string EQUIPMENT_TYPE_ID)
+        {
+            ViewBag.EQUIPMENT_TYPE_ID = EQUIPMENT_TYPE_ID;
+            return View();
+        }
+
+
+        public JsonResult GetMachineList(int page, int limit, string EQUIPMENT_TYPE_ID)
+        {
+            var db = DbFactory.GetSqlSugarClient();
+            var type = db.Queryable<RMS_EQUIPMENT_TYPE>().InSingle(EQUIPMENT_TYPE_ID);
+            var machines = db.Queryable<RMS_EQUIPMENT>().Where(it => it.TYPE == EQUIPMENT_TYPE_ID).ToList();
+
+            var viewdata = machines.Select(it => new
+            {
+                ID = it.ID,
+                NAME = it.NAME,
+                LAY_CHECKED = it.ID == type.GOLDEN_EQID,
+            });
+            return Json(new { data = viewdata, code = 0, count = viewdata.Count() }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult SetGoldenMachine(string EQID, string EQUIPMENT_TYPE_ID)
+        {
+            var db = DbFactory.GetSqlSugarClient();
+            var type = db.Queryable<RMS_EQUIPMENT_TYPE>().InSingle(EQUIPMENT_TYPE_ID);
+            type.GOLDEN_EQID = EQID;
+            db.Updateable<RMS_EQUIPMENT_TYPE>(type).UpdateColumns(it => new { it.GOLDEN_EQID }).ExecuteCommand();
             return Json(new { result = true, message = "更新成功" });
         }
     }
