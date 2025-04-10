@@ -36,6 +36,7 @@ namespace Rms.Web.Controllers.Production
         }
         List<LineMachines> lineMachines = new List<LineMachines>
         {
+            new LineMachines{Line = "S77",Aoi_B = "EQAOI00169"},
              new LineMachines{Line = "Z42", Spi= "EQSPI00190",Aoi_B = "EQAOI00213",Reflow="EQP010"},
              new LineMachines{Line = "Test", Spi= "Test",Aoi_B = "Test"},
         };
@@ -119,7 +120,7 @@ ORDER BY RET.ORDERSORT,RE.ORDERSORT";
                             var ppSelectResponse = JsonConvert.DeserializeObject<PpSelectResponse>(ppSelectResponseStr);
                             if (ppSelectResponse.Result)
                             {
-                                AddProductionLog(machineId, "PpSelectByPanelSn", "True" , $"{ machineId}发送切换到{recipeName}指令成功");
+                                AddProductionLog(machineId, "PpSelectByPanelSn", "True", $"{machineId}发送切换到{recipeName}指令成功");
                                 return Json($"{machineId}发送切换到{recipeName}指令成功，请等待设备切换");
                             }
                             else
@@ -143,7 +144,11 @@ ORDER BY RET.ORDERSORT,RE.ORDERSORT";
 
 
                 }
-
+                else
+                {
+                    AddProductionLog(machineId, "PpSelectByPanelSn", "False", $"{machineId}切换失败，SFIS Error {sfis_step7_res} {errmsg}");
+                    return Json($"{machineId}切换失败，SFIS Error {sfis_step7_res} {errmsg}");                
+                }
 
 
 
