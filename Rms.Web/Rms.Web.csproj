@@ -634,6 +634,7 @@
     <Content Include="Views\Production\PD5\Mounter.cshtml" />
     <Content Include="Views\Production\SMT\Index.cshtml" />
     <Content Include="Views\EquipmentType\SelectMachine.cshtml" />
+    <Content Include="Views\Production\SMT\SelectRecipe.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

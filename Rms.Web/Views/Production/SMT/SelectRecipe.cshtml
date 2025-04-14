@@ -1,0 +1,47 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<table class="layui-hide" id="recipes" lay-filter="recipes"></table>
+<link href="~/Scripts/layui/css/layui.css" rel="stylesheet" />
+<script src="~/Scripts/layui/layui.js"></script>
+<script>
+
+    layui.use(['table', 'jquery'], function () {
+        var table = layui.table
+            , $ = layui.jquery;
+        console.log($("#selectedID").val());
+        table.render({
+            elem: '#recipes'
+            , height: 'full'
+            , title: 'Recipes'
+            , id: "recipes"
+            , data: window.parent.recipeList
+           // , page: true
+            , limit: 9999
+            , cols: [[
+                { type: 'radio', fixed: 'left', height: 'auto' }
+                //  , { field: 'ID', title: 'ID', filter: true }
+                , { field: 'NAME', title: 'NAME' }
+
+
+            ]]
+            , done: function (res, curr, count) {
+
+            }
+        });
+
+        //回传给母页面的数据
+        var retdata = {};
+
+        window.callback = function () {
+            var selectData = layui.table.checkStatus('recipes').data;
+            retdata.selectData = selectData;
+            return JSON.stringify(retdata);
+        };
+
+    })
+</script>
