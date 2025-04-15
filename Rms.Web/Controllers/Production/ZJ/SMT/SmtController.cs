@@ -45,6 +45,11 @@ namespace Rms.Web.Controllers.Production
             return View("~/Views/Production/SMT/Index.cshtml");
         }
 
+        public ActionResult SelectRecipe()
+        {
+            return View("~/Views/Production/SMT/SelectRecipe.cshtml");
+        }
+
         public JsonResult GetLines()
         {
             return Json(lineMachines);
@@ -89,6 +94,7 @@ ORDER BY RET.ORDERSORT,RE.ORDERSORT";
 
         public JsonResult PpSelectByPanelSn(string station, string machineId, string panelSn)
         {
+            //station用于以后不同的站点，使用不同规则匹配recipe name
             string message = string.Empty;
             bool result = false;
             try
@@ -147,7 +153,7 @@ ORDER BY RET.ORDERSORT,RE.ORDERSORT";
                 else
                 {
                     AddProductionLog(machineId, "PpSelectByPanelSn", "False", $"{machineId}切换失败，SFIS Error {sfis_step7_res} {errmsg}");
-                    return Json($"{machineId}切换失败，SFIS Error {sfis_step7_res} {errmsg}");                
+                    return Json($"{machineId}切换失败，SFIS Error {sfis_step7_res} {errmsg}");
                 }
 
 
@@ -159,6 +165,101 @@ ORDER BY RET.ORDERSORT,RE.ORDERSORT";
             }
 
         }
+
+        public JsonResult PpSelectGetRecipeList(string station, string machineId, string panelSn)
+        {
+            //station用于以后不同的站点，使用不同规则匹配recipe name
+            string message = string.Empty;
+            bool result = false;
+            try
+            {
+                string sfis_step7_req = $"EQXXXXXX01,{panelSn},7,M001603,JORDAN,,OK,SN_MODEL_NAME_PROJECT_NAME_INFO=???";
+                string sfis_step7_res = string.Empty;
+                string errmsg = string.Empty;
+                if (SendMessageToSfis(sfis_step7_req, ref sfis_step7_res, ref errmsg))
+                {
+                    Dictionary<string, string> sfisParameters = sfis_step7_res.Split(',')[1].Split(' ').Select(keyValueString => keyValueString.Split('='))
+              .Where(keyValueArray => keyValueArray.Length == 2)
+              .ToDictionary(keyValueArray => keyValueArray[0], keyValueArray => keyValueArray[1]);
+                    string modelName = sfisParameters["SN_MODEL_NAME_PROJECT_NAME_INFO"].TrimEnd(';').Split(':')[0];
+                    string projectName = sfisParameters["SN_MODEL_NAME_PROJECT_NAME_INFO"].TrimEnd(';').Split(':')[1];
+                    string groupName = sfisParameters["SN_MODEL_NAME_PROJECT_NAME_INFO"].TrimEnd(';').Split(':')[2];
+
+                    string getEPPDUrl = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/GetEppd";
+                    var getEppdResponseStr = HTTPClientHelper.HttpPostRequestAsync4Json(getEPPDUrl, JsonConvert.SerializeObject(new GetEppdRequest { EquipmentId = machineId }));
+                    var getEppdResponse = JsonConvert.DeserializeObject<GetEppdResponse>(getEppdResponseStr);
+                    if (getEppdResponse.Result)
+                    {
+                        var eppd = getEppdResponse.EPPD;
+
+                        var recipeList = GetRecipeListByModelName(eppd, modelName);
+                        if (recipeList != null)
+                        {
+                            return Json(new { Result = true, RecipeList = recipeList.Select(it => new { NAME = it }).ToList() });
+                        }
+                        else
+                        {
+                            AddProductionLog(machineId, "PpSelectByPanelSn", "False", $"{machineId}中找不到与{modelName}匹配的程式");
+                            return Json(new { Result = false, Message = $"{machineId}中找不到与{modelName}匹配的程式" });
+                        }
+                    }
+                    else
+                    {
+                        AddProductionLog(machineId, "PpSelectByPanelSn", "False", $"{machineId}获取设备程式清单失败");
+                        return Json(new { Result = false, Message = $"{machineId}获取设备程式清单失败" });
+                    }
+                }
+                else
+                {
+                    AddProductionLog(machineId, "PpSelectByPanelSn", "False", $"{machineId}切换失败，SFIS Error {sfis_step7_res} {errmsg}");
+                    return Json(new { Result = false, Message = $"{machineId}切换失败，SFIS Error {sfis_step7_res} {errmsg}" });
+                }
+            }
+            catch (Exception ex)
+            {
+                message = $"切换失败：{ex.Message}";
+            }
+            return Json(new { Result = false, Message = message });
+
+        }
+
+        public JsonResult PpSelectByRecipeName(string machineId, string recipeName)
+        {
+            //station用于以后不同的站点，使用不同规则匹配recipe name
+            string message = string.Empty;
+            bool result = false;
+            try
+            {
+                if (!string.IsNullOrEmpty(recipeName))
+                {
+                    string ppselectUrl = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/PpSelect";
+                    var ppSelectResponseStr = HTTPClientHelper.HttpPostRequestAsync4Json(ppselectUrl, JsonConvert.SerializeObject(new PpSelectRequest { TrueName = User.TRUENAME, EquipmentId = machineId, RecipeName = recipeName }));
+                    var ppSelectResponse = JsonConvert.DeserializeObject<PpSelectResponse>(ppSelectResponseStr);
+                    if (ppSelectResponse.Result)
+                    {
+                        AddProductionLog(machineId, "PpSelectByPanelSn", "True", $"{machineId}发送切换到{recipeName}指令成功");
+                        return Json(new { Result = false, Message = $"{machineId}发送切换到{recipeName}指令成功，请等待设备切换" });
+                    }
+                    else
+                    {
+                        AddProductionLog(machineId, "PpSelectByPanelSn", "False", $"{machineId}发送切换到{recipeName}指令失败:{ppSelectResponse.Message}");
+                        return Json(new { Result = false, Message = $"{machineId}发送切换到{recipeName}指令失败:{ppSelectResponse.Message}" });
+                    }
+                }
+                else
+                {
+                    AddProductionLog(machineId, "PpSelectByPanelSn", "False", $"Recipe Name未选择");
+                    return Json(new { Result = false, Message = $"Recipe Name未选择" });
+                }
+            }
+            catch (Exception ex)
+            {
+                message = $"切换失败：{ex.Message}";
+            }
+            return Json(new { Result = false, Message = message });
+
+        }
+
 
         private string GetRecipeNameByModelName(List<string> EPPD, string modelName)
         {
@@ -176,6 +277,24 @@ ORDER BY RET.ORDERSORT,RE.ORDERSORT";
             }
             return string.Empty;
         }
+
+        private List<string> GetRecipeListByModelName(List<string> EPPD, string modelName)
+        {
+            for (int length = 10; length >= 7; length--)
+            {
+                if (modelName.Length >= length)
+                {
+                    string modelSubstring = modelName.Substring(0, length);
+                    List<string> matches = EPPD.Where(it => it.Length >= length && it.Substring(0, length) == modelSubstring).ToList();
+                    if (matches.Count > 0)
+                    {
+                        return matches;
+                    }
+                }
+            }
+            return null;
+        }
+
 
     }
 }

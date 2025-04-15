@@ -344,8 +344,41 @@
                         layer.msg('请扫入SN');
                         return elem.focus();
                     }
-                    $.post('../Smt/PpSelectByPanelSn', { station: data.station, machineId: machineId, panelSn: value }, function (data) {
-                        layer.open({ content: data });
+                    $.post('../Smt/PpSelectGetRecipeList', { station: data.station, machineId: machineId, panelSn: value }, function (data) {
+                        if (data.Result) {
+                            window.recipeList = data.RecipeList;
+                            layer.open({
+                                title: 'Select Recipe'
+                                , type: 2
+                                , btn: ['确定Confirm', '取消Cancel']
+                                , content: 'SelectRecipe'
+                                , area: ['40%', '85%']
+                                , success: function (layero, index) {
+
+                                }
+                                , yes: function (index) {
+                                    var res = window["layui-layer-iframe" + index].callback();
+                                    var jdata = JSON.parse(res);
+                                    var recipeName = jdata.selectData[0]?.NAME;
+
+                                    //如果选择不为空
+                                    if (recipeName) {
+                                        $.post('../Smt/PpSelectByRecipeName', { machineId: machineId, recipeName: recipeName }, function (pdata) {
+                                            layer.open({ content: pdata.Message });
+                                        });
+                                    } else {
+                                        layer.open({ content: "未选择程式" });
+                                    }
+                                    layer.close(index);
+
+                                }, btn2: function (index, layero) {
+                                    layer.msg('取消操作.Cancel.');
+                                }
+
+                            });
+                        } else {
+                            layer.open({ content: data.Message });
+                        }
                     });
                     // 关闭 prompt
                     layer.close(index);
@@ -364,7 +397,7 @@
             }
         }
         var loadingLog = false;
-        function loadLogs(eqid) {     
+        function loadLogs(eqid) {
             if (!eqid) {
                 var eqinfo = form.val('eqinfo');
                 eqid = eqinfo.eqid;
@@ -404,7 +437,7 @@
                     }
                 });
             }
-           
+
         }
         // 定时加载新日志
         setInterval(loadLogs, 3000);
