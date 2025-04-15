@@ -166,7 +166,7 @@ namespace Rms.Web.Controllers.Rms
         public class VersionForm
         {
             public string ID { get; set; }
-            public string NAME { get; set; }
+            //public string NAME { get; set; }
             public string REMARK { get; set; }
         }
 
@@ -200,7 +200,7 @@ namespace Rms.Web.Controllers.Rms
             db.BeginTran();
             try
             {
-                if (string.IsNullOrEmpty(data.NAME)) return Json(new ResponseResult { result = false, message = "请填写版本号！" });
+                //if (string.IsNullOrEmpty(data.NAME)) return Json(new ResponseResult { result = false, message = "请填写版本号！" });
                 if (string.IsNullOrEmpty(data.REMARK)) return Json(new ResponseResult { result = false, message = "请填写更新说明备注！" });
 
                 var version = db.Queryable<RMS_RECIPE_VERSION>().In(data.ID).First();
