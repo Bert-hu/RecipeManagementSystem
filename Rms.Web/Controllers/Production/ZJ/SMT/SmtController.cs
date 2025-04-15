@@ -179,35 +179,43 @@ ORDER BY RET.ORDERSORT,RE.ORDERSORT";
                 string errmsg = string.Empty;
                 if (SendMessageToSfis(sfis_step7_req, ref sfis_step7_res, ref errmsg))
                 {
-                    Dictionary<string, string> sfisParameters = sfis_step7_res.Split(',')[1].Split(' ').Select(keyValueString => keyValueString.Split('='))
-              .Where(keyValueArray => keyValueArray.Length == 2)
-              .ToDictionary(keyValueArray => keyValueArray[0], keyValueArray => keyValueArray[1]);
-                    string modelName = sfisParameters["SN_MODEL_NAME_PROJECT_NAME_INFO"].TrimEnd(';').Split(':')[0];
-                    string projectName = sfisParameters["SN_MODEL_NAME_PROJECT_NAME_INFO"].TrimEnd(';').Split(':')[1];
-                    string groupName = sfisParameters["SN_MODEL_NAME_PROJECT_NAME_INFO"].TrimEnd(';').Split(':')[2];
-
-                    string getEPPDUrl = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/GetEppd";
-                    var getEppdResponseStr = HTTPClientHelper.HttpPostRequestAsync4Json(getEPPDUrl, JsonConvert.SerializeObject(new GetEppdRequest { EquipmentId = machineId }));
-                    var getEppdResponse = JsonConvert.DeserializeObject<GetEppdResponse>(getEppdResponseStr);
-                    if (getEppdResponse.Result)
+                    if (sfis_step7_res.ToUpper().StartsWith("OK"))
                     {
-                        var eppd = getEppdResponse.EPPD;
+                        Dictionary<string, string> sfisParameters = sfis_step7_res.Split(',')[1].Split(' ').Select(keyValueString => keyValueString.Split('='))
+                 .Where(keyValueArray => keyValueArray.Length == 2)
+                 .ToDictionary(keyValueArray => keyValueArray[0], keyValueArray => keyValueArray[1]);
+                        string modelName = sfisParameters["SN_MODEL_NAME_PROJECT_NAME_INFO"].TrimEnd(';').Split(':')[0];
+                        string projectName = sfisParameters["SN_MODEL_NAME_PROJECT_NAME_INFO"].TrimEnd(';').Split(':')[1];
+                        string groupName = sfisParameters["SN_MODEL_NAME_PROJECT_NAME_INFO"].TrimEnd(';').Split(':')[2];
 
-                        var recipeList = GetRecipeListByModelName(eppd, modelName);
-                        if (recipeList != null)
+                        string getEPPDUrl = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/GetEppd";
+                        var getEppdResponseStr = HTTPClientHelper.HttpPostRequestAsync4Json(getEPPDUrl, JsonConvert.SerializeObject(new GetEppdRequest { EquipmentId = machineId }));
+                        var getEppdResponse = JsonConvert.DeserializeObject<GetEppdResponse>(getEppdResponseStr);
+                        if (getEppdResponse.Result)
                         {
-                            return Json(new { Result = true, RecipeList = recipeList.Select(it => new { NAME = it }).ToList() });
+                            var eppd = getEppdResponse.EPPD;
+
+                            var recipeList = GetRecipeListByModelName(eppd, modelName);
+                            if (recipeList != null)
+                            {
+                                return Json(new { Result = true, RecipeList = recipeList.Select(it => new { NAME = it }).ToList() });
+                            }
+                            else
+                            {
+                                AddProductionLog(machineId, "PpSelectByPanelSn", "False", $"{machineId}中找不到与{modelName}匹配的程式");
+                                return Json(new { Result = false, Message = $"{machineId}中找不到与{modelName}匹配的程式" });
+                            }
                         }
                         else
                         {
-                            AddProductionLog(machineId, "PpSelectByPanelSn", "False", $"{machineId}中找不到与{modelName}匹配的程式");
-                            return Json(new { Result = false, Message = $"{machineId}中找不到与{modelName}匹配的程式" });
+                            AddProductionLog(machineId, "PpSelectByPanelSn", "False", $"{machineId}获取设备程式清单失败");
+                            return Json(new { Result = false, Message = $"{machineId}获取设备程式清单失败" });
                         }
                     }
                     else
                     {
-                        AddProductionLog(machineId, "PpSelectByPanelSn", "False", $"{machineId}获取设备程式清单失败");
-                        return Json(new { Result = false, Message = $"{machineId}获取设备程式清单失败" });
+                        AddProductionLog(machineId, "PpSelectByPanelSn", "False", $"{machineId}切换失败，SFIS Error {sfis_step7_res} {errmsg}");
+                        return Json(new { Result = false, Message = $"{machineId}切换失败，SFIS Error {sfis_step7_res} {errmsg}" });
                     }
                 }
                 else
