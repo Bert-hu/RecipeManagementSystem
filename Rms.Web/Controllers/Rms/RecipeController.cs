@@ -271,18 +271,18 @@ namespace Rms.Web.Controllers.Rms
 
         }
 
-        public JsonResult UploadRcpFromEQP(string versionid, string rcpname)
-        {
-            //var vid = versionid;
-            string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/reloadrecipebody";
-            //string url = $"http://192.168.53.210:8085" + "/api/reloadrecipebody";
-            var body = JsonConvert.SerializeObject(new ReloadRecipeBodyRequest { TrueName = User.TRUENAME, VersionId = versionid, RecipeName = rcpname });
+        //public JsonResult UploadRcpFromEQP(string versionid, string rcpname)
+        //{
+        //    //var vid = versionid;
+        //    string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/reloadrecipebody";
+        //    //string url = $"http://192.168.53.210:8085" + "/api/reloadrecipebody";
+        //    var body = JsonConvert.SerializeObject(new ReloadRecipeBodyRequest { TrueName = User.TRUENAME, VersionId = versionid, RecipeName = rcpname });
 
-            var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(apiURL, body);
-            var res = JsonConvert.DeserializeObject<ReloadRecipeBodyResponse>(apiresult);
-            //GetFileTable(1, 1, versionid);
-            return Json(new { res });
-        }
+        //    var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(apiURL, body);
+        //    var res = JsonConvert.DeserializeObject<ReloadRecipeBodyResponse>(apiresult);
+        //    //GetFileTable(1, 1, versionid);
+        //    return Json(new { res });
+        //}
 
         /// <summary>
         /// 支持golden recipe，versionid是golden machine的recipe version， 要从当前eqpid上传body到golden machine的版本
