@@ -120,13 +120,16 @@
                         <div class="layui-input-inline">
                             <input type="text" name="eqid" id="eqid" autocomplete="off" placeholder="请选择设备" class="layui-input" disabled>
                         </div>
-                        <div class="layui-btn-container">
-                            <button type="button" class="layui-btn" id="ppSelectBySn">扫SN切换程式</button>
-                        </div>
+
                     </div>
                     <div class="layui-form-item">
 
-
+                        <div class="layui-btn-container">
+                            <button type="button" class="layui-btn" id="ppSelectBySn">扫SN切换程式</button>
+                        </div>
+                        <div class="layui-btn-container">
+                            <button type="button" class="layui-btn" id="ppSelectByMo">扫工单切换程式</button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -134,7 +137,7 @@
                 <div class="layui-card">
                     <div class="layui-card-header">历史记录</div>
                     <div class="layui-card-body" id="logCardContainer">
-                        <div id="logContainer" style="overflow-y: scroll auto;font-size:13px"></div>
+                        <div id="logContainer" style="overflow-y: auto;font-size:13px; max-height:30vh"></div>
                     </div>
                 </div>
             </div>
@@ -386,6 +389,57 @@
             }
         });
 
+        $('#ppSelectByMo').on('click', function () {
+            var data = form.val('eqinfo');
+            var machineId = data.eqid;
+            if (machineId) {
+                layer.prompt({ title: machineId + '请扫入工单切换机种', formType: 0 }, function (value, index, elem) {
+                    if (value === null || value === '') {
+                        layer.msg('请扫入Mo');
+                        return elem.focus();
+                    }
+                    $.post('../Smt/PpSelectGetRecipeList_MO', { station: data.station, machineId: machineId, mo: value }, function (data) {
+                        if (data.Result) {
+                            window.recipeList = data.RecipeList;
+                            layer.open({
+                                title: 'Select Recipe'
+                                , type: 2
+                                , btn: ['确定Confirm', '取消Cancel']
+                                , content: 'SelectRecipe'
+                                , area: ['40%', '85%']
+                                , success: function (layero, index) {
+
+                                }
+                                , yes: function (index) {
+                                    var res = window["layui-layer-iframe" + index].callback();
+                                    var jdata = JSON.parse(res);
+                                    var recipeName = jdata.selectData[0]?.NAME;
+
+                                    //如果选择不为空
+                                    if (recipeName) {
+                                        $.post('../Smt/PpSelectByRecipeName', { machineId: machineId, recipeName: recipeName }, function (pdata) {
+                                            layer.open({ content: pdata.Message });
+                                        });
+                                    } else {
+                                        layer.open({ content: "未选择程式" });
+                                    }
+                                    layer.close(index);
+
+                                }, btn2: function (index, layero) {
+                                    layer.msg('取消操作.Cancel.');
+                                }
+
+                            });
+                        } else {
+                            layer.open({ content: data.Message });
+                        }
+                    });
+                    // 关闭 prompt
+                    layer.close(index);
+                });
+            }
+        });
+
         var logContainer = document.getElementById('logContainer');
         var logCardContainer = document.getElementById('logCardContainer');
         var currentlogid;
@@ -407,7 +461,7 @@
                 loadingLog = true;
 
                 $.ajax({
-                    url: '../CommonProduction/GetNewLog', // 替换成您的日志API的实际URL
+                    url: '../CommonProduction/GetNewLog', 
                     type: 'POST',
                     data: {
                         equipmentid: eqid,
@@ -426,8 +480,8 @@
                                 logContainer.appendChild(logDiv);
                             });
 
-                            // 滚动到底部以显示最新内容
-                            logCardContainer.scrollTop = logContainer.scrollHeight;
+                            // 自动滚动到最下方
+                            logContainer.scrollTop = logContainer.scrollHeight;
                         }
                         loadingLog = false;
                     },
@@ -437,8 +491,7 @@
                     }
                 });
             }
-
-        }
+        }    
         // 定时加载新日志
         setInterval(loadLogs, 3000);
     });
