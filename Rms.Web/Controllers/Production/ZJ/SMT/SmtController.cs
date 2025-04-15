@@ -102,7 +102,7 @@ ORDER BY RET.ORDERSORT,RE.ORDERSORT";
                 string sfis_step7_req = $"EQXXXXXX01,{panelSn},7,M001603,JORDAN,,OK,SN_MODEL_NAME_PROJECT_NAME_INFO=???";
                 string sfis_step7_res = string.Empty;
                 string errmsg = string.Empty;
-                if (SendMessageToSfis(sfis_step7_req, ref sfis_step7_res, ref errmsg))
+                if (SendMessageToSfis(sfis_step7_req, ref sfis_step7_res, ref errmsg) && sfis_step7_res.ToUpper().StartsWith("OK"))
                 {
                     Dictionary<string, string> sfisParameters = sfis_step7_res.Split(',')[1].Split(' ').Select(keyValueString => keyValueString.Split('='))
               .Where(keyValueArray => keyValueArray.Length == 2)
@@ -161,9 +161,8 @@ ORDER BY RET.ORDERSORT,RE.ORDERSORT";
             }
             catch (Exception ex)
             {
-                message = $"切换失败：{ex.Message}";
+                return Json($"切换失败：{ex.Message}");
             }
-            return Json(new { Result = false, Message = message });
 
         }
 
