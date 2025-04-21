@@ -28,7 +28,7 @@ namespace Rms.Services.Core.Controllers
 
             if (!string.IsNullOrEmpty(eqpType.GOLDEN_EQID) && eqpType.GOLDEN_RECIPE_TYPE)
             {
-                goldenEqp = db.Queryable<RMS_EQUIPMENT>().In(goldenEqp.FATHER_EQID).First();
+                goldenEqp = db.Queryable<RMS_EQUIPMENT>().In(eqpType.GOLDEN_EQID).First();
             }
 
             var recipegroup = db.Queryable<RMS_RECIPE_GROUP>().First(it => it.NAME == req.RecipeGroupName);

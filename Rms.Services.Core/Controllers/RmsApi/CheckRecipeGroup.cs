@@ -36,7 +36,7 @@ namespace Rms.Services.Core.Controllers
 
             if (!string.IsNullOrEmpty(eqpType.GOLDEN_EQID) && eqpType.GOLDEN_RECIPE_TYPE)
             {
-                goldenEqp = db.Queryable<RMS_EQUIPMENT>().In(goldenEqp.FATHER_EQID).First();
+                goldenEqp = db.Queryable<RMS_EQUIPMENT>().In(eqpType.GOLDEN_EQID).First();
             }
 
             var allRecipes = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == goldenEqp.ID).ToList();//获取设备所有recipe
