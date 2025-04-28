@@ -39,7 +39,7 @@ namespace Rms.Web.Controllers.Production
             new LineMachines{Line = "S77",Aoi_B = "EQAOI00169"},
              new LineMachines{Line = "Z42", Spi= "EQSPI00190",Aoi_B = "EQAOI00213",Reflow="EQP010"},
              new LineMachines{Line = "Test", Spi= "Test",Aoi_B = "Test"},
-                      new LineMachines{Line = "S72",Reflow="EQFRF00125"},
+                      new LineMachines{Line = "S72",Reflow="EQFRF00125",Aoi_F = "EQAOI00232",Aoi_B = "EQAOI00233"},
         };
         public ActionResult Index()
         {
