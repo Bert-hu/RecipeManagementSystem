@@ -211,6 +211,11 @@
                 }
                 , currenteqpid: id
                 , done: function (data) {
+                    if (data.showMessage) {
+                        layer.alert(data.msg);
+                    }
+
+
                     newversionlock = data.newversionlock;
                     var that = $("#rcptable").siblings();
                     //console.log(data);
@@ -353,6 +358,7 @@
                             $.ajax({
                                 url: '../Recipe/AddNewVersion',
                                 data: {
+                                    eqid: window.currenteqid,
                                     recipeid: versiontable.config.currentrcpid,
                                 },
                                 async: false,
@@ -363,7 +369,7 @@
                                         ShowRCPTable(window.currenteqid)
                                         ShowVersionDetail(response.data.versionid);
                                     } else {
-                                        layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + response.message + '</em>', { icon: response.result ? 1 : 4 });
+                                        layer.alert('<em style="color:black;font-style:normal;font-weight:normal">' + response.Message + '</em>', { icon: response.result ? 1 : 4 });
                                     }
 
                                     result = response.result;
@@ -433,6 +439,7 @@
                             dataType: 'json',
                             url: '../Recipe/DownloadRecipeToApi',
                             data: {
+                                eqid: window.currenteqid,
                                 rcpID: selectdata.RECIPE_ID
                             },
                             success: function (data) {
@@ -442,11 +449,11 @@
                                 if (resultData.Result) {
                                     layer.close(index)
                                     window.rcptable.reload();
-                                    layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + 'Recipe download succeed.' + '</em>');
+                                    layer.alert('<em style="color:black;font-style:normal;font-weight:normal">' + 'Recipe download succeed.' + '</em>');
                                     //return false;
                                 } else {
 
-                                    layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + 'Error:' + resultData.Message + '</em>');
+                                    layer.alert('<em style="color:black;font-style:normal;font-weight:normal">' + 'Error:' + resultData.Message + '</em>');
                                     //return true;
                                 }
 
@@ -480,11 +487,11 @@
                                 if (resultData.Result) {
                                     layer.close(index)
                                     window.rcptable.reload();
-                                    layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + 'PP-SELECT succeed.' + '</em>');
+                                    layer.alert('<em style="color:black;font-style:normal;font-weight:normal">' + 'PP-SELECT succeed.' + '</em>');
                                     //return false;
                                 } else {
 
-                                    layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + 'Error:' + resultData.Message + '</em>');
+                                    layer.alert('<em style="color:black;font-style:normal;font-weight:normal">' + 'Error:' + resultData.Message + '</em>');
                                     //return true;
                                 }
 
@@ -497,10 +504,16 @@
                 });
             }
             else if (layEvent === 'compare') {
-                $.post('../Recipe/CompareRecipe', { reciepId: selectdata.RECIPE_ID }, function (res) {
+                var loadingIndex = layer.load();
+                setTimeout(function () {
+                    layer.close(loadingIndex);
+                    layer.alert('<em style="color:black;font-style:normal;font-weight:normal">Timeout</em>', { icon: 2 });
+
+                }, 5000);
+                $.post('../Recipe/CompareRecipe', { eqid:  window.currenteqid, reciepId: selectdata.RECIPE_ID }, function (res) {
+                    layer.close(loadingIndex);
 
                     var icon = res.Result ? 1 : 2;
-                    //layer.msg('<em style="color:black;font-style:normal;font-weight:normal">' + res.Message + '</em>', { icon: icon });
 
                     if (res.result) {
                         layer.alert('<em style="color:black;font-style:normal;font-weight:normal">' + res.Message + '</em>', { icon: icon });
@@ -553,17 +566,14 @@
                                 setTimeout(function () {
                                     layer.close(loadingIndex);
                                 }, 10);
-                                var resultData = data.replyItem
 
-                                if (resultData.Result) {
+                                if (data.Result) {
                                     layer.close(index)
                                     window.rcptable.reload();
-                                    layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + 'Recipe Added.' + '</em>');
-                                    //return false;
-                                } else {
+                                    layer.alert('<em style="color:black;font-style:normal;font-weight:normal">' + 'Recipe Added.' + '</em>');
 
-                                    layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + 'Error:' + resultData.Message + '</em>');
-                                    //return true;
+                                } else {
+                                    layer.alert('<em style="color:black;font-style:normal;font-weight:normal">' + 'Error:' + data.Message + '</em>');
                                 }
 
                             },

@@ -42,7 +42,17 @@ namespace Rms.Web.Controllers.Rms
         }
         public ActionResult GetRecipe(int page, int limit, string EQID)
         {
+            var showMessage = false;
+            var message = string.Empty;
             var eqp = db.Queryable<RMS_EQUIPMENT>().In(EQID).First();
+            var type = db.Queryable<RMS_EQUIPMENT_TYPE>().InSingle(eqp.TYPE);
+            if (type.GOLDEN_RECIPE_TYPE && EQID != type.GOLDEN_EQID)
+            {
+                showMessage = true;
+                message = $"当前设备Type启动了Golden Recipe，将显示Golden Machine Recipe清单。如需新增/升版操作，请切换到{type.GOLDEN_EQID}";
+                EQID = type.GOLDEN_EQID;
+            }
+
             var totalnum = 0;
             List<RecipeVersion> RecipeVersionList = db.Queryable<RMS_RECIPE>()
                 .Where(it => it.EQUIPMENT_ID == EQID)
@@ -64,7 +74,9 @@ namespace Rms.Web.Controllers.Rms
                 data = RecipeVersionList,
                 code = 0,
                 count = totalnum,
-                canEdit = eqp.RECIPE_TYPE == "secsSml"
+                canEdit = eqp.RECIPE_TYPE == "secsSml",
+                showMessage = showMessage,
+                msg = message
 
             }, JsonRequestBehavior.AllowGet);
 
@@ -89,7 +101,8 @@ namespace Rms.Web.Controllers.Rms
                         rcpItem.NAME = item;
                         rcpItem.EQUIPMENT_ID = EQID;
                         recipelist.Add(rcpItem);
-                    };
+                    }
+                    ;
                     //recipelist = recipelist.ToPageList(page, limit, ref totalnum);
                     return Json(new
                     {
@@ -140,8 +153,16 @@ namespace Rms.Web.Controllers.Rms
 
 
         [LogAttribute]
-        public JsonResult AddNewVersion(string recipeid)
+        public JsonResult AddNewVersion(string eqid, string recipeid)
         {
+            var eqp = db.Queryable<RMS_EQUIPMENT>().In(eqid).First();
+            var type = db.Queryable<RMS_EQUIPMENT_TYPE>().InSingle(eqp.TYPE);
+            if (type.GOLDEN_RECIPE_TYPE && eqid != type.GOLDEN_EQID)
+            {
+                var message = $"当前设备Type启用了Golden Recipe。如需新增/升版操作，请切换到{type.GOLDEN_EQID}";
+                return Json(new ResponseMessage { Result = false, Message = message });
+            }
+
             var recipe = db.Queryable<RMS_RECIPE>().In(recipeid).First();
             string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/addnewrecipeversion";
             var body = JsonConvert.SerializeObject(new AddNewRecipeVersionRequest { TrueName = User.TRUENAME, EquipmentId = recipe.EQUIPMENT_ID, RecipeName = recipe.NAME, RecipeId = recipeid });
@@ -291,7 +312,7 @@ namespace Rms.Web.Controllers.Rms
         /// <param name="rcpname"></param>
         /// <param name="eqpid"></param>
         /// <returns></returns>
-        public JsonResult UploadRcpFromEQP(string versionid, string rcpname,string eqpid)
+        public JsonResult UploadRcpFromEQP(string versionid, string rcpname, string eqpid)
         {
             //var vid = versionid;
             string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/reloadrecipebody";
@@ -348,13 +369,21 @@ namespace Rms.Web.Controllers.Rms
         [LogAttribute]
         public JsonResult AddNewRecipeToApi(string EQID, string rcpname)
         {
+            var eqp = db.Queryable<RMS_EQUIPMENT>().In(EQID).First();
+            var type = db.Queryable<RMS_EQUIPMENT_TYPE>().InSingle(eqp.TYPE);
+            if (type.GOLDEN_RECIPE_TYPE && EQID != type.GOLDEN_EQID)
+            {
+                var message = $"当前设备Type启用了Golden Recipe。如需新增/升版操作，请切换到{type.GOLDEN_EQID}";
+                return Json(new ResponseMessage { Result = false, Message = message });
+            }
+
 
             string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/addnewrecipe";
             var body = JsonConvert.SerializeObject(new AddNewRecipeRequest { TrueName = User.TRUENAME, EquipmentId = EQID, RecipeName = rcpname });
 
             var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(apiURL, body);
             var replyItem = JsonConvert.DeserializeObject<AddNewRecipeResponse>(apiresult);
-            return Json(new { replyItem });
+            return Json(replyItem);
         }
 
         public JsonResult DeleteFile(string fileid)
@@ -386,13 +415,13 @@ namespace Rms.Web.Controllers.Rms
             return Json(new { });
         }
         [LogAttribute]
-        public JsonResult DownloadRecipeToApi(string rcpID)
+        public JsonResult DownloadRecipeToApi(string eqid, string rcpID)
         {
             var db = DbFactory.GetSqlSugarClient();
             var recipe = db.Queryable<RMS_RECIPE>().In(rcpID).First();
 
             string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/downloadeffectiverecipetomachine";
-            var body = JsonConvert.SerializeObject(new DownloadEffectiveRecipeToMachineRequest { TrueName = User.TRUENAME, EquipmentId = recipe.EQUIPMENT_ID, RecipeName = recipe.NAME });
+            var body = JsonConvert.SerializeObject(new DownloadEffectiveRecipeToMachineRequest { TrueName = User.TRUENAME, EquipmentId = eqid, RecipeName = recipe.NAME });
 
             var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(apiURL, body);
             var replyItem = JsonConvert.DeserializeObject<DownloadEffectiveRecipeToMachineResponse>(apiresult);
@@ -547,7 +576,7 @@ namespace Rms.Web.Controllers.Rms
                 var serverdata = db.Queryable<RMS_RECIPE_DATA>().In(version.RECIPE_DATA_ID).First();
 
                 // 非标设备需要mapping参数字典
-                if (eqp.RECIPE_TYPE == "GeneralNonSecs"|| eqp.RECIPE_TYPE == "NonSecsGroup")
+                if (eqp.RECIPE_TYPE == "GeneralNonSecs" || eqp.RECIPE_TYPE == "NonSecsGroup")
                 {
                     var dataStr = Encoding.UTF8.GetString(serverdata.CONTENT);
                     JObject goldenObj = JObject.Parse(dataStr);
@@ -558,7 +587,7 @@ namespace Rms.Web.Controllers.Rms
                         var key = property.Name;
                         var value = property.Value;
                         var name = paramDict.Where(it => it.Key == key).FirstOrDefault()?.Name;
-                        var item = new 
+                        var item = new
                         {
                             Key = key,
                             Name = name,
@@ -567,9 +596,9 @@ namespace Rms.Web.Controllers.Rms
 
                         body.Add(item);
                     }
-                    return Json(new { Result = true, BodySml =  JsonConvert.SerializeObject(body), RecipeType = eqp.RECIPE_TYPE });
+                    return Json(new { Result = true, BodySml = JsonConvert.SerializeObject(body), RecipeType = eqp.RECIPE_TYPE });
                 }
-                
+
                 var dataobj = ByteArrayToObject(serverdata.CONTENT);
                 var bodySml = Encoding.Unicode.GetString((dataobj as RecipeBody).FormattedBody);
 
@@ -600,7 +629,7 @@ namespace Rms.Web.Controllers.Rms
             }
         }
 
-        public JsonResult CompareRecipe(string reciepId)
+        public JsonResult CompareRecipe(string eqid, string reciepId)
         {
             var db = DbFactory.GetSqlSugarClient();
             var recipe = db.Queryable<RMS_RECIPE>().In(reciepId).First();
