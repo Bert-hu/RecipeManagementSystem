@@ -505,12 +505,14 @@
             }
             else if (layEvent === 'compare') {
                 var loadingIndex = layer.load();
-                setTimeout(function () {
+                var timeoutId = setTimeout(function () {
                     layer.close(loadingIndex);
                     layer.alert('<em style="color:black;font-style:normal;font-weight:normal">Timeout</em>', { icon: 2 });
-
                 }, 5000);
-                $.post('../Recipe/CompareRecipe', { eqid:  window.currenteqid, reciepId: selectdata.RECIPE_ID }, function (res) {
+
+                $.post('../Recipe/CompareRecipe', { eqid: window.currenteqid, reciepId: selectdata.RECIPE_ID }, function (res) {
+                    // 清除超时计时器
+                    clearTimeout(timeoutId);
                     layer.close(loadingIndex);
 
                     var icon = res.Result ? 1 : 2;
@@ -519,8 +521,12 @@
                         layer.alert('<em style="color:black;font-style:normal;font-weight:normal">' + res.Message + '</em>', { icon: icon });
                     } else {
                         layer.alert('<em style="color:red;font-style:normal;font-weight:bold">' + res.Message + '</em>', { icon: icon });
-
                     }
+                }).fail(function () {
+                    // 清除超时计时器
+                    clearTimeout(timeoutId);
+                    layer.close(loadingIndex);
+                    layer.alert('<em style="color:red;font-style:normal;font-weight:bold">请求失败</em>', { icon: 2 });
                 });
             }
             //else if (layEvent === 'editbody'){
