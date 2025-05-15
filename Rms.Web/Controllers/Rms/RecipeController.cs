@@ -635,7 +635,7 @@ namespace Rms.Web.Controllers.Rms
             var recipe = db.Queryable<RMS_RECIPE>().In(reciepId).First();
 
             string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/CompareRecipeBody";
-            var body = JsonConvert.SerializeObject(new CompareRecipeBodyRequest { EquipmentId = recipe.EQUIPMENT_ID, RecipeName = recipe.NAME });
+            var body = JsonConvert.SerializeObject(new CompareRecipeBodyRequest { EquipmentId = eqid, RecipeName = recipe.NAME });
 
             var apiresult = HTTPClientHelper.HttpPostRequestAsync4Json(apiURL, body);
             if (string.IsNullOrEmpty(apiresult))
