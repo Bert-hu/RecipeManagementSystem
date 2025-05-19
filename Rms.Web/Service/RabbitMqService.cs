@@ -15,6 +15,7 @@ namespace Rms.Web
         //private static log4net.ILog Log = log4net.LogManager.GetLogger("Logger");
 
         static RabbitMqHelper rabbitMq;
+        public static string subConsumeQueue { get; set; }
 
         static RabbitMqService()
         {
@@ -43,7 +44,7 @@ namespace Rms.Web
                 rabbitMq?.Produce(routingKey, message, trans.ExpireSecond);
 
             }
-            catch (Exception )
+            catch (Exception)
             {
                 //Log.Error(ex);
             }
@@ -55,6 +56,10 @@ namespace Rms.Web
         {
             try
             {
+                if (trans.NeedReply)
+                {
+                    trans.ReplyChannel = subConsumeQueue;
+                }
 
                 var tcs = new TaskCompletionSource<RabbitMqTransaction>();
                 var message = JsonConvert.SerializeObject(trans);
@@ -73,7 +78,7 @@ namespace Rms.Web
                     return null;
                 }
             }
-            catch (Exception )
+            catch (Exception)
             {
                 return null;
             }
@@ -102,13 +107,13 @@ namespace Rms.Web
 
                 if (trans.IsReply)
                 {
-              
+
 
                     var tid = trans.TransactionID;
                     if (dictionary.TryGetValue(tid, out TaskCompletionSource<RabbitMqTransaction> tcs))
                     {
                         tcs.SetResult(trans);
-                       // dictionary.TryRemove(tid, out _);
+                        // dictionary.TryRemove(tid, out _);
                     }
                 }
                 else
@@ -123,7 +128,7 @@ namespace Rms.Web
                     }
                 }
             }
-            catch (Exception )
+            catch (Exception)
             {
                 //Log.Error(ex.Message);
             }

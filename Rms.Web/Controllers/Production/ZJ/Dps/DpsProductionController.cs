@@ -80,14 +80,14 @@ ORDER BY RET.ORDERSORT,RE.ORDERSORT";
                             }
                             else
                             {
-                                var ListenChannel = ConfigurationManager.AppSettings["ListenChannel"];
+                                // var ListenChannel = ConfigurationManager.AppSettings["ListenChannel"];
                                 var para = new Dictionary<string, object>() { { "LotName", lotid }, { "RecipeName", recipe.NAME } };
                                 var trans = new RabbitMqTransaction
                                 {
                                     TransactionName = $"Port{port}LotStart",
                                     EquipmentID = equipmentid,
                                     NeedReply = true,
-                                    ReplyChannel = ListenChannel,
+                                    //ReplyChannel = ListenChannel,
                                     Parameters = para
                                 };
                                 var rabbitmqroute = $"EAP.SecsClient.{equipmentid}";
@@ -229,7 +229,7 @@ ORDER BY ORDER_SORT", equipmentid);
                                                 eqp.CURRENT_PRODUCT = lotid;
                                                 eqp.LASTRUN_RECIPE_ID = recipe.ID;
                                                 eqp.LASTRUN_RECIPE_TIME = DateTime.Now;
-                                                db.Updateable<RMS_EQUIPMENT>(eqp).UpdateColumns(it => new {it.CURRENT_MODEL_NAME, it.CURRENT_PRODUCT, it.LASTRUN_RECIPE_ID, it.LASTRUN_RECIPE_TIME }).ExecuteCommand();
+                                                db.Updateable<RMS_EQUIPMENT>(eqp).UpdateColumns(it => new { it.CURRENT_MODEL_NAME, it.CURRENT_PRODUCT, it.LASTRUN_RECIPE_ID, it.LASTRUN_RECIPE_TIME }).ExecuteCommand();
                                             }
                                             else//SFIS获取LOT INFO失败
                                             {
@@ -300,7 +300,7 @@ ORDER BY ORDER_SORT", equipmentid);
                         eqp.CURRENT_PRODUCT = null;
                         eqp.CURRENT_MODEL_NAME = null;
                         eqp.LASTRUN_RECIPE_TIME = DateTime.Now;
-                        db.Updateable<RMS_EQUIPMENT>(eqp).UpdateColumns(it => new { it.CURRENT_PRODUCT,it.CURRENT_MODEL_NAME, it.LASTRUN_RECIPE_TIME }).ExecuteCommand();
+                        db.Updateable<RMS_EQUIPMENT>(eqp).UpdateColumns(it => new { it.CURRENT_PRODUCT, it.CURRENT_MODEL_NAME, it.LASTRUN_RECIPE_TIME }).ExecuteCommand();
                     }
                     else//SFIS获取LOT INFO失败
                     {

@@ -28,6 +28,7 @@ namespace Rms.Web
             var RabbitMqUser = CommonConfiguration.Configs["RabbitMqUser"];
             var RabbitMqPassword = CommonConfiguration.Configs["RabbitMqPassword"];
             var ListenChannel = ConfigurationManager.AppSettings["ListenChannel"];
+            RabbitMqService.subConsumeQueue = ListenChannel + "." + Guid.NewGuid().ToString("N");
 
 
             var isdebugmode = ConfigurationManager.AppSettings["IsDebugMode"].ToUpper() == "TRUE";
@@ -35,12 +36,13 @@ namespace Rms.Web
 
 #if DEBUG
 
-           // RabbitMqService.Initiate("192.168.53.174", "admin", "admin", 5672);
-            //RabbitMqService.BeginConsume(ListenChannel);       //debugger 环境
+           //RabbitMqService.Initiate("192.168.53.174", "admin", "admin", 5672);
+           //RabbitMqService.BeginConsume(ListenChannel);       //debugger 环境
 
 #else
       RabbitMqService.Initiate(RabbitMqHost, RabbitMqUser, RabbitMqPassword, RabbitMqPort);
                 RabbitMqService.BeginConsume(ListenChannel);
+                RabbitMqService.BeginConsume(RabbitMqService.subConsumeQueue);  
 #endif
 
         }
