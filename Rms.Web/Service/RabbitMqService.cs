@@ -59,6 +59,7 @@ namespace Rms.Web
                 if (trans.NeedReply)
                 {
                     trans.ReplyChannel = subConsumeQueue;
+
                 }
 
                 var tcs = new TaskCompletionSource<RabbitMqTransaction>();
