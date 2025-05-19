@@ -16,27 +16,43 @@ namespace Rms.Services.Core.RabbitMq.TransactionHandler
             var repTrans = trans.GetReplyTransaction();
             try
             {
+                string message = string.Empty;
+                bool result = false;
                 var EquipmentId = trans.EquipmentID;
                 var RecipeName = string.Empty;
                 //if (trans.Parameters.TryGetValue("EquipmentId", out object _equipmentId)) EquipmentId = _equipmentId?.ToString();
                 if (trans.Parameters.TryGetValue("RecipeName", out object _recipeName)) RecipeName = _recipeName?.ToString();
 
-                var recipe = sqlSugarClient.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == EquipmentId && it.NAME == RecipeName).First();
-                if (recipe == null)
+                var eqp = sqlSugarClient.Queryable<RMS_EQUIPMENT>().In(EquipmentId).First();
+                if (eqp == null)
                 {
-                    repTrans.Parameters.Add("Result", false);
-                    repTrans.Parameters.Add("Message", $"Recipe does not exist in RMS");
+                    message = $"Euipment '{EquipmentId}' not exists!";
                 }
                 else
                 {
-                    var recipe_version = sqlSugarClient.Queryable<RMS_RECIPE_VERSION>().In(recipe.VERSION_EFFECTIVE_ID).First();
-                    var eqp = sqlSugarClient.Queryable<RMS_EQUIPMENT>().In(recipe.EQUIPMENT_ID).First();
-                    RmsTransactionService service = new RmsTransactionService(sqlSugarClient, rabbitMq);
-                    (var result, var message) = service.CompareRecipe(eqp, recipe_version.ID);
-                    repTrans.Parameters.Add("Result", result);
-                    repTrans.Parameters.Add("Message", message);
-                }
+                    var eqpType = sqlSugarClient.Queryable<RMS_EQUIPMENT_TYPE>().In(eqp.TYPE).First();
+                    RMS_EQUIPMENT goldenEqp = eqp;//默认为自己
 
+                    if (!string.IsNullOrEmpty(eqpType.GOLDEN_EQID) && eqpType.GOLDEN_RECIPE_TYPE)
+                    {
+                        goldenEqp = sqlSugarClient.Queryable<RMS_EQUIPMENT>().In(eqpType.GOLDEN_EQID).First();
+                    }
+
+                    var recipe = sqlSugarClient.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == goldenEqp.ID && it.NAME == RecipeName).First();
+                    if (recipe == null)
+                    {
+                        result = false;
+                        message = $"Recipe does not exist in RMS";
+                    }
+                    else
+                    {
+                        var recipe_version = sqlSugarClient.Queryable<RMS_RECIPE_VERSION>().In(recipe.VERSION_EFFECTIVE_ID).First();
+                        RmsTransactionService service = new RmsTransactionService(sqlSugarClient, rabbitMq);
+                        (result, message) = service.CompareRecipe(eqp, recipe_version.ID);
+                    }
+                }
+                repTrans.Parameters.Add("Result", result);
+                repTrans.Parameters.Add("Message", message);
 
             }
             catch (Exception ex)
