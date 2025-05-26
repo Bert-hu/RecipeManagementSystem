@@ -157,11 +157,11 @@ namespace Rms.Web.Controllers.Rms
         {
             var eqp = db.Queryable<RMS_EQUIPMENT>().In(eqid).First();
             var type = db.Queryable<RMS_EQUIPMENT_TYPE>().InSingle(eqp.TYPE);
-            if (type.GOLDEN_RECIPE_TYPE && eqid != type.GOLDEN_EQID)
-            {
-                var message = $"当前设备Type启用了Golden Recipe。如需新增/升版操作，请切换到{type.GOLDEN_EQID}";
-                return Json(new ResponseResult { result = false, message = message });
-            }
+            //if (type.GOLDEN_RECIPE_TYPE && eqid != type.GOLDEN_EQID)
+            //{
+            //    var message = $"当前设备Type启用了Golden Recipe。如需新增/升版操作，请切换到{type.GOLDEN_EQID}";
+            //    return Json(new ResponseResult { result = false, message = message });
+            //}
 
             var recipe = db.Queryable<RMS_RECIPE>().In(recipeid).First();
             string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/addnewrecipeversion";
@@ -371,11 +371,11 @@ namespace Rms.Web.Controllers.Rms
         {
             var eqp = db.Queryable<RMS_EQUIPMENT>().In(EQID).First();
             var type = db.Queryable<RMS_EQUIPMENT_TYPE>().InSingle(eqp.TYPE);
-            if (type.GOLDEN_RECIPE_TYPE && EQID != type.GOLDEN_EQID)
-            {
-                var message = $"当前设备Type启用了Golden Recipe。如需新增/升版操作，请切换到{type.GOLDEN_EQID}";
-                return Json(new ResponseMessage { Result = false, Message = message });
-            }
+            //if (type.GOLDEN_RECIPE_TYPE && EQID != type.GOLDEN_EQID)
+            //{
+            //    var message = $"当前设备Type启用了Golden Recipe。如需新增/升版操作，请切换到{type.GOLDEN_EQID}";
+            //    return Json(new ResponseMessage { Result = false, Message = message });
+            //}
 
 
             string apiURL = ConfigurationManager.AppSettings["EAP.API"].ToString() + "/api/addnewrecipe";
