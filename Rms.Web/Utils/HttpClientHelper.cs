@@ -135,7 +135,7 @@ namespace Rms.Web.Utils
                 {
                     http.DefaultRequestHeaders.Add("User-Agent", @"Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)");
                     http.DefaultRequestHeaders.Add("Accept", @"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
-                    http.Timeout = TimeSpan.FromSeconds(120);
+                    http.Timeout = TimeSpan.FromSeconds(10);
                     HttpResponseMessage message = null;
                     using (Stream dataStream = new MemoryStream(Encoding.UTF8.GetBytes(strBody) ?? new byte[0]))
                     {
