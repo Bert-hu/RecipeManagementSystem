@@ -370,7 +370,11 @@
 
             //load recipe body
             layui.$('#loadbody').on('click', function () {
-
+                var loadingIndex = layer.load(1,{shade:0.3});
+                var timeoutId = setTimeout(function () {
+                    layer.close(loadingIndex);
+                    layer.alert('<em style="color:black;font-style:normal;font-weight:normal">Timeout</em>', { icon: 2 });
+                }, 10000);
                 $.ajax({
                     type: 'post',
                     dataType: 'json',
@@ -381,6 +385,8 @@
                         eqpid: currenteqid
                     },
                     success: function (data) {
+                        clearTimeout(timeoutId);
+                        layer.close(loadingIndex);
                         console.log(data.res.Message)
                         var message = data.res.Message;
                         //console.log('testest')

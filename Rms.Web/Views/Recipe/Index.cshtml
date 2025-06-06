@@ -504,7 +504,7 @@
                 });
             }
             else if (layEvent === 'compare') {
-                var loadingIndex = layer.load();
+                var loadingIndex = layer.load(1, { shade: 0.3 });
                 var timeoutId = setTimeout(function () {
                     layer.close(loadingIndex);
                     layer.alert('<em style="color:black;font-style:normal;font-weight:normal">Timeout</em>', { icon: 2 });
@@ -559,7 +559,7 @@
                         var res = window["layui-layer-iframe" + index].callback();
                         //console.log(res);
                         var data = JSON.parse(res);
-                        var loadingIndex = layer.load();
+                        var loadingIndex = layer.load(1, { shade: 0.3 });
                         $.ajax({
                             type: 'post',
                             dataType: 'json',
@@ -707,7 +707,7 @@
                 , yes: function (index) {
                     var res = window["layui-layer-iframe" + index].callback();
 
-                    var loadingIndex = layer.load();
+                    var loadingIndex = layer.load(1, { shade: 0.3 });
                     $.ajax({
                         type: 'post',
                         contentType: 'application/x-www-form-urlencoded; charset=UTF-8',

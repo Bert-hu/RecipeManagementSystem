@@ -225,7 +225,7 @@
                 //isAdd, 此次操作是新增还是删除
                 var isAdd = data.isAdd;
 
-                var loadingIndex = layer.load();
+                var loadingIndex = layer.load(1, { shade: 0.3 });
 
                 //console.log(change);
                 //console.log(arr);
@@ -532,7 +532,7 @@
                 area: ['300px', '35px'] //自定义文本域宽高
             }, function (value, index, elem) {
                 layer.close(index);
-                var loadingIndex = layer.load();
+                var loadingIndex = layer.load(1, { shade: 0.3 });
                 $.ajax({
                     type: 'post',
                     dataType: 'json',
