@@ -193,6 +193,8 @@ namespace Rms.Services.Core.Rms.RecipeTypeFunction
         {
             try
             {
+                var eqp = db.Queryable<RMS_EQUIPMENT>().InSingle(EquipmentId);
+
                 var recipe_version = db.Queryable<RMS_RECIPE_VERSION>().InSingle(RecipeVersionId);
                 if (recipe_version.RECIPE_DATA_ID == null)
                 {
@@ -210,13 +212,29 @@ namespace Rms.Services.Core.Rms.RecipeTypeFunction
                 var paras = Encoding.Unicode.GetString((dataobj as RecipeBody).FormattedBody);
                 //var body = Convert.ToBase64String(data);
 
+                var specList = db.Queryable<RMS_PARAMETER_SCOPE>().Where(it => it.RecipeID == recipe.ID).ToList();
+                var specDictList = db.Queryable<RMS_PARAMETER_DIC>().Where(it => it.EQ_TYPE_ID == eqp.TYPE).ToList();
+                var specResult = (from a in specList
+                                  join b in specDictList on a.ParamKey equals b.ID
+                                  select new RMS_PARAMETER_SCOPE
+                                  {
+                                      ID = a.ID,
+                                      PARAMETER_NAME = b.Key,
+                                      Type = a.Type,
+                                      LCL = a.LCL,
+                                      UCL = a.UCL,
+                                      EnumValue = a.EnumValue,
+
+                                  }).ToList();
+
+
                 var trans = new RabbitMqTransaction
                 {
                     TransactionName = "CompareRecipe",
                     EquipmentID = EquipmentId,
                     NeedReply = true,
                     ExpireSecond = 15,
-                    Parameters = new Dictionary<string, object>() { { "RecipeName", recipe.NAME }, { "RecipeBody", body },{ "RecipeParameters" , paras } }
+                    Parameters = new Dictionary<string, object>() { { "RecipeName", recipe.NAME }, { "RecipeBody", body },{ "RecipeParameters" , paras } ,{ "RecipeParameterScope", specResult } }
                 };
                 var rabbitRes = rabbitMq.ProduceWaitReply(rabbitMqRoute, trans);
                 if (rabbitRes != null)
