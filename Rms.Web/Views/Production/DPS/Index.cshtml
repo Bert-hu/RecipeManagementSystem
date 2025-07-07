@@ -93,8 +93,8 @@
                                     <button type="button" class="layui-btn" id="downloadbylotbtn">
                                         <i class="layui-icon layui-icon-upload layui-font-12"></i>By lot下载机种
                                     </button>
-                                    <button type="button" class="layui-btn" id="downloadbylotbtn" style="display: none">
-                                        <i class="layui-icon layui-icon-upload layui-font-12"></i>By lot下载机种
+                                    <button type="button" class="layui-btn" id="comparerecipe">
+                                        <i class="layui-icon layui-icon-upload layui-font-12"></i>比较Recipe内容
                                     </button>
                                 </div>
                             </div>
@@ -202,6 +202,7 @@
             el: '#equipments',
             //initValue: [0],
             radio: true,
+            filterable: true,
             repeat: true,
             clickClose: true,
             model: {
@@ -570,6 +571,44 @@
 
             });
         });
+        $("#comparerecipe").click(function () {
+            var loadingIndex = layer.load(1, { shade: 0.3 });
+            $.ajax({
+                type: 'post',
+                dataType: 'json',
+                url: '../DpsProduction/CompareCurrentRecipe',
+                data: {
+                    eqid: equipmentSel.getValue()[0].value
+                },
+                success: function (data) {
+                    //setTimeout(function () {
+                    //    loadLogs();
+                    //    LoadEquipmentInfo();
+                    //    layer.close(loadingIndex);
+                    //}, 10);
+                    if (data.Result) {
+                        //layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + 'Recipe download succeed.' + '</em>');
+                        layer.open({
+                            title: '下载成功'
+                            , content: data.Message
+                        });
+                        WaitAndRefresh();
+                    } else {
+                        layer.close(loadingIndex);
+                        layer.open({
+                            title: '下载失败'
+                            , content: data.Message
+                        });
+                    }
+
+                },
+                error: function (err) {
+                    console.log(err)
+                }
+            });
+
+        });
+
         $("#portalotstart").click(function () {
             PortLotStart("A");
         });

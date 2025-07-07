@@ -161,11 +161,10 @@
                     success: function (data) {
 
                         processselect.innerHTML = "";
-                        // 添加默认选项
-                        //var defaultOption = document.createElement("option");
-                        //defaultOption.value = "";
-                        //defaultOption.text = "请选择Process";
-                        //processselect.add(defaultOption);
+                        // 添加all选项
+                        var alloption = document.createElement("option");
+                        alloption.text = 'All';
+                        processselect.add(alloption);
                         // 自动生成其他选项
                         for (var i = 0; i < data.length; i++) {
                             var option = document.createElement("option");
@@ -248,6 +247,9 @@
                 , currenteqpid: id
                 , done: function (data) {
                     //console.log(data.data[0])
+                    if (data.showMessage) {
+                        layer.alert(data.msg);
+                    }
                     var that = $("#rcptable").siblings();
                     if (data.data.length > 0) {
                         selid = data.data[0].RECIPE_ID

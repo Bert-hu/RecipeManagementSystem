@@ -269,12 +269,10 @@
                         console.log(data);
 
                         processselect.innerHTML = "";
-                        // 添加默认选项
-                        //var defaultOption = document.createElement("option");
-                        //defaultOption.value = "";
-                        //defaultOption.text = "请选择Process";
-                        //processselect.add(defaultOption);
-                        // 自动生成其他选项
+                        // 添加all选项
+                        var alloption = document.createElement("option");
+                        alloption.text = 'All';
+                        processselect.add(alloption);
                         for (var i = 0; i < data.length; i++) {
                             var option = document.createElement("option");
                             option.text = data[i];

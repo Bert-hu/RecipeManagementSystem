@@ -40,7 +40,7 @@ namespace Rms.Web.Controllers.Ems
 
             if (!string.IsNullOrEmpty(processfilter))
             {
-                eqptypes = eqptypes.Where(it => it.PROCESS == processfilter).OrderBy(it => it.ORDERSORT).ToList();
+                eqptypes = eqptypes.Where(it => processfilter == "All" || it.PROCESS == processfilter).OrderBy(it => it.ORDERSORT).ToList();
             }
 
             var rawdata = db.Queryable<RMS_EQUIPMENT>().OrderBy(it => it.ORDERSORT).ToList();

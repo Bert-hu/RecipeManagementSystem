@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Web.Mvc;
+using System.Web.UI.WebControls.WebParts;
 
 namespace Rms.Web.Controllers.Production
 {
@@ -35,6 +36,61 @@ ORDER BY RET.ORDERSORT,RE.ORDERSORT";
 
 
             return Json(data, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult CompareCurrentRecipe(string eqid)
+        {
+            if (User == null)
+            {
+                return Json(new { Result = false, Message = "未登录" }, JsonRequestBehavior.AllowGet);
+            }
+            bool result = false;
+            string repmsg = $"";
+            try
+            {
+                var sql = string.Format(@"SELECT 
+RE.ID,RE.NAME,RE.LASTRUN_RECIPE_ID,RR.NAME RECIPE_NAME,RE.CURRENT_MODEL_NAME RECIPE_GROUP,RE.LASTRUN_RECIPE_TIME DATETIME,RE.CURRENT_PRODUCT CURRENT_PRODUCT
+FROM RMS_EQUIPMENT RE
+LEFT JOIN RMS_RECIPE RR
+ON RE.LASTRUN_RECIPE_ID = RR.ID
+WHERE RE.ID = '{0}'", eqid);
+                var info = db.SqlQueryable<EquipmentInfo>(sql).First();
+                if (!string.IsNullOrEmpty(info.RECIPE_NAME))
+                {
+                    var trans = new RabbitMqTransaction
+                    {
+                        TransactionName = $"CompareRecipeBody",
+                        EquipmentID = eqid,
+                        NeedReply = true,
+                        Parameters = new Dictionary<string, object> { { "RecipeName",info.RECIPE_NAME } }
+                    };
+
+                    var rabbitRes = RabbitMqService.ProduceWaitReply("Rms.Service", trans, 10);
+                    if (rabbitRes == null)
+                    {
+                        repmsg += "Machine do not reply, pls check EAP client";
+                    }
+                    else
+                    {
+                        if (rabbitRes.Parameters.TryGetValue("Result", out object _rec)) result = (bool)_rec;
+                        if (rabbitRes.Parameters.TryGetValue("Message", out object _rec1)) repmsg += _rec1?.ToString();
+
+                    }
+                }
+                else
+                {
+                    repmsg = $"Recipe为空，无法比较";
+                }
+
+
+
+            }
+            catch (Exception ex)
+            {
+                repmsg = $"RMS异常： {ex.Message}";
+            }
+            return Json(new { Result = result, Message = repmsg }, JsonRequestBehavior.AllowGet);
+
         }
 
         public JsonResult PortLotStart(string equipmentid, string lotid, string port)

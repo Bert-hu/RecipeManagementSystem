@@ -34,10 +34,19 @@ namespace Rms.Web
             var isdebugmode = ConfigurationManager.AppSettings["IsDebugMode"].ToUpper() == "TRUE";
             CommonConfiguration.UpdateConfig(isdebugmode);
 
+
 #if DEBUG
 
-           //RabbitMqService.Initiate("192.168.53.174", "admin", "admin", 5672);
-           //RabbitMqService.BeginConsume(ListenChannel);       //debugger 环境
+            //RabbitMqService.Initiate("192.168.53.174", "admin", "admin", 5672);
+            //RabbitMqService.BeginConsume(ListenChannel);       //debugger 环境
+            RabbitMqHost = ConfigurationManager.AppSettings["RabbitMqHost"];
+            RabbitMqPort = int.Parse(ConfigurationManager.AppSettings["RabbitMqPort"]);
+            RabbitMqUser = ConfigurationManager.AppSettings["RabbitMqUser"];
+            RabbitMqPassword = ConfigurationManager.AppSettings["RabbitMqPassword"];
+
+            RabbitMqService.Initiate(RabbitMqHost, RabbitMqUser, RabbitMqPassword, RabbitMqPort);
+            RabbitMqService.BeginConsume(ListenChannel);
+            RabbitMqService.BeginConsume(RabbitMqService.subConsumeQueue);
 
 #else
       RabbitMqService.Initiate(RabbitMqHost, RabbitMqUser, RabbitMqPassword, RabbitMqPort);
