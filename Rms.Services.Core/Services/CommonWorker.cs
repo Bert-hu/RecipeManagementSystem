@@ -23,10 +23,22 @@ namespace Rms.Services.Core.Services
             //var typesInNamespace = wrsmodels.GetTypes()
             //   .Where(t => t.Namespace != null && t.IsClass && t.Namespace.StartsWith("Rms.Models.DataBase"))
             //   .ToList();
-            
+
             //foreach (var type in typesInNamespace)
             //{
-            //    sqlSugarClient.CodeFirst.InitTables(type);
+            //    try
+            //    {
+            //        if (type.Name == "RecipeBody")
+            //        {
+            //            continue;
+            //        }
+
+            //        sqlSugarClient.CodeFirst.InitTables(type);
+            //    }
+            //    catch (Exception)
+            //    {
+            //        continue;
+            //    }
             //}
 
             return Task.CompletedTask;
