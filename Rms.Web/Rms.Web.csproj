@@ -635,6 +635,7 @@
     <Content Include="Views\Production\SMT\Index.cshtml" />
     <Content Include="Views\EquipmentType\SelectMachine.cshtml" />
     <Content Include="Views\Production\SMT\SelectRecipe.cshtml" />
+    <Content Include="Views\RecipeMapping\AliasConfig.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

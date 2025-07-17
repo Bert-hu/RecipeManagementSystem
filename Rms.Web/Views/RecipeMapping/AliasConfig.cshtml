@@ -1,0 +1,128 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<div style="margin-bottom:10px;">
+    <input type="text" id="aliasInput" class="layui-input" style="width:200px;display:inline-block;" placeholder="Input Alias">
+    <button id="addAliasBtn" class="layui-btn layui-btn-normal" style="display:inline-block;">Add</button>
+</div>
+<table class="layui-hide" id="aliasTable" lay-filter="aliasTable"></table>
+<form class="layui-form" action="" lay-filter="configForm">
+
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn" lay-submit lay-filter="configFormSubmit">Submit</button>
+        </div>
+    </div>
+</form>
+<script type="text/html" id="toolBar">
+    <div class="layui-clear-space">
+        <a class="layui-btn layui-btn-xs" lay-event="delete">Delete</a>
+    </div>
+</script>
+
+<link href="~/Scripts/layui/css/layui.css" rel="stylesheet" />
+<script src="~/Scripts/layui/layui.js"></script>
+<script>
+        var configId = '@ViewBag.configId';
+
+        layui.use(['jquery', 'layer', 'table', 'form', 'upload', 'element', 'code'], function () {
+            var $ = layui.jquery
+                , layer = layui.layer
+                , table = layui.table
+                , form = layui.form
+                ;
+            console.log(configId);
+            if (configId != '') {
+
+                var aliasData = [];
+
+                $.post('../RecipeMapping/GetAliasConfigById', { configId: configId }, function (res) {
+                    // 处理响应数据
+                    if (res.code ==0) {
+                        aliasData = res.data;
+                        window.aliasTable = table.render({
+                            elem: '#aliasTable'
+                            , data: aliasData
+                            , id: "aliasTable"
+                            , limit: 1000
+                            , limits: [1000]
+                            , height: 'full-235'
+                            , cols: [[
+                                { field: 'RecipeAlias', title: 'Recipe Alias' },
+                                { fixed: 'right', title: '', width: 134, minWidth: 125, templet: '#toolBar' }
+                            ]]
+                        });
+                    } else {
+                        layer.alert(res.message);
+                    }
+                });
+
+                // 添加按钮点击事件
+                $('#addAliasBtn').on('click', function () {
+                    var alias = $('#aliasInput').val().trim();
+                    if (!alias) {
+                        layer.msg('请输入别名');
+                        return;
+                    }
+                    // 添加到数据数组
+                    aliasData.push({ RecipeAlias: alias });
+                    // 重新渲染表格
+                    table.reload('aliasTable', {
+                        data: aliasData
+                    });
+                    $('#aliasInput').val('');
+                });
+
+
+                $.post('../RecipeMapping/GetAliasConfigById', { configId: configId }, function (res) {
+                    // 处理响应数据
+                    console.log(res);
+
+                });
+
+
+                // 触发单元格工具事件
+                table.on('tool(aliasTable)', function (obj) { // 双击 toolDouble
+                    var data = obj.data; // 获得当前行数据
+                    // console.log(obj)
+                    if (obj.event === 'delete') {
+                        layer.confirm('Delete [ ' + data.RecipeAlias + '] ?', function (index) {
+                            obj.del(); // 删除对应行（tr）的DOM结构
+                            aliasData = table.getData('aliasTable');
+                            layer.close(index);
+                            // 向服务端发送删除指令
+                        });
+                    }
+                });
+            }
+
+            form.on('submit(configFormSubmit)', function (data) {
+
+                aliasData = table.getData('aliasTable');
+                var newdata = aliasData.map(it => it.RecipeAlias);
+                console.log(newdata);
+
+
+
+                $.post('../RecipeMapping/UpdateAliasConfig', { configId: configId, recipeAlias: newdata }, function (res) {
+                    // 处理响应数据
+                    console.log(res)
+                    if (res.result) {
+                        var index = window.parent.layer.getFrameIndex(window.name)
+                        window.parent.layer.close(index);
+                        window.parent.recipegrouptable.reload();
+                    } else {
+                        layer.alert(res.message);
+                    }
+                });
+
+                return false;
+            });
+
+
+        });
+</script>

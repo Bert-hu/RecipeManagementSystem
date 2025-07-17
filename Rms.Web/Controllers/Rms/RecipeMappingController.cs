@@ -223,5 +223,60 @@ ORDER BY equipment.ORDERSORT", line, recipegroup_id);
             return Json(new { data = data, code = 0, count = totalnum }, JsonRequestBehavior.AllowGet);
 
         }
+
+        public JsonResult AddRecipeAliasConfig(string equipmentTypeId, string recipeName)
+        {
+            var config = db.Queryable<RMS_RECIPE_NAME_ALIAS>().First(it => it.EQUIPMENT_TYPE_ID == equipmentTypeId && it.RECIPE_NAME == recipeName);
+            if (config != null)
+            {
+                return Json(new { result = false, message = $"Fail，Recipe {recipeName} already exists" });
+            }
+
+            db.Insertable(new RMS_RECIPE_NAME_ALIAS
+            {
+                EQUIPMENT_TYPE_ID = equipmentTypeId,
+                RECIPE_NAME = recipeName,
+                RECIPE_ALIAS = new System.Collections.Generic.List<string>()
+            }).ExecuteCommand();
+
+            return Json(new { result = true, message = "Add successfully" });
+        }
+
+        public JsonResult DeleteRecipeAliasConfig(string configId)
+        {
+            var config = db.Deleteable<RMS_RECIPE_NAME_ALIAS>().Where(it => it.ID == configId).ExecuteCommand();
+
+            return Json(new { result = true, message = "Delete successfully" });
+        }
+
+        public ActionResult AliasConfig(string configId)
+        {
+            ViewBag.ConfigId = configId;
+            return View();
+        }
+
+        public JsonResult GetAliasConfigById(string configId)
+        {
+            var config = db.Queryable<RMS_RECIPE_NAME_ALIAS>().First(it => it.ID == configId);
+            var data = config.RECIPE_ALIAS.Select(it => new { RecipeAlias = it }).ToList();
+            return Json(new { data = data, code = 0, count = data.Count }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult UpdateAliasConfig(string configId, string[] recipeAlias)
+        {
+            try
+            {
+                var config = db.Queryable<RMS_RECIPE_NAME_ALIAS>().InSingle(configId);
+
+                config.RECIPE_ALIAS = recipeAlias.Distinct().ToList();
+                db.Updateable(config).ExecuteCommand();
+
+                return Json(new { result = true, message = "Update successfully" });
+            }
+            catch (System.Exception ex)
+            {
+                return Json(new { result = false, message = ex.Message });
+            }
+        }
     }
 }
