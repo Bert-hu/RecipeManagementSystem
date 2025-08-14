@@ -85,6 +85,8 @@ ORDER BY equipment.ORDERSORT", line, recipegroup_id);
             }
             var eqps = db.Queryable<RMS_EQUIPMENT>().OrderBy(it => it.ORDERSORT).ToList();
             var mappings = db.Queryable<RMS_RECIPE_GROUP_MAPPING>().Where(it => it.RECIPE_GROUP_ID == recipegroup_id).ToList();
+
+            var submappings = db.Queryable<RMS_RECIPE_GROUP_MAPPING_SUBRECIPE>().Where(it => it.RECIPE_GROUP_ID == recipegroup_id).ToList();
             var recipes = db.Queryable<RMS_RECIPE>().In(mappings.Select(it => it.RECIPE_ID)).ToList();
 
             var data = eqps.Join(eqptypes, eqp => eqp.TYPE, eqptype => eqptype.ID, (eqp, eqptype) => new { eqp = eqp, eqptype = eqptype }) //全连接筛选设备

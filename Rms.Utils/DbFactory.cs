@@ -1,4 +1,5 @@
-﻿using SqlSugar;
+﻿using Rms.Models.DataBase.Rms;
+using SqlSugar;
 using System.Configuration;
 
 namespace Rms.Utils
@@ -19,6 +20,9 @@ namespace Rms.Utils
                 InitKeyType = InitKeyType.Attribute,
 
             }); //默认SystemTable
+
+            db.CodeFirst.InitTables(typeof(RMS_RECIPE_GROUP_MAPPING_SUBRECIPE));
+
             return db;
         }
     }

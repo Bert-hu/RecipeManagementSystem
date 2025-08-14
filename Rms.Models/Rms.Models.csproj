@@ -75,6 +75,7 @@
     <Compile Include="DataBase\Rms\RMS_MARKING_CONFIG.cs" />
     <Compile Include="DataBase\Rms\RMS_MARKING_FIELD.cs" />
     <Compile Include="DataBase\Rms\RMS_MARKING_VERSION.cs" />
+    <Compile Include="DataBase\Rms\RMS_RECIPE_GROUP_MAPPING_SUBRECIPE.cs" />
     <Compile Include="RMS_DIFFERENT_PARAMETER.cs" />
     <Compile Include="DataBase\Rms\RMS_RECIPE_GROUP.cs" />
     <Compile Include="DataBase\Rms\RMS_RECIPE_DATA.cs" />
