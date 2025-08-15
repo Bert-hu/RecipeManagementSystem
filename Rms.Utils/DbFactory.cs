@@ -21,7 +21,7 @@ namespace Rms.Utils
 
             }); //默认SystemTable
 
-            db.CodeFirst.InitTables(typeof(RMS_RECIPE_GROUP_MAPPING_SUBRECIPE));
+            //db.CodeFirst.InitTables(typeof(RMS_RECIPE_GROUP_MAPPING_SUBRECIPE));
 
             return db;
         }

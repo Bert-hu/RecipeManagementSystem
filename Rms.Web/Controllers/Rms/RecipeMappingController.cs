@@ -88,24 +88,39 @@ ORDER BY equipment.ORDERSORT", line, recipegroup_id);
 
             var submappings = db.Queryable<RMS_RECIPE_GROUP_MAPPING_SUBRECIPE>().Where(it => it.RECIPE_GROUP_ID == recipegroup_id).ToList();
             var recipes = db.Queryable<RMS_RECIPE>().In(mappings.Select(it => it.RECIPE_ID)).ToList();
+            var subrecipes = db.Queryable<RMS_RECIPE>().In(submappings.Select(it => it.RECIPE_ID_LIST).SelectMany(it => it).Distinct()).ToList();
 
-            var data = eqps.Join(eqptypes, eqp => eqp.TYPE, eqptype => eqptype.ID, (eqp, eqptype) => new { eqp = eqp, eqptype = eqptype }) //全连接筛选设备
-                 .OrderBy(x => x.eqptype.ORDERSORT)  //按type排序设备
-                 .GroupJoin(recipes, filtereqp => filtereqp.eqp.ID, rcp => rcp.EQUIPMENT_ID, (filtereqps, rcps) =>
-                 new EqupmentTableData
-                 {
-                     LINE = filtereqps.eqp.LINE,
-                     EQUIPMENT_ID = filtereqps.eqp.ID,
-                     EQUIPMENT_NAME = filtereqps.eqp.NAME,
-                     EQUIPMENT_TYPE_NAME = filtereqps.eqptype.NAME,
-                     RECIPE_GROUP_ID = recipegroup_id,
-                     RECIPE_NAME = rcps.Select(x => x.NAME).FirstOrDefault(),
-                     VERSION_EFFECTIVE_ID = rcps.Select(x => x.VERSION_EFFECTIVE_ID).FirstOrDefault(),
+            //var data = eqps.Join(eqptypes, eqp => eqp.TYPE, eqptype => eqptype.ID, (eqp, eqptype) => new { eqp = eqp, eqptype = eqptype }) //全连接筛选设备
+            //     .OrderBy(x => x.eqptype.ORDERSORT)  //按type排序设备
+            //     .GroupJoin(recipes, filtereqp => filtereqp.eqp.ID, rcp => rcp.EQUIPMENT_ID, (filtereqps, rcps) =>
+            //     new EqupmentTableData
+            //     {
+            //         LINE = filtereqps.eqp.LINE,
+            //         EQUIPMENT_ID = filtereqps.eqp.ID,
+            //         EQUIPMENT_NAME = filtereqps.eqp.NAME,
+            //         EQUIPMENT_TYPE_NAME = filtereqps.eqptype.NAME,
+            //         RECIPE_GROUP_ID = recipegroup_id,
+            //         RECIPE_NAME = rcps.Select(x => x.NAME).FirstOrDefault(),
+            //         VERSION_EFFECTIVE_ID = rcps.Select(x => x.VERSION_EFFECTIVE_ID).FirstOrDefault(),
 
-                 }).ToList();
+            //     }).ToList();
 
-
-
+            var data = eqps.Join(eqptypes, eqp => eqp.TYPE, eqptype => eqptype.ID, (eqp, eqptype) => new { eqp = eqp, eqptype = eqptype })
+                .OrderBy(x => x.eqptype.ORDERSORT)
+                .GroupJoin(recipes, filtereqp => filtereqp.eqp.ID, rcp => rcp.EQUIPMENT_ID, (filtereqps, rcps) => new { filtereqps, rcps })      // 新增与子配方的连接
+      .GroupJoin(subrecipes, combined => combined.filtereqps.eqp.ID, subrcp => subrcp.EQUIPMENT_ID,
+          (combined, subrcps) => new EqupmentTableData
+          {
+              LINE = combined.filtereqps.eqp.LINE,
+              EQUIPMENT_ID = combined.filtereqps.eqp.ID,
+              EQUIPMENT_NAME = combined.filtereqps.eqp.NAME,
+              EQUIPMENT_TYPE_NAME = combined.filtereqps.eqptype.NAME,
+              RECIPE_GROUP_ID = recipegroup_id,
+              RECIPE_NAME = combined.rcps.Select(x => x.NAME).FirstOrDefault(),
+              VERSION_EFFECTIVE_ID = combined.rcps.Select(x => x.VERSION_EFFECTIVE_ID).FirstOrDefault(),
+              // 新增子配方名称，用逗号拼接
+              SUB_RECIPE_NAMES = string.Join(",", subrcps.Select(x => x.NAME).Where(name => !string.IsNullOrEmpty(name)))
+          }).ToList();
             return Json(new { data = data, code = 0, count = totalnum }, JsonRequestBehavior.AllowGet);
         }
 
@@ -197,6 +212,49 @@ ORDER BY equipment.ORDERSORT", line, recipegroup_id);
 
         }
 
+        public ActionResult BindingSubRecipePage(string EQUIPMENT_ID, string RECIPE_GROUP_ID)
+        {
+            ViewBag.EQUIPMENT_ID = EQUIPMENT_ID;
+            ViewBag.RECIPE_GROUP_ID = RECIPE_GROUP_ID;
+            return View();
+        }
+
+        public JsonResult GetBindingSubRecipe(int page, int limit, string EQUIPMENT_ID, string RECIPE_GROUP_ID)
+        {
+            var db = DbFactory.GetSqlSugarClient();
+            var data = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == EQUIPMENT_ID).ToList();
+            var eqrecipeids = data.Select(it => it.ID).ToList();
+            var oldbinding = db.Queryable<RMS_RECIPE_GROUP_MAPPING_SUBRECIPE>().Where(it => it.RECIPE_GROUP_ID == RECIPE_GROUP_ID).First();
+            var viewdata = data.Select(it => new
+            {
+                ID = it.ID,
+                NAME = it.NAME,
+                LAY_CHECKED = oldbinding?.RECIPE_ID_LIST.Contains(it.ID) ?? false,
+            });
+            return Json(new { data = viewdata, code = 0, count = viewdata.Count() }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult SetSubRecipeBinding(string EQUIPMENT_ID, string RECIPE_GROUP_ID, string[] RECIPE_ID_LIST)
+        {
+            var db = DbFactory.GetSqlSugarClient();
+            //当前eqid下所有recipe
+            var recipes = db.Queryable<RMS_RECIPE>().Where(it => it.EQUIPMENT_ID == EQUIPMENT_ID).ToList();
+            var eqrecipeids = recipes.Select(it => it.ID).ToList();
+            //删除旧的绑定
+            var oldbindings = db.Queryable<RMS_RECIPE_GROUP_MAPPING_SUBRECIPE>().Where(it => it.RECIPE_GROUP_ID == RECIPE_GROUP_ID).ToList();
+            db.Deleteable<RMS_RECIPE_GROUP_MAPPING_SUBRECIPE>(oldbindings).ExecuteCommand();
+            //加入新的
+            if (RECIPE_ID_LIST != null && RECIPE_ID_LIST.Length > 0)
+            {
+                db.Insertable<RMS_RECIPE_GROUP_MAPPING_SUBRECIPE>(new RMS_RECIPE_GROUP_MAPPING_SUBRECIPE
+                {
+                    RECIPE_ID_LIST = RECIPE_ID_LIST.Distinct().ToList(),
+                    RECIPE_GROUP_ID = RECIPE_GROUP_ID
+                }).ExecuteCommand();
+            }
+            return Json(new { result = true, message = "更新成功" });
+        }
+
         public class EqupmentTableData
         {
             public string LINE { get; set; }
@@ -206,6 +264,7 @@ ORDER BY equipment.ORDERSORT", line, recipegroup_id);
             public string RECIPE_GROUP_ID { get; set; }
             public string RECIPE_NAME { get; set; }
             public string VERSION_EFFECTIVE_ID { get; set; }
+            public string SUB_RECIPE_NAMES { get; set; }
         }
 
 

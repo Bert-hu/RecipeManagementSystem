@@ -69,6 +69,24 @@ namespace Rms.Services.Core.Controllers
                     return Json(res);
                 }
                 (downloadResult, downloadMessage) = rmsTransactionService.DownloadRecipeToMachine(eqp, recipe.VERSION_EFFECTIVE_ID);
+
+                //20250815: 新增下载绑定的所有subrecipe
+                var subbinding = db.Queryable<RMS_RECIPE_GROUP_MAPPING_SUBRECIPE>().Where(it => it.RECIPE_GROUP_ID == recipegroup.ID).First();
+                if (subbinding != null && subbinding.RECIPE_ID_LIST?.Count > 0)
+                {
+                    foreach (var subrecipeId in subbinding.RECIPE_ID_LIST)
+                    {
+                        var subrecipe = db.Queryable<RMS_RECIPE>().InSingle(subrecipeId);
+                        if (subrecipe != null)
+                        {
+                            var subrecipe_version = db.Queryable<RMS_RECIPE_VERSION>().InSingle(subrecipe.VERSION_EFFECTIVE_ID);
+                            if (subrecipe_version != null && subrecipe_version.RECIPE_DATA_ID != null)
+                            {
+                                rmsTransactionService.DownloadRecipeToMachine(eqp, subrecipe.VERSION_EFFECTIVE_ID);
+                            }
+                        }
+                    }
+                }
             }
             else
             {

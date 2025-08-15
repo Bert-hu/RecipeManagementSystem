@@ -13,7 +13,7 @@ namespace Rms.Models.DataBase.Rms
         [SugarColumn(IsPrimaryKey = true)]
         public string ID { get; set; } = Guid.NewGuid().ToString("N");
         [SugarColumn(IsJson = true)]
-        public List<string> RECIPE_ID_LIST { get; set; }
+        public List<string> RECIPE_ID_LIST { get; set; } = new List<string>();
         public string RECIPE_GROUP_ID { get; set; }
     }
 }

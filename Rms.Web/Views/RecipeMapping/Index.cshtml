@@ -13,6 +13,7 @@
 </style>
 <script src="~/Scripts/layui/xm-select.js"></script>
 <script src="~/Scripts/layui/layui.table.formdate.js"></script>
+<script src="~/Scripts/layui_NEW/layui.js"></script>
 
 <div class="layui-row layui-col-space10" style=" margin-bottom: 50px">
     <div class="layui-col-md3">
@@ -58,6 +59,7 @@
 
 <script type="text/html" id="equipmenttoolbar">
     <a class="layui-btn layui-btn layui-btn-xs" lay-event="modify">更改/Change</a>
+    <a class="layui-btn layui-btn layui-btn-xs" lay-event="modifysubrecipe">更改SubRecipe/Change SubRecipe</a>
 </script>
 
 <script>
@@ -124,6 +126,11 @@
                 , cols: [[
                     { field: 'NAME', title: 'Name', sort: true }
                 ]]
+                , where: {
+                    page: 1,
+                    limit: 9999
+                }
+
 
             });
 
@@ -138,23 +145,26 @@
                 , url: '../RecipeMapping/GetEquipments'
                 //, toolbar: '#addnewrcp'
                 , id: "equipmenttable"
-                , limit: 1000
-                , limits: [1000]
+                //, limit: 1000
+                //, limits: [1000]
                 , height: 'full-235'
                 , cols: [[
-                    { field: 'LINE', title: 'LINE' }
-                    , { field: 'EQUIPMENT_ID', title: 'EQID' }
-                    , { field: 'EQUIPMENT_TYPE_NAME', title: 'EQ Type' }
-                    , { field: 'EQUIPMENT_NAME', title: 'Name' }
-                    , { field: 'RECIPE_NAME', title: 'Recipe Name' }
+                    { field: 'LINE', title: 'LINE', minWidth:30}
+                    , { field: 'EQUIPMENT_ID', title: 'EQID', minWidth: 30 }
+                    , { field: 'EQUIPMENT_TYPE_NAME', title: 'EQ Type', minWidth: 30 }
+                    , { field: 'EQUIPMENT_NAME', title: 'Name', minWidth: 30 }
+                    , { field: 'RECIPE_NAME', title: 'Recipe Name', minWidth: 30 }
+                    , { field: 'SUB_RECIPE_NAMES', title: 'Sub Recipe Names', minWidth: 70 }
 
                     // , { field: 'RECIPE_EFFECTIVE_VERSION', title: '生效版本', width: '15%' }
-                    , { fixed: 'right', width: '15%', align: 'center', toolbar: '#equipmenttoolbar' }
+                    , { fixed: 'right', width: '25%', align: 'center', toolbar: '#equipmenttoolbar', minWidth: 150}
                 ]]
                 , where: {
                     recipegroup_id: currentRecipeGroup,
                     line: selectedline,
-                    processfilter: selectedline
+                    processfilter: selectedline,
+                    page: 1,
+                    limit: 9999
                 }
 
                 , done: function (data) {
@@ -252,6 +262,54 @@
                     }
 
                 });
+            }
+            else if (event === 'modifysubrecipe') {
+                layer.open({
+                    title: '更改SubRecipe绑定/Change Sub Recipe binding'
+                    , type: 2
+                    , btn: ['确定Confirm', '取消Cancel']
+                    , content: 'BindingSubRecipePage?EQUIPMENT_ID=' + selectdata.EQUIPMENT_ID + '&RECIPE_GROUP_ID=' + selectdata.RECIPE_GROUP_ID
+                    , area: ['40%', '85%']
+                    , success: function (layero, index) {
+
+
+                    }
+                    , yes: function (index) {
+                        var res = window["layui-layer-iframe" + index].callback();
+                        console.log(res);
+                        var jdata = JSON.parse(res);
+                        console.log(jdata);
+                        //var recipeid = jdata.selectData[0].ID;
+                        var recipeidlist = jdata.selectData.map(it => it.ID);
+
+
+                        $.ajax({
+                            url: '../RecipeMapping/SetSubRecipeBinding',//控制器活动,返回一个分部视图,并且给分部视图传递数据.
+                            data: {
+                                RECIPE_ID_LIST: recipeidlist,
+                                EQUIPMENT_ID: selectdata.EQUIPMENT_ID,
+                                RECIPE_GROUP_ID: selectdata.RECIPE_GROUP_ID
+                            },//传给服务器的数据(即后台AddUsers()方法的参数,参数类型要一致才可以)
+                            type: 'POST',
+                            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',//数据类型必须有
+                            async: false,
+                            success: function (data) {
+                                layer.open({ content: data.message });
+                                ShowEquipmentTable();
+                            },
+                            error: function (message) {
+                                alert('error!');
+                            }
+                        });
+                        layer.close(index);
+
+
+                    }, btn2: function (index, layero) {
+                        layer.msg('取消操作.Cancel.');
+                    }
+
+                });
+
             }
         })
 
