@@ -588,15 +588,16 @@
                     //}, 10);
                     if (data.Result) {
                         //layer.msg('<em style="color:white;font-style:normal;font-weight:normal">' + 'Recipe download succeed.' + '</em>');
+                        layer.close(loadingIndex);
                         layer.open({
-                            title: '下载成功'
+                            title: '通过'
                             , content: data.Message
                         });
                         WaitAndRefresh();
                     } else {
                         layer.close(loadingIndex);
                         layer.open({
-                            title: '下载失败'
+                            title: '失败'
                             , content: data.Message
                         });
                     }
